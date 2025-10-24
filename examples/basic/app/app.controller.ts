@@ -1,4 +1,4 @@
-import { Controller, Get, Injectable } from "@dwexjs/core";
+import { Controller, Get } from "@dwexjs/core";
 import { Logger } from "@dwexjs/logger";
 
 /**

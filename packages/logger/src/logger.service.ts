@@ -69,7 +69,25 @@ export class Logger {
 				write(chunk: Buffer, _encoding: string, callback: () => void) {
 					try {
 						const log = JSON.parse(chunk.toString());
-						const { pid, time, msg, context } = log;
+						const { pid, time, msg, context, level } = log;
+
+						// Map pino level numbers to level names and colors
+						const levelMap: Record<
+							number,
+							{ name: string; color: string }
+						> = {
+							10: { name: "TRACE", color: "\x1b[90m" }, // gray
+							20: { name: "DEBUG", color: "\x1b[36m" }, // cyan
+							30: { name: "LOG", color: "\x1b[32m" }, // green
+							40: { name: "WARN", color: "\x1b[38;2;255;189;189m" }, // #FFBDBD
+							50: { name: "ERROR", color: "\x1b[38;2;255;164;164m" }, // #FFA4A4
+							60: { name: "FATAL", color: "\x1b[91m" }, // bright red
+						};
+
+						const levelInfo = levelMap[level] || {
+							name: "LOG",
+							color: "\x1b[32m",
+						};
 
 						const date = new Date(time);
 						const day = String(date.getDate()).padStart(2, "0");
@@ -80,8 +98,10 @@ export class Logger {
 						const seconds = String(date.getSeconds()).padStart(2, "0");
 						const formattedTime = `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
 
-						// #BADFDB for [Dwex], green for LOG, #FCF9EA for [context]
-						const formatted = `\x1b[38;2;186;223;219m[Dwex]\x1b[39m ${pid} - ${formattedTime}  \x1b[32mLOG\x1b[39m \x1b[38;2;252;249;234m[${context || ""}]\x1b[39m ${msg}`;
+						// #BADFDB for [Dwex], level-specific color for level, #FCF9EA for [context]
+						// Pad level name to 5 characters for consistent alignment (spacing before)
+						const paddedLevel = levelInfo.name.padStart(5, " ");
+						const formatted = `\x1b[38;2;186;223;219m[Dwex]\x1b[39m ${pid} - ${formattedTime} ${levelInfo.color}${paddedLevel}\x1b[39m \x1b[38;2;252;249;234m[${context || ""}]\x1b[39m ${msg}`;
 						console.log(formatted);
 					} catch (error) {
 						// Fallback if parsing fails

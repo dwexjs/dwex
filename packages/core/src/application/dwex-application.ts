@@ -99,7 +99,9 @@ export class DwexApplication {
 
 		// Log completion message
 		if (this.dwexAppLogger) {
-			this.dwexAppLogger.log("Dwex application successfully started");
+			this.dwexAppLogger.log(
+				`Dwex application successfully started on ${this.server.port}`,
+			);
 		}
 	}
 
