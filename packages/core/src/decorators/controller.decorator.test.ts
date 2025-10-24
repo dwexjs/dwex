@@ -1,0 +1,30 @@
+import { describe, it, expect } from "vitest";
+import { Controller } from "./controller.decorator";
+import { CONTROLLER_PATH } from "@dwexjs/common";
+import "reflect-metadata";
+
+describe("Controller Decorator", () => {
+	it("should set controller path metadata", () => {
+		@Controller("/users")
+		class UserController {}
+
+		const path = Reflect.getMetadata(CONTROLLER_PATH, UserController);
+		expect(path).toBe("/users");
+	});
+
+	it("should handle empty path", () => {
+		@Controller()
+		class AppController {}
+
+		const path = Reflect.getMetadata(CONTROLLER_PATH, AppController);
+		expect(path).toBe("");
+	});
+
+	it("should handle nested paths", () => {
+		@Controller("/api/v1/users")
+		class ApiUserController {}
+
+		const path = Reflect.getMetadata(CONTROLLER_PATH, ApiUserController);
+		expect(path).toBe("/api/v1/users");
+	});
+});
