@@ -1,19 +1,19 @@
 {
-  "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
-  "files": [],
-  "references": [
-    {
-      "path": "./packages/core"
-    },
-    {
-      "path": "./packages/common"
-    },
-    {
-      "path": "./packages/jwt"
-    },
-    {
-      "path": "./packages/create-dwex"
-    }
-  ]
+	"extends": "./tsconfig.base.json",
+	"compileOnSave": false,
+	"files": [],
+	"references": [
+		{
+			"path": "./packages/core"
+		},
+		{
+			"path": "./packages/common"
+		},
+		{
+			"path": "./packages/jwt"
+		},
+		{
+			"path": "./packages/create-dwex"
+		}
+	]
 }

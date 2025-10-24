@@ -1,5 +1,5 @@
-import type { ModuleMetadata } from './module-metadata.interface.js';
-import type { Type } from './type.interface.js';
+import type { ModuleMetadata } from "./module-metadata.interface.js";
+import type { Type } from "./type.interface.js";
 
 /**
  * Interface for dynamically configured modules.
@@ -24,13 +24,13 @@ import type { Type } from './type.interface.js';
  * ```
  */
 export interface DynamicModule extends ModuleMetadata {
-  /**
-   * The module class.
-   */
-  module: Type<any>;
+	/**
+	 * The module class.
+	 */
+	module: Type<any>;
 
-  /**
-   * Whether this module should be global (available to all modules).
-   */
-  global?: boolean;
+	/**
+	 * Whether this module should be global (available to all modules).
+	 */
+	global?: boolean;
 }

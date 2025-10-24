@@ -1,4 +1,4 @@
-import type { ExecutionContext } from './execution-context.interface.js';
+import type { ExecutionContext } from "./execution-context.interface.js";
 
 /**
  * Interface for implementing guards that determine whether
@@ -16,14 +16,14 @@ import type { ExecutionContext } from './execution-context.interface.js';
  * ```
  */
 export interface CanActivate {
-  /**
-   * Determines whether the current request is allowed to proceed.
-   *
-   * @param context - The execution context
-   * @returns true if the request is allowed, false otherwise.
-   *          Can also return a Promise<boolean> for async validation.
-   */
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Promise<void> | void;
+	/**
+	 * Determines whether the current request is allowed to proceed.
+	 *
+	 * @param context - The execution context
+	 * @returns true if the request is allowed, false otherwise.
+	 *          Can also return a Promise<boolean> for async validation.
+	 */
+	canActivate(
+		context: ExecutionContext,
+	): boolean | Promise<boolean> | Promise<void> | void;
 }

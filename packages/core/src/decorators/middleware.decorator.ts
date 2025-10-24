@@ -1,10 +1,10 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 import {
-  MIDDLEWARE_METADATA,
-  type DwexMiddleware,
-  type MiddlewareFunction,
-  type Type,
-} from '@dwexjs/common';
+	MIDDLEWARE_METADATA,
+	type DwexMiddleware,
+	type MiddlewareFunction,
+	type Type,
+} from "@dwexjs/common";
 
 /**
  * Applies middleware to a controller or route handler.
@@ -37,9 +37,9 @@ import {
  * ```
  */
 export function UseMiddleware(
-  ...middleware: Array<Type<DwexMiddleware> | MiddlewareFunction>
+	...middleware: Array<Type<DwexMiddleware> | MiddlewareFunction>
 ): ClassDecorator {
-  return (target: Function) => {
-    Reflect.defineMetadata(MIDDLEWARE_METADATA, middleware, target);
-  };
+	return (target: Function) => {
+		Reflect.defineMetadata(MIDDLEWARE_METADATA, middleware, target);
+	};
 }

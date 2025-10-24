@@ -5,7 +5,11 @@
  * @returns true if the value is a constructor function
  */
 export function isConstructor(value: any): boolean {
-  return typeof value === 'function' && value.prototype && value.prototype.constructor === value;
+	return (
+		typeof value === "function" &&
+		value.prototype &&
+		value.prototype.constructor === value
+	);
 }
 
 /**
@@ -15,7 +19,7 @@ export function isConstructor(value: any): boolean {
  * @returns true if the value is undefined
  */
 export function isUndefined(value: any): value is undefined {
-  return typeof value === 'undefined';
+	return typeof value === "undefined";
 }
 
 /**
@@ -25,7 +29,7 @@ export function isUndefined(value: any): value is undefined {
  * @returns true if the value is null or undefined
  */
 export function isNil(value: any): value is null | undefined {
-  return value === null || typeof value === 'undefined';
+	return value === null || typeof value === "undefined";
 }
 
 /**
@@ -35,7 +39,7 @@ export function isNil(value: any): value is null | undefined {
  * @returns true if the value is a string
  */
 export function isString(value: any): value is string {
-  return typeof value === 'string';
+	return typeof value === "string";
 }
 
 /**
@@ -45,7 +49,7 @@ export function isString(value: any): value is string {
  * @returns true if the value is an object
  */
 export function isObject(value: any): value is object {
-  return value !== null && typeof value === 'object';
+	return value !== null && typeof value === "object";
 }
 
 /**
@@ -55,7 +59,7 @@ export function isObject(value: any): value is object {
  * @returns true if the value is a symbol
  */
 export function isSymbol(value: any): value is symbol {
-  return typeof value === 'symbol';
+	return typeof value === "symbol";
 }
 
 /**
@@ -65,5 +69,5 @@ export function isSymbol(value: any): value is symbol {
  * @returns true if the value is a function
  */
 export function isFunction(value: any): value is Function {
-  return typeof value === 'function';
+	return typeof value === "function";
 }

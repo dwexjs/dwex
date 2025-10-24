@@ -1,9 +1,9 @@
-import { HttpStatus } from '../enums/http-status.enum.js';
+import { HttpStatus } from "../enums/http-status.enum.js";
 import {
-  HttpException,
-  type HttpExceptionOptions,
-  type HttpExceptionResponse,
-} from './http-exception.js';
+	HttpException,
+	type HttpExceptionOptions,
+	type HttpExceptionResponse,
+} from "./http-exception.js";
 
 /**
  * Exception for 400 Bad Request.
@@ -14,12 +14,12 @@ import {
  * ```
  */
 export class BadRequestException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Bad Request',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.BAD_REQUEST, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Bad Request",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.BAD_REQUEST, options);
+	}
 }
 
 /**
@@ -31,12 +31,12 @@ export class BadRequestException extends HttpException {
  * ```
  */
 export class UnauthorizedException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Unauthorized',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.UNAUTHORIZED, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Unauthorized",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.UNAUTHORIZED, options);
+	}
 }
 
 /**
@@ -48,12 +48,12 @@ export class UnauthorizedException extends HttpException {
  * ```
  */
 export class PaymentRequiredException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Payment Required',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.PAYMENT_REQUIRED, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Payment Required",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.PAYMENT_REQUIRED, options);
+	}
 }
 
 /**
@@ -65,12 +65,12 @@ export class PaymentRequiredException extends HttpException {
  * ```
  */
 export class ForbiddenException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Forbidden',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.FORBIDDEN, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Forbidden",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.FORBIDDEN, options);
+	}
 }
 
 /**
@@ -82,12 +82,12 @@ export class ForbiddenException extends HttpException {
  * ```
  */
 export class NotFoundException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Not Found',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.NOT_FOUND, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Not Found",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.NOT_FOUND, options);
+	}
 }
 
 /**
@@ -99,12 +99,12 @@ export class NotFoundException extends HttpException {
  * ```
  */
 export class MethodNotAllowedException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Method Not Allowed',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.METHOD_NOT_ALLOWED, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Method Not Allowed",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.METHOD_NOT_ALLOWED, options);
+	}
 }
 
 /**
@@ -116,12 +116,12 @@ export class MethodNotAllowedException extends HttpException {
  * ```
  */
 export class NotAcceptableException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Not Acceptable',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.NOT_ACCEPTABLE, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Not Acceptable",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.NOT_ACCEPTABLE, options);
+	}
 }
 
 /**
@@ -133,12 +133,12 @@ export class NotAcceptableException extends HttpException {
  * ```
  */
 export class RequestTimeoutException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Request Timeout',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.REQUEST_TIMEOUT, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Request Timeout",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.REQUEST_TIMEOUT, options);
+	}
 }
 
 /**
@@ -150,12 +150,12 @@ export class RequestTimeoutException extends HttpException {
  * ```
  */
 export class ConflictException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Conflict',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.CONFLICT, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Conflict",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.CONFLICT, options);
+	}
 }
 
 /**
@@ -167,12 +167,12 @@ export class ConflictException extends HttpException {
  * ```
  */
 export class GoneException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Gone',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.GONE, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Gone",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.GONE, options);
+	}
 }
 
 /**
@@ -184,12 +184,12 @@ export class GoneException extends HttpException {
  * ```
  */
 export class PayloadTooLargeException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Payload Too Large',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.PAYLOAD_TOO_LARGE, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Payload Too Large",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.PAYLOAD_TOO_LARGE, options);
+	}
 }
 
 /**
@@ -201,12 +201,12 @@ export class PayloadTooLargeException extends HttpException {
  * ```
  */
 export class UnsupportedMediaTypeException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Unsupported Media Type',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.UNSUPPORTED_MEDIA_TYPE, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Unsupported Media Type",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.UNSUPPORTED_MEDIA_TYPE, options);
+	}
 }
 
 /**
@@ -218,12 +218,12 @@ export class UnsupportedMediaTypeException extends HttpException {
  * ```
  */
 export class UnprocessableEntityException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Unprocessable Entity',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.UNPROCESSABLE_ENTITY, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Unprocessable Entity",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.UNPROCESSABLE_ENTITY, options);
+	}
 }
 
 /**
@@ -235,10 +235,10 @@ export class UnprocessableEntityException extends HttpException {
  * ```
  */
 export class TooManyRequestsException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Too Many Requests',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.TOO_MANY_REQUESTS, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Too Many Requests",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.TOO_MANY_REQUESTS, options);
+	}
 }

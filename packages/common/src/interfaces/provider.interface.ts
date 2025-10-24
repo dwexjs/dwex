@@ -1,38 +1,38 @@
-import type { Type } from './type.interface.js';
+import type { Type } from "./type.interface.js";
 
 /**
  * Scope of a provider instance.
  */
 export enum Scope {
-  /**
-   * A single instance is shared across the entire application.
-   */
-  SINGLETON = 'SINGLETON',
+	/**
+	 * A single instance is shared across the entire application.
+	 */
+	SINGLETON = "SINGLETON",
 
-  /**
-   * A new instance is created for each request.
-   */
-  REQUEST = 'REQUEST',
+	/**
+	 * A new instance is created for each request.
+	 */
+	REQUEST = "REQUEST",
 
-  /**
-   * A new instance is created every time it's injected.
-   */
-  TRANSIENT = 'TRANSIENT',
+	/**
+	 * A new instance is created every time it's injected.
+	 */
+	TRANSIENT = "TRANSIENT",
 }
 
 /**
  * Base provider interface.
  */
 export interface BaseProvider {
-  /**
-   * Optional injection token.
-   */
-  provide?: string | symbol | Type<any>;
+	/**
+	 * Optional injection token.
+	 */
+	provide?: string | symbol | Type<any>;
 
-  /**
-   * Optional scope for the provider.
-   */
-  scope?: Scope;
+	/**
+	 * Optional scope for the provider.
+	 */
+	scope?: Scope;
 }
 
 /**
@@ -47,7 +47,7 @@ export interface BaseProvider {
  * ```
  */
 export interface ClassProvider<T = any> extends BaseProvider {
-  useClass: Type<T>;
+	useClass: Type<T>;
 }
 
 /**
@@ -62,7 +62,7 @@ export interface ClassProvider<T = any> extends BaseProvider {
  * ```
  */
 export interface ValueProvider<T = any> extends BaseProvider {
-  useValue: T;
+	useValue: T;
 }
 
 /**
@@ -78,8 +78,8 @@ export interface ValueProvider<T = any> extends BaseProvider {
  * ```
  */
 export interface FactoryProvider<T = any> extends BaseProvider {
-  useFactory: (...args: any[]) => T | Promise<T>;
-  inject?: Array<Type<any> | string | symbol>;
+	useFactory: (...args: any[]) => T | Promise<T>;
+	inject?: Array<Type<any> | string | symbol>;
 }
 
 /**
@@ -94,15 +94,15 @@ export interface FactoryProvider<T = any> extends BaseProvider {
  * ```
  */
 export interface ExistingProvider extends BaseProvider {
-  useExisting: Type<any> | string | symbol;
+	useExisting: Type<any> | string | symbol;
 }
 
 /**
  * Union type of all provider types.
  */
 export type Provider =
-  | Type<any>
-  | ClassProvider
-  | ValueProvider
-  | FactoryProvider
-  | ExistingProvider;
+	| Type<any>
+	| ClassProvider
+	| ValueProvider
+	| FactoryProvider
+	| ExistingProvider;

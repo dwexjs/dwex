@@ -14,23 +14,23 @@
  * ```
  */
 export interface ExecutionContext {
-  /**
-   * Returns the Request object.
-   */
-  getRequest<T = any>(): T;
+	/**
+	 * Returns the Request object.
+	 */
+	getRequest<T = any>(): T;
 
-  /**
-   * Returns the Response object.
-   */
-  getResponse<T = any>(): T;
+	/**
+	 * Returns the Response object.
+	 */
+	getResponse<T = any>(): T;
 
-  /**
-   * Returns the handler (controller method) being executed.
-   */
-  getHandler(): Function;
+	/**
+	 * Returns the handler (controller method) being executed.
+	 */
+	getHandler(): Function;
 
-  /**
-   * Returns the controller class that contains the handler.
-   */
-  getClass(): Function;
+	/**
+	 * Returns the controller class that contains the handler.
+	 */
+	getClass(): Function;
 }

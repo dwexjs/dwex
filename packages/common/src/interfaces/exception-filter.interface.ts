@@ -19,12 +19,12 @@
  * ```
  */
 export interface ExceptionFilter<T = any> {
-  /**
-   * Handles the exception and sends an appropriate response.
-   *
-   * @param exception - The exception that was thrown
-   * @param request - The request object
-   * @param response - The response object
-   */
-  catch(exception: T, request: any, response: any): void | Promise<void>;
+	/**
+	 * Handles the exception and sends an appropriate response.
+	 *
+	 * @param exception - The exception that was thrown
+	 * @param request - The request object
+	 * @param response - The response object
+	 */
+	catch(exception: T, request: any, response: any): void | Promise<void>;
 }

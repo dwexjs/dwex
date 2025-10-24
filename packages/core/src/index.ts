@@ -1,20 +1,20 @@
 // Re-export common types and utilities
-export * from '@dwexjs/common';
+export * from "@dwexjs/common";
 
 // Reflection
-export * from './reflection/index.js';
+export * from "./reflection/index.js";
 
 // Dependency Injection
-export * from './di/index.js';
+export * from "./di/index.js";
 
 // Decorators
-export * from './decorators/index.js';
+export * from "./decorators/index.js";
 
 // Middleware
-export * from './middleware/index.js';
+export * from "./middleware/index.js";
 
 // Router
-export * from './router/index.js';
+export * from "./router/index.js";
 
 // Application
-export * from './application/index.js';
+export * from "./application/index.js";

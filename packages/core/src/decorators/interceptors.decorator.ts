@@ -1,5 +1,9 @@
-import 'reflect-metadata';
-import { INTERCEPTORS_METADATA, type DwexInterceptor, type Type } from '@dwexjs/common';
+import "reflect-metadata";
+import {
+	INTERCEPTORS_METADATA,
+	type DwexInterceptor,
+	type Type,
+} from "@dwexjs/common";
 
 /**
  * Applies interceptors to a route handler or controller.
@@ -28,24 +32,24 @@ import { INTERCEPTORS_METADATA, type DwexInterceptor, type Type } from '@dwexjs/
  * ```
  */
 export function UseInterceptors(
-  ...interceptors: Array<Type<DwexInterceptor>>
+	...interceptors: Array<Type<DwexInterceptor>>
 ): MethodDecorator & ClassDecorator {
-  return (
-    target: any,
-    propertyKey?: string | symbol,
-    descriptor?: PropertyDescriptor,
-  ) => {
-    if (descriptor) {
-      // Method decorator
-      Reflect.defineMetadata(
-        INTERCEPTORS_METADATA,
-        interceptors,
-        descriptor.value,
-      );
-      return descriptor;
-    }
-    // Class decorator
-    Reflect.defineMetadata(INTERCEPTORS_METADATA, interceptors, target);
-    return target;
-  };
+	return (
+		target: any,
+		propertyKey?: string | symbol,
+		descriptor?: PropertyDescriptor,
+	) => {
+		if (descriptor) {
+			// Method decorator
+			Reflect.defineMetadata(
+				INTERCEPTORS_METADATA,
+				interceptors,
+				descriptor.value,
+			);
+			return descriptor;
+		}
+		// Class decorator
+		Reflect.defineMetadata(INTERCEPTORS_METADATA, interceptors, target);
+		return target;
+	};
 }

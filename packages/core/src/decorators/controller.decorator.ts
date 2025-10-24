@@ -1,5 +1,5 @@
-import 'reflect-metadata';
-import { CONTROLLER_PATH } from '@dwexjs/common';
+import "reflect-metadata";
+import { CONTROLLER_PATH } from "@dwexjs/common";
 
 /**
  * Marks a class as a controller and defines its base path.
@@ -29,8 +29,8 @@ import { CONTROLLER_PATH } from '@dwexjs/common';
  * }
  * ```
  */
-export function Controller(path = ''): ClassDecorator {
-  return (target: Function) => {
-    Reflect.defineMetadata(CONTROLLER_PATH, path, target);
-  };
+export function Controller(path = ""): ClassDecorator {
+	return (target: Function) => {
+		Reflect.defineMetadata(CONTROLLER_PATH, path, target);
+	};
 }

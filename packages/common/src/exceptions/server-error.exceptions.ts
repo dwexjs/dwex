@@ -1,9 +1,9 @@
-import { HttpStatus } from '../enums/http-status.enum.js';
+import { HttpStatus } from "../enums/http-status.enum.js";
 import {
-  HttpException,
-  type HttpExceptionOptions,
-  type HttpExceptionResponse,
-} from './http-exception.js';
+	HttpException,
+	type HttpExceptionOptions,
+	type HttpExceptionResponse,
+} from "./http-exception.js";
 
 /**
  * Exception for 500 Internal Server Error.
@@ -14,12 +14,12 @@ import {
  * ```
  */
 export class InternalServerErrorException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Internal Server Error',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.INTERNAL_SERVER_ERROR, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Internal Server Error",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.INTERNAL_SERVER_ERROR, options);
+	}
 }
 
 /**
@@ -31,12 +31,12 @@ export class InternalServerErrorException extends HttpException {
  * ```
  */
 export class NotImplementedException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Not Implemented',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.NOT_IMPLEMENTED, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Not Implemented",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.NOT_IMPLEMENTED, options);
+	}
 }
 
 /**
@@ -48,12 +48,12 @@ export class NotImplementedException extends HttpException {
  * ```
  */
 export class BadGatewayException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Bad Gateway',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.BAD_GATEWAY, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Bad Gateway",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.BAD_GATEWAY, options);
+	}
 }
 
 /**
@@ -65,12 +65,12 @@ export class BadGatewayException extends HttpException {
  * ```
  */
 export class ServiceUnavailableException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Service Unavailable',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.SERVICE_UNAVAILABLE, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Service Unavailable",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.SERVICE_UNAVAILABLE, options);
+	}
 }
 
 /**
@@ -82,10 +82,10 @@ export class ServiceUnavailableException extends HttpException {
  * ```
  */
 export class GatewayTimeoutException extends HttpException {
-  constructor(
-    response: HttpExceptionResponse = 'Gateway Timeout',
-    options?: HttpExceptionOptions,
-  ) {
-    super(response, HttpStatus.GATEWAY_TIMEOUT, options);
-  }
+	constructor(
+		response: HttpExceptionResponse = "Gateway Timeout",
+		options?: HttpExceptionOptions,
+	) {
+		super(response, HttpStatus.GATEWAY_TIMEOUT, options);
+	}
 }

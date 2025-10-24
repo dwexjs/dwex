@@ -1,4 +1,4 @@
-import type { ExecutionContext } from './execution-context.interface.js';
+import type { ExecutionContext } from "./execution-context.interface.js";
 
 /**
  * Interface for implementing interceptors that can transform
@@ -19,15 +19,12 @@ import type { ExecutionContext } from './execution-context.interface.js';
  * ```
  */
 export interface DwexInterceptor {
-  /**
-   * Intercepts the request/response cycle.
-   *
-   * @param context - The execution context
-   * @param next - Function to call the next interceptor or handler
-   * @returns The result from the handler, potentially transformed
-   */
-  intercept(
-    context: ExecutionContext,
-    next: () => Promise<any>,
-  ): Promise<any>;
+	/**
+	 * Intercepts the request/response cycle.
+	 *
+	 * @param context - The execution context
+	 * @param next - Function to call the next interceptor or handler
+	 * @returns The result from the handler, potentially transformed
+	 */
+	intercept(context: ExecutionContext, next: () => Promise<any>): Promise<any>;
 }

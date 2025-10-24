@@ -1,2 +1,2 @@
-export * from './dwex-application.js';
-export * from './dwex-factory.js';
+export * from "./dwex-application.js";
+export * from "./dwex-factory.js";
