@@ -8,13 +8,17 @@
     "emitDeclarationOnly": false,
     "forceConsistentCasingInFileNames": true,
     "types": [
-      "node"
+      "bun"
     ]
   },
   "include": [
     "src/**/*.ts"
   ],
-  "references": [],
+  "references": [
+    {
+      "path": "../common/tsconfig.lib.json"
+    }
+  ],
   "exclude": [
     "vite.config.ts",
     "vite.config.mts",

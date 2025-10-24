@@ -7,10 +7,13 @@
       "path": "./packages/core"
     },
     {
-      "path": "./packages/core"
+      "path": "./packages/common"
     },
     {
-      "path": "./packages/core"
+      "path": "./packages/jwt"
+    },
+    {
+      "path": "./packages/create-dwex"
     }
   ]
 }

@@ -16,6 +16,14 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@dwex/source"]
+    "customConditions": ["@dwex/source"],
+    "paths": {
+      "@/common": ["./packages/common/src/index.ts"],
+      "@/common/*": ["./packages/common/src/*"],
+      "@/core": ["./packages/core/src/index.ts"],
+      "@/core/*": ["./packages/core/src/*"],
+      "@/jwt": ["./packages/jwt/src/index.ts"],
+      "@/jwt/*": ["./packages/jwt/src/*"]
+    }
   }
 }
