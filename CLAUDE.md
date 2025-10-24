@@ -1,14 +1,76 @@
-<!-- nx configuration start-->
-<!-- Leave the start & end comments to automatically receive updates. -->
+# Dwex Framework - Project Guidelines
 
-# General Guidelines for working with Nx
+## Tech Stack
 
-- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
-- You have access to the Nx MCP server and its tools, use them to help the user
-- When answering questions about the repository, use the `nx_workspace` tool first to gain an understanding of the workspace architecture where applicable.
-- When working in individual projects, use the `nx_project_details` mcp tool to analyze and understand the specific project structure and dependencies
-- For questions around nx configuration, best practices or if you're unsure, use the `nx_docs` tool to get relevant, up-to-date docs. Always use this instead of assuming things about nx configuration
-- If the user needs help with an Nx configuration or project graph error, use the `nx_workspace` tool to get any errors
+- **Runtime**: Bun
+- **Language**: TypeScript 5.9+
+- **Build Tool**: Nx 22 (monorepo)
+- **Module System**: ESM (type: "module")
+- **Bundler**: tsc
+- **Testing**: Vitest
+- **Formatter/Linter**: Biome
 
+## Monorepo Structure
 
-<!-- nx configuration end-->
+- Nx workspace with packages under `packages/*`
+- Main packages: `@dwexjs/core`, `@dwexjs/common`, `@dwexjs/jwt`, `@dwexjs/logger`
+- Examples located in `examples/*`
+
+## Code Style
+
+### Formatting (Biome)
+
+- **Indentation**: Tabs (not spaces)
+- **Quotes**: Double quotes for strings
+- **Format command**: `bunx nx format` or `bunx biome format --write packages`
+- Auto-organize imports enabled
+
+### TypeScript
+
+- **Strict mode**: Enabled with all strict flags
+- **Target**: ES2022
+- **Module**: NodeNext with module resolution "nodenext"
+- **Compiler options**: `composite: true`, `declarationMap: true`, `emitDeclarationOnly: true`
+- Enable unused locals checking and implicit return checking
+
+### Architecture Patterns
+
+- **Decorator-based**: Uses TypeScript decorators extensively (`@Controller`, `@Injectable`, `@Get`, etc.)
+- **Dependency Injection**: reflect-metadata based DI system
+- **Scoped instances**: Support for singleton, request, and transient scopes
+- **Modular**: Module-based architecture similar to NestJS
+
+## Development Guidelines
+
+### Running Tasks
+
+- Always use `bun nx` commands for tasks: `bun nx run`, `bun nx run-many`, `bun nx affected`
+- Build: `bun nx run-many -t build` or `bun nx run <project>:build`
+- Test: `bun nx run <project>:test`
+- Typecheck: `bun nx run <project>:typecheck`
+
+### File Structure
+
+- Source files in `src/`
+- Tests colocated with source: `*.test.ts` files next to implementation
+- Index files for clean exports: `index.ts` in each directory
+- Build output in `dist/` (gitignored)
+
+### Dependencies
+
+- Use workspace protocol (`*`) for internal package dependencies
+- Core dependencies: `reflect-metadata`, `cookie`, `tslib`
+- Dev dependencies managed at root level
+
+### Documentation
+
+- Use JSDoc comments for public APIs
+- Include `@example` blocks in decorator documentation
+- Document function parameters with `@param` and return types with `@returns`
+
+## Package Publishing
+
+- ESM only (no CommonJS)
+- Export both types and source via package.json `exports` field
+- Include `@dwex/source` custom condition for monorepo development
+- Files: Only include `dist/` directory, exclude `.tsbuildinfo` files
