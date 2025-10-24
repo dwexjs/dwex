@@ -1,6 +1,5 @@
 import "reflect-metadata";
 import {
-	INJECTABLE,
 	SELF_DECLARED_DEPS,
 	OPTIONAL_DEPS,
 	SCOPE,
@@ -24,6 +23,7 @@ export type InjectionToken = string | symbol | Type<any>;
  */
 interface InstanceWrapper<T = any> {
 	instance?: T;
+	metatype?: Type<T> | FactoryProvider | any;
 	scope: Scope;
 	isResolved: boolean;
 }
@@ -52,6 +52,7 @@ export class Container {
 			// Class provider
 			this.providers.set(provider, {
 				instance: undefined,
+				metatype: provider,
 				scope: this.getScope(provider),
 				isResolved: false,
 			});
@@ -59,7 +60,8 @@ export class Container {
 			const classProvider = provider as ClassProvider;
 			const token = classProvider.provide || classProvider.useClass;
 			this.providers.set(token, {
-				instance: classProvider.useClass,
+				instance: undefined,
+				metatype: classProvider.useClass,
 				scope: classProvider.scope || this.getScope(classProvider.useClass),
 				isResolved: false,
 			});
@@ -68,6 +70,7 @@ export class Container {
 			const token = valueProvider.provide!;
 			this.providers.set(token, {
 				instance: valueProvider.useValue,
+				metatype: undefined,
 				scope: valueProvider.scope || Scope.SINGLETON,
 				isResolved: true,
 			});
@@ -75,7 +78,8 @@ export class Container {
 			const factoryProvider = provider as FactoryProvider;
 			const token = factoryProvider.provide!;
 			this.providers.set(token, {
-				instance: factoryProvider,
+				instance: undefined,
+				metatype: factoryProvider,
 				scope: factoryProvider.scope || Scope.SINGLETON,
 				isResolved: false,
 			});
@@ -83,7 +87,8 @@ export class Container {
 			const existingProvider = provider as ExistingProvider;
 			const token = existingProvider.provide!;
 			this.providers.set(token, {
-				instance: existingProvider.useExisting,
+				instance: undefined,
+				metatype: existingProvider.useExisting,
 				scope: existingProvider.scope || Scope.SINGLETON,
 				isResolved: false,
 			});
@@ -163,7 +168,7 @@ export class Container {
 		token: InjectionToken,
 		wrapper: InstanceWrapper,
 	): T {
-		const providerDef = wrapper.instance;
+		const providerDef = wrapper.metatype;
 
 		// Handle factory provider
 		if (this.isFactoryProvider(providerDef)) {
@@ -181,13 +186,6 @@ export class Container {
 
 		// Handle class provider
 		const ClassToInstantiate = providerDef as Type<T>;
-
-		// Verify it's injectable
-		if (!Reflect.getMetadata(INJECTABLE, ClassToInstantiate)) {
-			throw new Error(
-				`${ClassToInstantiate.name} is not decorated with @Injectable()`,
-			);
-		}
 
 		// Get constructor dependencies
 		const dependencies =
