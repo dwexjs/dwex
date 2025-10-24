@@ -1,5 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { Get, Post, Put, Delete, Patch, Options, Head, All } from "./http-methods.decorator";
+import {
+	Get,
+	Post,
+	Put,
+	Delete,
+	Patch,
+	Options,
+	Head,
+	All,
+} from "./http-methods.decorator";
 import { ROUTE_PATH, HTTP_METHOD, RequestMethod } from "@dwexjs/common";
 import "reflect-metadata";
 

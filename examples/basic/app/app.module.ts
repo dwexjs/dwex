@@ -6,11 +6,11 @@ import { AppController } from "./app.controller";
  * Root application module
  */
 @Module({
-  imports: [
-    LoggerModule.forRoot({
-      isGlobal: true,
-    }),
-  ],
-  controllers: [AppController],
+	imports: [
+		LoggerModule.forRoot({
+			isGlobal: true,
+		}),
+	],
+	controllers: [AppController],
 })
 export class AppModule {}
