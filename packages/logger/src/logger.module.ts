@@ -45,10 +45,8 @@ export interface LoggerModuleOptions {
  */
 export class LoggerModule {
 	static forRoot(config?: LoggerModuleOptions): any {
-		// Create a logger instance with the provided options
-		if (config?.options) {
-			Logger.getGlobalLogger(config.options);
-		}
+		// Initialize the global logger with the provided options
+		Logger.initialize(config?.options);
 
 		const metadata: ModuleMetadata = {
 			providers: [

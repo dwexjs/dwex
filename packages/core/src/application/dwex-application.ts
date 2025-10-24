@@ -21,6 +21,10 @@ export class DwexApplication {
 	private readonly globalMiddleware: MiddlewareFunction[] = [];
 	private server?: ReturnType<typeof Bun.serve>;
 	private logger?: any; // Optional logger instance
+	private instanceLoaderLogger?: any;
+	private routesResolverLogger?: any;
+	private routerExplorerLogger?: any;
+	private dwexAppLogger?: any;
 
 	constructor(private readonly rootModule: Type<any>) {
 		this.container = new Container();
@@ -35,19 +39,20 @@ export class DwexApplication {
 		// First scan to register all providers
 		await this.scanModule(this.rootModule, true);
 
-		// Try to get logger from container (if LoggerModule was imported)
+		// Try to create logger instances (if LoggerModule was imported)
 		try {
-			const { LOGGER_TOKEN } = await import("@dwexjs/logger");
-			this.logger = this.container.get(LOGGER_TOKEN, true);
-			if (this.logger) {
-				// Log startup message
-				this.logger.info("Starting Dwex application...", {
-					context: "DwexFactory",
-				});
+			const { Logger } = await import("@dwexjs/logger");
+			this.logger = new Logger("DwexFactory");
+			this.instanceLoaderLogger = new Logger("InstanceLoader");
+			this.routesResolverLogger = new Logger("RoutesResolver");
+			this.routerExplorerLogger = new Logger("RouterExplorer");
+			this.dwexAppLogger = new Logger("DwexApplication");
 
-				// Second scan to log module initialization
-				await this.scanModule(this.rootModule, false, true);
-			}
+			// Log startup message
+			this.logger.log("Starting Dwex application...");
+
+			// Second scan to log module initialization
+			await this.scanModule(this.rootModule, false, true);
 		} catch (error) {
 			// Logger not available, that's okay
 		}
@@ -93,10 +98,8 @@ export class DwexApplication {
 		this.logRoutes();
 
 		// Log completion message
-		if (this.logger) {
-			this.logger.info("Dwex application successfully started", {
-				context: "DwexApplication",
-			});
+		if (this.dwexAppLogger) {
+			this.dwexAppLogger.log("Dwex application successfully started");
 		}
 	}
 
@@ -289,10 +292,10 @@ export class DwexApplication {
 		}
 
 		// Log module initialization (only on second pass if logger available)
-		if (logOnly && this.logger) {
-			this.logger.info(`${moduleClass.name} dependencies initialized`, {
-				context: "InstanceLoader",
-			});
+		if (logOnly && this.instanceLoaderLogger) {
+			this.instanceLoaderLogger.log(
+				`${moduleClass.name} dependencies initialized`,
+			);
 		}
 
 		// const isGlobal = Reflect.getMetadata(GLOBAL_MODULE, moduleClass);
@@ -344,7 +347,7 @@ export class DwexApplication {
 	 * Logs all registered routes.
 	 */
 	private logRoutes(): void {
-		if (!this.logger) return;
+		if (!this.routesResolverLogger || !this.routerExplorerLogger) return;
 
 		const routes = this.router.getRoutes();
 		const groupedRoutes: Record<
@@ -375,15 +378,13 @@ export class DwexApplication {
 		)) {
 			// Log controller registration
 			const controllerPath = controllerRoutes[0]?.controllerPath || "/";
-			this.logger.info(`${controllerName} {${controllerPath}}`, {
-				context: "RoutesResolver",
-			});
+			this.routesResolverLogger.log(`${controllerName} {${controllerPath}}`);
 
 			// Log each route
 			for (const route of controllerRoutes) {
-				this.logger.info(`Mapped {${route.path}, ${route.method}} route`, {
-					context: "RouterExplorer",
-				});
+				this.routerExplorerLogger.log(
+					`Mapped {${route.path}, ${route.method}} route`,
+				);
 			}
 		}
 	}

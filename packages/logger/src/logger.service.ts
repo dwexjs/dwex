@@ -1,7 +1,7 @@
 import pino, { type Logger as PinoLogger } from "pino";
 import "reflect-metadata";
 import { INJECTABLE } from "@dwexjs/common";
-import type { LoggerOptions, LogLevel, LoggerContext } from "./logger.types.js";
+import type { LoggerOptions, LogLevel } from "./logger.types.js";
 
 /**
  * Logger service for application-wide logging.
@@ -10,22 +10,40 @@ import type { LoggerOptions, LogLevel, LoggerContext } from "./logger.types.js";
  *
  * @example
  * ```typescript
+ * @Injectable()
  * class UserService {
- *   constructor(private logger: Logger) {}
+ *   private readonly logger = new Logger(UserService.name);
  *
  *   findAll() {
- *     this.logger.log('Finding all users', 'UserService');
+ *     this.logger.log('Finding all users');
  *     return users;
  *   }
  * }
  * ```
  */
 export class Logger {
-	private pinoLogger: PinoLogger;
-	private context?: string;
-	private static globalLogger?: Logger;
+	private static sharedPinoLogger?: PinoLogger;
+	private readonly context?: string;
 
-	constructor(options?: LoggerOptions) {
+	constructor(context?: string) {
+		this.context = context;
+
+		// Initialize with default config if not already initialized
+		if (!Logger.sharedPinoLogger) {
+			Logger.initialize();
+		}
+	}
+
+	/**
+	 * Initialize the global logger configuration.
+	 * This should be called by LoggerModule during application bootstrap.
+	 */
+	static initialize(options?: LoggerOptions): void {
+		// Only initialize once
+		if (Logger.sharedPinoLogger) {
+			return;
+		}
+
 		const isProduction = process.env.NODE_ENV === "production";
 		const isDevelopment = !isProduction;
 
@@ -73,125 +91,81 @@ export class Logger {
 				},
 			});
 
-			this.pinoLogger = pino(pinoOptions, customStream);
+			Logger.sharedPinoLogger = pino(pinoOptions, customStream);
 		} else {
-			this.pinoLogger = pino(pinoOptions);
+			Logger.sharedPinoLogger = pino(pinoOptions);
 		}
-	}
-
-	/**
-	 * Create a child logger with a specific context
-	 */
-	setContext(context: string): Logger {
-		const childLogger = new Logger();
-		childLogger.pinoLogger = this.pinoLogger.child({ context });
-		childLogger.context = context;
-		return childLogger;
-	}
-
-	/**
-	 * Get or create the global logger instance
-	 */
-	static getGlobalLogger(options?: LoggerOptions): Logger {
-		if (!Logger.globalLogger) {
-			Logger.globalLogger = new Logger(options);
-		}
-		return Logger.globalLogger;
 	}
 
 	/**
 	 * Log a message at info level
 	 */
-	log(message: string, context?: string | LoggerContext): void {
-		this.info(message, context);
+	log(message: string): void {
+		this.info(message);
 	}
 
 	/**
 	 * Log a message at info level
 	 */
-	info(message: string, context?: string | LoggerContext): void {
-		const ctx = this.buildContext(context);
-		this.pinoLogger.info(ctx, message);
+	info(message: string): void {
+		const ctx = this.context ? { context: this.context } : {};
+		Logger.sharedPinoLogger!.info(ctx, message);
 	}
 
 	/**
 	 * Log a message at error level
 	 */
-	error(
-		message: string,
-		trace?: string,
-		context?: string | LoggerContext,
-	): void;
-	error(message: string, error?: Error, context?: string | LoggerContext): void;
-	error(
-		message: string,
-		traceOrError?: string | Error,
-		context?: string | LoggerContext,
-	): void {
-		const ctx = this.buildContext(context);
+	error(message: string, trace?: string): void;
+	error(message: string, error?: Error): void;
+	error(message: string, traceOrError?: string | Error): void {
+		const ctx = this.context ? { context: this.context } : {};
 
 		if (traceOrError instanceof Error) {
-			this.pinoLogger.error({ ...ctx, err: traceOrError }, message);
+			Logger.sharedPinoLogger!.error({ ...ctx, err: traceOrError }, message);
 		} else if (typeof traceOrError === "string") {
-			this.pinoLogger.error({ ...ctx, trace: traceOrError }, message);
+			Logger.sharedPinoLogger!.error({ ...ctx, trace: traceOrError }, message);
 		} else {
-			this.pinoLogger.error(ctx, message);
+			Logger.sharedPinoLogger!.error(ctx, message);
 		}
 	}
 
 	/**
 	 * Log a message at warn level
 	 */
-	warn(message: string, context?: string | LoggerContext): void {
-		const ctx = this.buildContext(context);
-		this.pinoLogger.warn(ctx, message);
+	warn(message: string): void {
+		const ctx = this.context ? { context: this.context } : {};
+		Logger.sharedPinoLogger!.warn(ctx, message);
 	}
 
 	/**
 	 * Log a message at debug level
 	 */
-	debug(message: string, context?: string | LoggerContext): void {
-		const ctx = this.buildContext(context);
-		this.pinoLogger.debug(ctx, message);
+	debug(message: string): void {
+		const ctx = this.context ? { context: this.context } : {};
+		Logger.sharedPinoLogger!.debug(ctx, message);
 	}
 
 	/**
 	 * Log a message at trace level
 	 */
-	trace(message: string, context?: string | LoggerContext): void {
-		const ctx = this.buildContext(context);
-		this.pinoLogger.trace(ctx, message);
+	trace(message: string): void {
+		const ctx = this.context ? { context: this.context } : {};
+		Logger.sharedPinoLogger!.trace(ctx, message);
 	}
 
 	/**
 	 * Log a message at fatal level
 	 */
-	fatal(message: string, context?: string | LoggerContext): void {
-		const ctx = this.buildContext(context);
-		this.pinoLogger.fatal(ctx, message);
-	}
-
-	/**
-	 * Build context object from string or object
-	 */
-	private buildContext(context?: string | LoggerContext): LoggerContext {
-		if (!context) {
-			return this.context ? { context: this.context } : {};
-		}
-
-		if (typeof context === "string") {
-			return { context };
-		}
-
-		// Merge with instance context if available
-		return this.context ? { context: this.context, ...context } : context;
+	fatal(message: string): void {
+		const ctx = this.context ? { context: this.context } : {};
+		Logger.sharedPinoLogger!.fatal(ctx, message);
 	}
 
 	/**
 	 * Get the underlying Pino logger instance
 	 */
-	getPinoLogger(): PinoLogger {
-		return this.pinoLogger;
+	static getPinoLogger(): PinoLogger | undefined {
+		return Logger.sharedPinoLogger;
 	}
 }
 
