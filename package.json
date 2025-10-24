@@ -2,7 +2,9 @@
 	"name": "@dwexjs/source",
 	"version": "0.0.0",
 	"license": "MIT",
-	"scripts": {},
+	"scripts": {
+		"format": "bunx biome format --write packages"
+	},
 	"private": true,
 	"dependencies": {
 		"@clack/prompts": "^0.11.0",
