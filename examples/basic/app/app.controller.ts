@@ -1,23 +1,27 @@
-import { Controller, Get } from "@dwexjs/core";
+import { Controller, Get, Inject } from "@dwexjs/core";
+import { Logger, LOGGER_TOKEN } from "@dwexjs/logger";
 
 /**
  * Main application controller
  */
 @Controller()
 export class AppController {
-	/**
-	 * Health check endpoint
-	 */
-	@Get("ping")
-	ping() {
-		return { message: "pong", timestamp: new Date().toISOString() };
-	}
+  constructor(@Inject(LOGGER_TOKEN) private logger: Logger) {}
 
-	/**
-	 * Root endpoint
-	 */
-	@Get()
-	root() {
-		return { message: "Hello World from Dwex!", version: "1.0.0" };
-	}
+  /**
+   * Health check endpoint
+   */
+  @Get("ping")
+  ping() {
+    this.logger.log("Fetching all users", "UserService");
+    return { message: "pong", timestamp: new Date().toISOString() };
+  }
+
+  /**
+   * Root endpoint
+   */
+  @Get()
+  root() {
+    return { message: "Hello World from Dwex!", version: "1.0.0" };
+  }
 }

@@ -31,10 +31,13 @@
   },
   "references": [
     {
-      "path": "../../packages/core"
+      "path": "../../packages/common"
     },
     {
-      "path": "../../packages/common"
+      "path": "../../packages/logger"
+    },
+    {
+      "path": "../../packages/core"
     }
   ]
 }
