@@ -38,6 +38,7 @@
 		"vitest": "^3.0.0"
 	},
 	"workspaces": [
+		"examples/*",
 		"packages/*"
 	],
 	"nx": {

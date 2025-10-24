@@ -1,0 +1,21 @@
+{
+	"name": "basic",
+	"module": "src/main.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "bun run index.ts",
+		"start": "bun run index.ts"
+	},
+	"dependencies": {
+		"@dwexjs/common": "*",
+		"@dwexjs/core": "*",
+		"reflect-metadata": "^0.2.2"
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
+}
