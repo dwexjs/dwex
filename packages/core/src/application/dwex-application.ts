@@ -1,10 +1,10 @@
 import {
-	HttpException,
-	type MiddlewareFunction,
-	MODULE_METADATA,
-	type ModuleMetadata,
-	NotFoundException,
-	type Type,
+  HttpException,
+  type MiddlewareFunction,
+  MODULE_METADATA,
+  type ModuleMetadata,
+  NotFoundException,
+  type Type,
 } from "@dwexjs/common";
 import "reflect-metadata";
 import { Container } from "../di/container.js";
@@ -15,290 +15,376 @@ import { Router } from "../router/router.js";
  * Dwex application instance.
  */
 export class DwexApplication {
-	private readonly container: Container;
-	private readonly router: Router;
-	private readonly requestHandler: RequestHandler;
-	private readonly globalMiddleware: MiddlewareFunction[] = [];
-	private server?: ReturnType<typeof Bun.serve>;
+  private readonly container: Container;
+  private readonly router: Router;
+  private readonly requestHandler: RequestHandler;
+  private readonly globalMiddleware: MiddlewareFunction[] = [];
+  private server?: ReturnType<typeof Bun.serve>;
+  private logger?: any; // Optional logger instance
 
-	constructor(private readonly rootModule: Type<any>) {
-		this.container = new Container();
-		this.router = new Router();
-		this.requestHandler = new RequestHandler(this.container);
-	}
+  constructor(private readonly rootModule: Type<any>) {
+    this.container = new Container();
+    this.router = new Router();
+    this.requestHandler = new RequestHandler(this.container);
+  }
 
-	/**
-	 * Initializes the application by scanning modules and registering providers.
-	 */
-	async init(): Promise<void> {
-		await this.scanModule(this.rootModule);
-	}
+  /**
+   * Initializes the application by scanning modules and registering providers.
+   */
+  async init(): Promise<void> {
+    // First scan to register all providers
+    await this.scanModule(this.rootModule, true);
 
-	/**
-	 * Adds global middleware that runs before all routes.
-	 *
-	 * @param middleware - Middleware function
-	 *
-	 * @example
-	 * ```typescript
-	 * app.use(corsMiddleware());
-	 * app.use(bodyParserMiddleware());
-	 * ```
-	 */
-	use(middleware: MiddlewareFunction): void {
-		this.globalMiddleware.push(middleware);
-	}
+    // Try to get logger from container (if LoggerModule was imported)
+    try {
+      const { LOGGER_TOKEN } = await import("@dwexjs/logger");
+      this.logger = this.container.get(LOGGER_TOKEN, true);
+      if (this.logger) {
+        // Log startup message
+        this.logger.info("Starting Dwex application...", {
+          context: "DwexFactory",
+        });
 
-	/**
-	 * Starts the HTTP server.
-	 *
-	 * @param port - Port to listen on
-	 * @param hostname - Hostname to bind to
-	 * @returns Promise that resolves when the server is listening
-	 *
-	 * @example
-	 * ```typescript
-	 * await app.listen(3000);
-	 * console.log('Server running on http://localhost:3000');
-	 * ```
-	 */
-	async listen(port: number, hostname = "0.0.0.0"): Promise<void> {
-		this.server = Bun.serve({
-			port,
-			hostname,
-			fetch: this.handleRequest.bind(this),
-			error: this.handleError.bind(this),
-		});
+        // Second scan to log module initialization
+        await this.scanModule(this.rootModule, false, true);
+      }
+    } catch (error) {
+      // Logger not available, that's okay
+    }
+  }
 
-		console.log(`Server listening on http://${hostname}:${port}`);
-	}
+  /**
+   * Adds global middleware that runs before all routes.
+   *
+   * @param middleware - Middleware function
+   *
+   * @example
+   * ```typescript
+   * app.use(corsMiddleware());
+   * app.use(bodyParserMiddleware());
+   * ```
+   */
+  use(middleware: MiddlewareFunction): void {
+    this.globalMiddleware.push(middleware);
+  }
 
-	/**
-	 * Stops the HTTP server.
-	 */
-	async close(): Promise<void> {
-		if (this.server) {
-			this.server.stop();
-		}
-	}
+  /**
+   * Starts the HTTP server.
+   *
+   * @param port - Port to listen on
+   * @param hostname - Hostname to bind to
+   * @returns Promise that resolves when the server is listening
+   *
+   * @example
+   * ```typescript
+   * await app.listen(3000);
+   * console.log('Server running on http://localhost:3000');
+   * ```
+   */
+  async listen(port: number, hostname = "0.0.0.0"): Promise<void> {
+    this.server = Bun.serve({
+      port,
+      hostname,
+      fetch: this.handleRequest.bind(this),
+      error: this.handleError.bind(this),
+    });
 
-	/**
-	 * Gets the underlying DI container.
-	 */
-	getContainer(): Container {
-		return this.container;
-	}
+    // Log all registered routes
+    this.logRoutes();
 
-	/**
-	 * Gets the router instance.
-	 */
-	getRouter(): Router {
-		return this.router;
-	}
+    // Log completion message
+    if (this.logger) {
+      this.logger.info("Dwex application successfully started", {
+        context: "DwexApplication",
+      });
+    }
+  }
 
-	/**
-	 * Handles incoming HTTP requests.
-	 */
-	private async handleRequest(req: Request): Promise<Response> {
-		try {
-			// Create a mutable request object
-			const request: any = {
-				...req,
-				url: new URL(req.url).pathname + new URL(req.url).search,
-				method: req.method,
-				headers: Object.fromEntries(req.headers.entries()),
-				text: () => req.text(),
-				json: () => req.json(),
-			};
+  /**
+   * Stops the HTTP server.
+   */
+  async close(): Promise<void> {
+    if (this.server) {
+      this.server.stop();
+    }
+  }
 
-			// Create response object
-			const response: any = {
-				statusCode: 200,
-				headers: new Headers(),
-				body: undefined,
-				setHeader(key: string, value: string) {
-					this.headers.set(key, value);
-					return this;
-				},
-				status(code: number) {
-					this.statusCode = code;
-					return this;
-				},
-				send(data: any) {
-					this.body = data;
-					return this;
-				},
-				json(data: any) {
-					this.headers.set("Content-Type", "application/json");
-					this.body = JSON.stringify(data);
-					return this;
-				},
-				end() {
-					return this;
-				},
-			};
+  /**
+   * Gets the underlying DI container.
+   */
+  getContainer(): Container {
+    return this.container;
+  }
 
-			// Execute global middleware
-			await this.executeMiddleware(request, response, this.globalMiddleware);
+  /**
+   * Gets the router instance.
+   */
+  getRouter(): Router {
+    return this.router;
+  }
 
-			// Find matching route
-			const route = this.router.findRoute(
-				request.method,
-				request.url.split("?")[0],
-			);
+  /**
+   * Handles incoming HTTP requests.
+   */
+  private async handleRequest(req: Request): Promise<Response> {
+    try {
+      // Create a mutable request object
+      const request: any = {
+        ...req,
+        url: new URL(req.url).pathname + new URL(req.url).search,
+        method: req.method,
+        headers: Object.fromEntries(req.headers.entries()),
+        text: () => req.text(),
+        json: () => req.json(),
+      };
 
-			if (!route) {
-				throw new NotFoundException(
-					`Cannot ${request.method} ${request.url.split("?")[0]}`,
-				);
-			}
+      // Create response object
+      const response: any = {
+        statusCode: 200,
+        headers: new Headers(),
+        body: undefined,
+        setHeader(key: string, value: string) {
+          this.headers.set(key, value);
+          return this;
+        },
+        status(code: number) {
+          this.statusCode = code;
+          return this;
+        },
+        send(data: any) {
+          this.body = data;
+          return this;
+        },
+        json(data: any) {
+          this.headers.set("Content-Type", "application/json");
+          this.body = JSON.stringify(data);
+          return this;
+        },
+        end() {
+          return this;
+        },
+      };
 
-			// Execute route handler
-			const result = await this.requestHandler.handle(route, request, response);
+      // Execute global middleware
+      await this.executeMiddleware(request, response, this.globalMiddleware);
 
-			// If response was manually sent, use it
-			if (response.body !== undefined) {
-				return new Response(response.body, {
-					status: response.statusCode,
-					headers: response.headers,
-				});
-			}
+      // Find matching route
+      const route = this.router.findRoute(
+        request.method,
+        request.url.split("?")[0],
+      );
 
-			// Auto-serialize response
-			if (result !== undefined && result !== null) {
-				const body =
-					typeof result === "string" ? result : JSON.stringify(result);
-				const headers = new Headers(response.headers);
+      if (!route) {
+        throw new NotFoundException(
+          `Cannot ${request.method} ${request.url.split("?")[0]}`,
+        );
+      }
 
-				if (typeof result === "object") {
-					headers.set("Content-Type", "application/json");
-				}
+      // Execute route handler
+      const result = await this.requestHandler.handle(route, request, response);
 
-				return new Response(body, {
-					status: response.statusCode,
-					headers,
-				});
-			}
+      // If response was manually sent, use it
+      if (response.body !== undefined) {
+        return new Response(response.body, {
+          status: response.statusCode,
+          headers: response.headers,
+        });
+      }
 
-			// No content
-			return new Response(null, { status: 204 });
-		} catch (error) {
-			return this.handleError(error);
-		}
-	}
+      // Auto-serialize response
+      if (result !== undefined && result !== null) {
+        const body =
+          typeof result === "string" ? result : JSON.stringify(result);
+        const headers = new Headers(response.headers);
 
-	/**
-	 * Executes middleware chain.
-	 */
-	private async executeMiddleware(
-		req: any,
-		res: any,
-		middleware: MiddlewareFunction[],
-	): Promise<void> {
-		for (const mw of middleware) {
-			await new Promise<void>((resolve, reject) => {
-				mw(req, res, (error?: any) => {
-					if (error) {
-						reject(error);
-					} else {
-						resolve();
-					}
-				});
-			});
-		}
-	}
+        if (typeof result === "object") {
+          headers.set("Content-Type", "application/json");
+        }
 
-	/**
-	 * Handles errors and returns appropriate responses.
-	 */
-	private handleError(error: any): Response {
-		if (error instanceof HttpException) {
-			const response = error.getResponse();
-			const status = error.getStatus();
+        return new Response(body, {
+          status: response.statusCode,
+          headers,
+        });
+      }
 
-			return new Response(
-				JSON.stringify(
-					typeof response === "string"
-						? { statusCode: status, message: response }
-						: response,
-				),
-				{
-					status,
-					headers: { "Content-Type": "application/json" },
-				},
-			);
-		}
+      // No content
+      return new Response(null, { status: 204 });
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
 
-		// Log unexpected errors
-		console.error("Unhandled error:", error);
+  /**
+   * Executes middleware chain.
+   */
+  private async executeMiddleware(
+    req: any,
+    res: any,
+    middleware: MiddlewareFunction[],
+  ): Promise<void> {
+    for (const mw of middleware) {
+      await new Promise<void>((resolve, reject) => {
+        mw(req, res, (error?: any) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+      });
+    }
+  }
 
-		return new Response(
-			JSON.stringify({
-				statusCode: 500,
-				message: "Internal Server Error",
-			}),
-			{
-				status: 500,
-				headers: { "Content-Type": "application/json" },
-			},
-		);
-	}
+  /**
+   * Handles errors and returns appropriate responses.
+   */
+  private handleError(error: any): Response {
+    if (error instanceof HttpException) {
+      const response = error.getResponse();
+      const status = error.getStatus();
 
-	/**
-	 * Scans a module and registers its providers and controllers.
-	 */
-	private async scanModule(moduleClass: Type<any>): Promise<void> {
-		const metadata: ModuleMetadata | undefined = Reflect.getMetadata(
-			MODULE_METADATA,
-			moduleClass,
-		);
+      return new Response(
+        JSON.stringify(
+          typeof response === "string"
+            ? { statusCode: status, message: response }
+            : response,
+        ),
+        {
+          status,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
 
-		if (!metadata) {
-			throw new Error(`${moduleClass.name} is not decorated with @Module()`);
-		}
+    // Log unexpected errors
+    console.error("Unhandled error:", error);
 
-		// const isGlobal = Reflect.getMetadata(GLOBAL_MODULE, moduleClass);
+    return new Response(
+      JSON.stringify({
+        statusCode: 500,
+        message: "Internal Server Error",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  }
 
-		// Register providers
-		if (metadata.providers) {
-			for (const provider of metadata.providers) {
-				this.container.addProvider(provider);
-			}
-		}
+  /**
+   * Scans a module and registers its providers and controllers.
+   */
+  private async scanModule(
+    moduleClass: Type<any>,
+    register = true,
+    logOnly = false,
+  ): Promise<void> {
+    const metadata: ModuleMetadata | undefined = Reflect.getMetadata(
+      MODULE_METADATA,
+      moduleClass,
+    );
 
-		// Scan imported modules
-		if (metadata.imports) {
-			for (const importedModule of metadata.imports) {
-				if (typeof importedModule === "function") {
-					await this.scanModule(importedModule);
-				} else {
-					// Dynamic module
-					const dynamicModule = await importedModule;
-					if ("module" in dynamicModule) {
-						await this.scanModule(dynamicModule.module);
+    if (!metadata) {
+      throw new Error(`${moduleClass.name} is not decorated with @Module()`);
+    }
 
-						if (dynamicModule.providers) {
-							for (const provider of dynamicModule.providers) {
-								this.container.addProvider(provider);
-							}
-						}
-					}
-				}
-			}
-		}
+    // Log module initialization (only on second pass if logger available)
+    if (logOnly && this.logger) {
+      this.logger.info(`${moduleClass.name} dependencies initialized`, {
+        context: "InstanceLoader",
+      });
+    }
 
-		// Register controllers
-		if (metadata.controllers) {
-			for (const ControllerClass of metadata.controllers) {
-				// Add controller as a provider so it can be injected
-				this.container.addProvider(ControllerClass);
+    // const isGlobal = Reflect.getMetadata(GLOBAL_MODULE, moduleClass);
 
-				// Create controller instance
-				const controller = this.container.get(ControllerClass);
+    // Register providers (only on first pass)
+    if (register && metadata.providers) {
+      for (const provider of metadata.providers) {
+        this.container.addProvider(provider);
+      }
+    }
 
-				// Register routes
-				this.router.registerController(controller, ControllerClass);
-			}
-		}
-	}
+    // Scan imported modules
+    if (metadata.imports) {
+      for (const importedModule of metadata.imports) {
+        if (typeof importedModule === "function") {
+          await this.scanModule(importedModule, register, logOnly);
+        } else {
+          // Dynamic module
+          const dynamicModule = await importedModule;
+          if ("module" in dynamicModule) {
+            await this.scanModule(dynamicModule.module, register, logOnly);
+
+            if (register && dynamicModule.providers) {
+              for (const provider of dynamicModule.providers) {
+                this.container.addProvider(provider);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Register controllers (only on first pass)
+    if (register && metadata.controllers) {
+      for (const ControllerClass of metadata.controllers) {
+        // Add controller as a provider so it can be injected
+        this.container.addProvider(ControllerClass);
+
+        // Create controller instance
+        const controller = this.container.get(ControllerClass);
+
+        // Register routes
+        this.router.registerController(controller, ControllerClass);
+      }
+    }
+  }
+
+  /**
+   * Logs all registered routes.
+   */
+  private logRoutes(): void {
+    if (!this.logger) return;
+
+    const routes = this.router.getRoutes();
+    const groupedRoutes: Record<
+      string,
+      Array<{ method: string; path: string; controllerPath: string }>
+    > = {};
+
+    // Group routes by controller
+    for (const route of routes) {
+      const controllerName = route.controller.constructor.name;
+      if (!groupedRoutes[controllerName]) {
+        groupedRoutes[controllerName] = [];
+      }
+
+      // Extract base path (everything before the first param or end of path)
+      const basePath = route.path.split(":")[0].replace(/\/$/, "") || "/";
+
+      groupedRoutes[controllerName].push({
+        method: route.method,
+        path: route.path,
+        controllerPath: basePath,
+      });
+    }
+
+    // Log routes by controller
+    for (const [controllerName, controllerRoutes] of Object.entries(
+      groupedRoutes,
+    )) {
+      // Log controller registration
+      const controllerPath = controllerRoutes[0]?.controllerPath || "/";
+      this.logger.info(`${controllerName} {${controllerPath}}`, {
+        context: "RoutesResolver",
+      });
+
+      // Log each route
+      for (const route of controllerRoutes) {
+        this.logger.info(`Mapped {${route.path}, ${route.method}} route`, {
+          context: "RouterExplorer",
+        });
+      }
+    }
+  }
 }
