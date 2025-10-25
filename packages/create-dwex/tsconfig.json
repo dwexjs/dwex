@@ -3,11 +3,20 @@
 	"files": [],
 	"include": [],
 	"references": [
-		{
-			"path": "./tsconfig.lib.json"
-		},
-		{
-			"path": "./tsconfig.spec.json"
-		}
-	]
+    {
+      "path": "../jwt"
+    },
+    {
+      "path": "../logger"
+    },
+    {
+      "path": "../core"
+    },
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

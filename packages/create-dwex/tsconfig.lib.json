@@ -10,7 +10,17 @@
 		"types": ["bun"]
 	},
 	"include": ["src/**/*.ts"],
-	"references": [],
+	"references": [
+    {
+      "path": "../jwt/tsconfig.lib.json"
+    },
+    {
+      "path": "../logger/tsconfig.lib.json"
+    },
+    {
+      "path": "../core/tsconfig.lib.json"
+    }
+  ],
 	"exclude": [
 		"vite.config.ts",
 		"vite.config.mts",
