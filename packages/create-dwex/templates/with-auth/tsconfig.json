@@ -28,19 +28,5 @@
 		"noUnusedParameters": false,
 		"noPropertyAccessFromIndexSignature": false,
 		"types": ["bun"]
-  },
-  "references": [
-    {
-      "path": "../../../jwt"
-    },
-    {
-      "path": "../.."
-    },
-    {
-      "path": "../../../logger"
-    },
-    {
-      "path": "../../../core"
-    }
-  ]
+  }
 }
