@@ -1,0 +1,461 @@
+---
+title: Controllers
+description: Handle HTTP requests with decorator-based routing
+---
+
+## What are Controllers?
+
+Controllers are responsible for handling incoming HTTP requests and returning responses. In Dwex, controllers are classes decorated with `@Controller()` that group related routes together.
+
+## Basic Controller
+
+```typescript
+import { Controller, Get } from "@dwexjs/core";
+
+@Controller("users")
+export class UserController {
+	@Get()
+	findAll() {
+		return ["Alice", "Bob", "Charlie"];
+	}
+}
+```
+
+This controller handles `GET /users` and returns a list of users.
+
+## Route Paths
+
+### Controller Path
+
+The `@Controller()` decorator defines a base path:
+
+```typescript
+@Controller("users") // Base path: /users
+export class UserController {
+	@Get() // Handles: GET /users
+	findAll() {}
+
+	@Get("profile") // Handles: GET /users/profile
+	getProfile() {}
+}
+```
+
+### No Base Path
+
+Controllers can have no base path:
+
+```typescript
+@Controller() // No base path
+export class AppController {
+	@Get() // Handles: GET /
+	home() {
+		return "Welcome!";
+	}
+
+	@Get("health") // Handles: GET /health
+	health() {
+		return "OK";
+	}
+}
+```
+
+## HTTP Methods
+
+Dwex provides decorators for all standard HTTP methods:
+
+```typescript
+import { Controller, Get, Post, Put, Delete, Patch } from "@dwexjs/core";
+
+@Controller("posts")
+export class PostController {
+	@Get()
+	findAll() {
+		return [];
+	}
+
+	@Post()
+	create() {
+		return { id: 1 };
+	}
+
+	@Put(":id")
+	update() {
+		return { updated: true };
+	}
+
+	@Patch(":id")
+	partialUpdate() {
+		return { updated: true };
+	}
+
+	@Delete(":id")
+	remove() {
+		return { deleted: true };
+	}
+}
+```
+
+### All Methods
+
+Handle any HTTP method with `@All()`:
+
+```typescript
+import { Controller, All } from "@dwexjs/core";
+
+@Controller("webhook")
+export class WebhookController {
+	@All()
+	handleWebhook() {
+		return "Webhook received";
+	}
+}
+```
+
+## Route Parameters
+
+Extract values from the URL path:
+
+```typescript
+import { Controller, Get, Param } from "@dwexjs/core";
+
+@Controller("users")
+export class UserController {
+	@Get(":id")
+	findOne(@Param("id") id: string) {
+		return { id, name: "John Doe" };
+	}
+
+	@Get(":userId/posts/:postId")
+	findPost(
+		@Param("userId") userId: string,
+		@Param("postId") postId: string,
+	) {
+		return { userId, postId };
+	}
+}
+```
+
+### All Parameters
+
+Get all route parameters as an object:
+
+```typescript
+@Get(":userId/posts/:postId")
+findPost(@Param() params: { userId: string; postId: string }) {
+	return params;
+}
+```
+
+## Request Data
+
+### Query Parameters
+
+Access query strings with `@Query()`:
+
+```typescript
+import { Controller, Get, Query } from "@dwexjs/core";
+
+@Controller("search")
+export class SearchController {
+	@Get()
+	search(@Query("q") query: string, @Query("limit") limit: string) {
+		return { query, limit };
+	}
+
+	// Or get all query params
+	@Get("advanced")
+	advancedSearch(@Query() query: Record<string, string>) {
+		return query;
+	}
+}
+```
+
+Request: `GET /search?q=typescript&limit=10`
+
+### Request Body
+
+Access request body with `@Body()`:
+
+```typescript
+import { Controller, Post, Body } from "@dwexjs/core";
+
+@Controller("users")
+export class UserController {
+	@Post()
+	create(@Body() data: { name: string; email: string }) {
+		return { id: 1, ...data };
+	}
+
+	// Or specific property
+	@Post("register")
+	register(@Body("email") email: string) {
+		return { email };
+	}
+}
+```
+
+### Headers
+
+Access request headers with `@Headers()`:
+
+```typescript
+import { Controller, Get, Headers } from "@dwexjs/core";
+
+@Controller("api")
+export class ApiController {
+	@Get("version")
+	getVersion(@Headers("user-agent") userAgent: string) {
+		return { userAgent };
+	}
+
+	// Or all headers
+	@Get("info")
+	getInfo(@Headers() headers: Record<string, string>) {
+		return { headers };
+	}
+}
+```
+
+### Cookies
+
+Access cookies with `@Cookies()`:
+
+```typescript
+import { Controller, Get, Cookies } from "@dwexjs/core";
+
+@Controller("session")
+export class SessionController {
+	@Get()
+	getSession(@Cookies("sessionId") sessionId: string) {
+		return { sessionId };
+	}
+}
+```
+
+### Request & Response Objects
+
+Access the raw request/response:
+
+```typescript
+import { Controller, Get, Req, Res } from "@dwexjs/core";
+
+@Controller("raw")
+export class RawController {
+	@Get()
+	handle(@Req() request: Request, @Res() response: Response) {
+		return { url: request.url, method: request.method };
+	}
+}
+```
+
+## Responses
+
+### Automatic JSON
+
+Return objects or arrays, Dwex automatically serializes to JSON:
+
+```typescript
+@Get()
+findAll() {
+	return [{ id: 1, name: 'Alice' }];
+}
+```
+
+Response:
+
+```json
+[{ "id": 1, "name": "Alice" }]
+```
+
+### Status Codes
+
+Throw exceptions to return error status codes:
+
+```typescript
+import { Controller, Get, Param, NotFoundException } from "@dwexjs/core";
+
+@Controller("users")
+export class UserController {
+	@Get(":id")
+	findOne(@Param("id") id: string) {
+		const user = this.users.find((u) => u.id === id);
+
+		if (!user) {
+			throw new NotFoundException("User not found");
+		}
+
+		return user;
+	}
+}
+```
+
+### Custom Response
+
+Use `@Res()` for full control:
+
+```typescript
+@Get('download')
+download(@Res() response: Response) {
+	response.setHeader('Content-Type', 'application/pdf');
+	response.send(pdfBuffer);
+}
+```
+
+## Dependency Injection
+
+Controllers can inject services via constructor:
+
+```typescript
+import { Controller, Get, Injectable } from "@dwexjs/core";
+
+@Injectable()
+class UserService {
+	findAll() {
+		return ["Alice", "Bob"];
+	}
+}
+
+@Controller("users")
+export class UserController {
+	constructor(private readonly userService: UserService) {}
+
+	@Get()
+	findAll() {
+		return this.userService.findAll();
+	}
+}
+```
+
+Register both in a module:
+
+```typescript
+@Module({
+	controllers: [UserController],
+	providers: [UserService],
+})
+export class UserModule {}
+```
+
+## Async Handlers
+
+Route handlers can be async:
+
+```typescript
+@Controller("users")
+export class UserController {
+	constructor(private readonly db: DatabaseService) {}
+
+	@Get()
+	async findAll() {
+		return await this.db.users.findMany();
+	}
+
+	@Post()
+	async create(@Body() data: CreateUserDto) {
+		return await this.db.users.create(data);
+	}
+}
+```
+
+## Request IP & Host
+
+Get client IP and hostname:
+
+```typescript
+import { Controller, Get, Ip, Host } from "@dwexjs/core";
+
+@Controller("info")
+export class InfoController {
+	@Get("ip")
+	getIp(@Ip() ip: string) {
+		return { ip };
+	}
+
+	@Get("host")
+	getHost(@Host() host: string) {
+		return { host };
+	}
+}
+```
+
+## Best Practices
+
+### 1. Keep Controllers Thin
+
+Controllers should delegate business logic to services:
+
+```typescript
+// Good
+@Controller("users")
+export class UserController {
+	constructor(private readonly userService: UserService) {}
+
+	@Get()
+	findAll() {
+		return this.userService.findAll();
+	}
+}
+
+// Avoid
+@Controller("users")
+export class UserController {
+	@Get()
+	findAll() {
+		// Complex logic in controller
+		const users = database.query("SELECT * FROM users");
+		return users.map((u) => transformUser(u));
+	}
+}
+```
+
+### 2. Use DTOs
+
+Define types for request data:
+
+```typescript
+interface CreateUserDto {
+	email: string;
+	name: string;
+	password: string;
+}
+
+@Post()
+create(@Body() data: CreateUserDto) {
+	return this.userService.create(data);
+}
+```
+
+### 3. Consistent Naming
+
+Follow REST conventions:
+
+- `findAll()` - GET collection
+- `findOne()` - GET single item
+- `create()` - POST
+- `update()` - PUT
+- `remove()` - DELETE
+
+### 4. Handle Errors
+
+Always validate and handle errors:
+
+```typescript
+@Get(':id')
+async findOne(@Param('id') id: string) {
+	const user = await this.userService.findOne(id);
+
+	if (!user) {
+		throw new NotFoundException(`User #${id} not found`);
+	}
+
+	return user;
+}
+```
+
+## Next Steps
+
+<Cards>
+	<Card title="Routing" href="/docs/routing/http-methods" />
+	<Card title="Request Data" href="/docs/routing/request-data" />
+	<Card title="Guards" href="/docs/security/guards" />
+</Cards>

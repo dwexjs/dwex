@@ -1,0 +1,352 @@
+---
+title: Modules
+description: Organize your application into cohesive, reusable modules
+---
+
+## What are Modules?
+
+Modules are the fundamental building blocks of a Dwex application. A module is a class decorated with `@Module()` that organizes related components (controllers, providers, etc.) into cohesive units.
+
+## Basic Module
+
+Here's a simple module:
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { UserController } from "./user.controller";
+import { UserService } from "./user.service";
+
+@Module({
+	controllers: [UserController],
+	providers: [UserService],
+})
+export class UserModule {}
+```
+
+## Module Metadata
+
+The `@Module()` decorator accepts an object with the following properties:
+
+### `controllers`
+
+Controllers defined in this module. These handle incoming HTTP requests.
+
+```typescript
+@Module({
+	controllers: [UserController, ProfileController],
+})
+export class UserModule {}
+```
+
+### `providers`
+
+Injectable services and other providers available in this module.
+
+```typescript
+@Module({
+	providers: [UserService, EmailService, ValidationPipe],
+})
+export class UserModule {}
+```
+
+### `imports`
+
+Other modules whose exported providers should be available in this module.
+
+```typescript
+@Module({
+	imports: [DatabaseModule, LoggerModule],
+	controllers: [UserController],
+	providers: [UserService],
+})
+export class UserModule {}
+```
+
+### `exports`
+
+Providers that should be available to other modules that import this module.
+
+```typescript
+@Module({
+	providers: [UserService, UserRepository],
+	exports: [UserService], // UserRepository is private to this module
+})
+export class UserModule {}
+```
+
+## Importing Modules
+
+To use providers from another module, import that module:
+
+```typescript
+@Module({
+	imports: [UserModule], // Imports UserService
+	controllers: [PostController],
+	providers: [PostService],
+})
+export class PostModule {}
+```
+
+Now `PostService` can inject `UserService`:
+
+```typescript
+@Injectable()
+export class PostService {
+	constructor(private readonly userService: UserService) {}
+
+	async createPost(userId: string, title: string) {
+		const user = await this.userService.findOne(userId);
+		// ...
+	}
+}
+```
+
+## Global Modules
+
+If a module should be available everywhere without explicit imports, mark it as global:
+
+```typescript
+import { Module, Global } from "@dwexjs/core";
+
+@Global()
+@Module({
+	providers: [ConfigService, CacheService],
+	exports: [ConfigService, CacheService],
+})
+export class SharedModule {}
+```
+
+Now any module can inject `ConfigService` or `CacheService` without importing `SharedModule`.
+
+**Best Practice**: Only make truly shared utilities global. Overusing global modules can make dependencies unclear.
+
+## Dynamic Modules
+
+Dynamic modules allow configuration at runtime. This is useful for modules that need different settings in different contexts.
+
+### Creating a Dynamic Module
+
+```typescript
+import { Module, type DynamicModule } from "@dwexjs/core";
+
+@Module({})
+export class DatabaseModule {
+	static forRoot(options: DatabaseOptions): DynamicModule {
+		return {
+			module: DatabaseModule,
+			providers: [
+				{
+					provide: "DATABASE_OPTIONS",
+					useValue: options,
+				},
+				DatabaseService,
+			],
+			exports: [DatabaseService],
+		};
+	}
+}
+```
+
+### Using a Dynamic Module
+
+```typescript
+@Module({
+	imports: [
+		DatabaseModule.forRoot({
+			host: "localhost",
+			port: 5432,
+			database: "myapp",
+		}),
+	],
+})
+export class AppModule {}
+```
+
+### Async Configuration
+
+For configuration that requires async initialization:
+
+```typescript
+@Module({})
+export class DatabaseModule {
+	static async forRootAsync(
+		options: DatabaseAsyncOptions,
+	): Promise<DynamicModule> {
+		const config = await options.useFactory();
+
+		return {
+			module: DatabaseModule,
+			providers: [
+				{
+					provide: "DATABASE_OPTIONS",
+					useValue: config,
+				},
+				DatabaseService,
+			],
+			exports: [DatabaseService],
+		};
+	}
+}
+```
+
+Usage:
+
+```typescript
+@Module({
+	imports: [
+		await DatabaseModule.forRootAsync({
+			useFactory: async () => {
+				const config = await loadConfig();
+				return config.database;
+			},
+		}),
+	],
+})
+export class AppModule {}
+```
+
+## Module Re-exporting
+
+You can re-export imported modules to simplify imports:
+
+```typescript
+@Module({
+	imports: [UserModule, PostModule, CommentModule],
+	exports: [UserModule, PostModule, CommentModule],
+})
+export class ContentModule {}
+```
+
+Now other modules only need to import `ContentModule`:
+
+```typescript
+@Module({
+	imports: [ContentModule], // Gets User, Post, and Comment modules
+})
+export class AppModule {}
+```
+
+## Feature Modules
+
+Organize your app by features:
+
+```typescript
+// user.module.ts
+@Module({
+	imports: [DatabaseModule],
+	controllers: [UserController],
+	providers: [UserService, UserRepository],
+	exports: [UserService],
+})
+export class UserModule {}
+```
+
+```typescript
+// auth.module.ts
+@Module({
+	imports: [UserModule, JwtModule],
+	controllers: [AuthController],
+	providers: [AuthService, AuthGuard],
+	exports: [AuthGuard],
+})
+export class AuthModule {}
+```
+
+```typescript
+// app.module.ts
+@Module({
+	imports: [UserModule, AuthModule],
+})
+export class AppModule {}
+```
+
+## Root Module
+
+Every application has exactly one root module passed to `DwexFactory.create()`:
+
+```typescript
+import { DwexFactory } from "@dwexjs/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+```
+
+The root module typically imports all feature modules:
+
+```typescript
+@Module({
+	imports: [
+		LoggerModule,
+		DatabaseModule.forRoot({ url: process.env.DATABASE_URL }),
+		UserModule,
+		AuthModule,
+		PostModule,
+	],
+})
+export class AppModule {}
+```
+
+## Best Practices
+
+### 1. Single Responsibility
+
+Each module should focus on one feature or domain:
+
+```typescript
+// Good
+@Module({ ... })
+export class UserModule {}
+
+@Module({ ... })
+export class AuthModule {}
+
+// Avoid
+@Module({ ... })
+export class UserAndAuthModule {} // Too broad
+```
+
+### 2. Export Only What's Needed
+
+Keep module internals private:
+
+```typescript
+@Module({
+	providers: [UserService, UserRepository, UserValidator],
+	exports: [UserService], // Only expose the service
+})
+export class UserModule {}
+```
+
+### 3. Use Shared Modules Wisely
+
+Create a `SharedModule` for truly common utilities:
+
+```typescript
+@Global()
+@Module({
+	providers: [ConfigService, LoggerService],
+	exports: [ConfigService, LoggerService],
+})
+export class SharedModule {}
+```
+
+### 4. Lazy Loading (Future)
+
+While not yet implemented, plan your modules for potential lazy loading:
+
+```typescript
+// Each feature in its own module
+@Module({ ... })
+export class AdminModule {}
+
+@Module({ ... })
+export class PublicModule {}
+```
+
+## Next Steps
+
+<Cards>
+	<Card title="Controllers" href="/docs/fundamentals/controllers" />
+	<Card title="Providers & DI" href="/docs/fundamentals/providers" />
+	<Card title="Middleware" href="/docs/fundamentals/middleware" />
+</Cards>

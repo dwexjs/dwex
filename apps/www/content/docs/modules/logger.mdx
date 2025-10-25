@@ -1,0 +1,467 @@
+---
+title: Logger Module
+description: Built-in logging with Pino
+---
+
+## Installation
+
+```bash
+bun add @dwexjs/logger
+```
+
+## Basic Setup
+
+Import the logger module:
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { LoggerModule } from "@dwexjs/logger";
+
+@Module({
+	imports: [LoggerModule],
+})
+export class AppModule {}
+```
+
+## Using the Logger
+
+Inject the logger into your services and controllers:
+
+```typescript
+import { Injectable } from "@dwexjs/core";
+import { Logger } from "@dwexjs/logger";
+
+@Injectable()
+export class UserService {
+	private readonly logger = new Logger(UserService.name);
+
+	async findAll() {
+		this.logger.log("Fetching all users");
+		return [];
+	}
+
+	async create(user: CreateUserDto) {
+		this.logger.log(`Creating user: ${user.email}`);
+		try {
+			const result = await this.db.create(user);
+			this.logger.log(`User created successfully: ${result.id}`);
+			return result;
+		} catch (error) {
+			this.logger.error("Failed to create user", error);
+			throw error;
+		}
+	}
+}
+```
+
+In controllers:
+
+```typescript
+import { Controller, Get, Post, Body } from "@dwexjs/core";
+import { Logger } from "@dwexjs/logger";
+
+@Controller("users")
+export class UserController {
+	private readonly logger = new Logger(UserController.name);
+
+	constructor(private readonly userService: UserService) {}
+
+	@Get()
+	async findAll() {
+		this.logger.log("GET /users");
+		return await this.userService.findAll();
+	}
+
+	@Post()
+	async create(@Body() data: CreateUserDto) {
+		this.logger.log("POST /users", data);
+		return await this.userService.create(data);
+	}
+}
+```
+
+## Log Levels
+
+The logger supports multiple log levels:
+
+```typescript
+const logger = new Logger("MyService");
+
+// Log levels (lowest to highest)
+logger.debug("Debug message"); // Development details
+logger.log("Info message"); // General information
+logger.warn("Warning message"); // Warning conditions
+logger.error("Error message"); // Error conditions
+logger.fatal("Fatal message"); // Critical errors
+```
+
+### With Context
+
+Pass additional context data:
+
+```typescript
+logger.log("User logged in", {
+	userId: user.id,
+	timestamp: new Date(),
+});
+
+logger.error("Database connection failed", {
+	error: error.message,
+	stack: error.stack,
+	connectionString: "postgres://...",
+});
+```
+
+## Logger Context
+
+Set a context name for all log messages:
+
+```typescript
+// Constructor injection
+@Injectable()
+export class PaymentService {
+	private readonly logger = new Logger(PaymentService.name);
+	// Context: "PaymentService"
+}
+
+// Custom context
+const logger = new Logger("CustomContext");
+```
+
+Output:
+
+```
+[PaymentService] Processing payment for user 123
+[CustomContext] Custom operation started
+```
+
+## Configuration
+
+Configure the logger module:
+
+```typescript
+import { LoggerModule } from "@dwexjs/logger";
+
+@Module({
+	imports: [
+		LoggerModule.register({
+			level: "debug", // Minimum log level
+			prettyPrint: true, // Pretty print in development
+			timestamp: true, // Include timestamps
+		}),
+	],
+})
+export class AppModule {}
+```
+
+### Options
+
+```typescript
+interface LoggerOptions {
+	level?: "debug" | "log" | "warn" | "error" | "fatal";
+	prettyPrint?: boolean;
+	timestamp?: boolean;
+	destination?: string; // File path for logs
+}
+```
+
+## Development vs Production
+
+Configure different settings per environment:
+
+```typescript
+LoggerModule.register({
+	level: process.env.NODE_ENV === "production" ? "warn" : "debug",
+	prettyPrint: process.env.NODE_ENV !== "production",
+	timestamp: true,
+});
+```
+
+## Error Logging
+
+Log errors with stack traces:
+
+```typescript
+try {
+	await riskyOperation();
+} catch (error) {
+	this.logger.error("Operation failed", error);
+	// Logs error message and stack trace
+}
+```
+
+With additional context:
+
+```typescript
+catch (error) {
+	this.logger.error('Payment processing failed', {
+		error: error.message,
+		stack: error.stack,
+		userId: user.id,
+		amount: payment.amount,
+	});
+}
+```
+
+## Request Logging
+
+Log HTTP requests:
+
+```typescript
+@Injectable()
+export class LoggingInterceptor implements DwexInterceptor {
+	private readonly logger = new Logger("HTTP");
+
+	async intercept(context: ExecutionContext, next: () => Promise<any>) {
+		const request = context.getRequest();
+		const { method, url } = request;
+
+		this.logger.log(`${method} ${url}`);
+
+		const start = Date.now();
+		const result = await next();
+		const duration = Date.now() - start;
+
+		this.logger.log(`${method} ${url} - ${duration}ms`);
+
+		return result;
+	}
+}
+```
+
+Apply globally:
+
+```typescript
+@Module({
+	providers: [LoggingInterceptor],
+})
+export class AppModule {}
+```
+
+## Structured Logging
+
+Log structured data for better querying:
+
+```typescript
+this.logger.log("User action", {
+	action: "login",
+	userId: "123",
+	ip: "192.168.1.1",
+	timestamp: new Date().toISOString(),
+	metadata: {
+		userAgent: request.headers["user-agent"],
+		country: "US",
+	},
+});
+```
+
+Output (JSON in production):
+
+```json
+{
+	"level": "info",
+	"message": "User action",
+	"context": "AuthService",
+	"action": "login",
+	"userId": "123",
+	"ip": "192.168.1.1",
+	"timestamp": "2024-01-01T12:00:00.000Z"
+}
+```
+
+## File Logging
+
+Write logs to a file:
+
+```typescript
+LoggerModule.register({
+	level: "info",
+	destination: "./logs/app.log",
+});
+```
+
+Rotate logs daily:
+
+```typescript
+import * as path from "path";
+
+LoggerModule.register({
+	destination: path.join(
+		"./logs",
+		`app-${new Date().toISOString().split("T")[0]}.log`,
+	),
+});
+```
+
+## Performance Monitoring
+
+Log performance metrics:
+
+```typescript
+@Injectable()
+export class UserService {
+	private readonly logger = new Logger(UserService.name);
+
+	async findAll() {
+		const start = Date.now();
+
+		const users = await this.db.users.findMany();
+
+		const duration = Date.now() - start;
+		this.logger.log(`Query took ${duration}ms`, {
+			operation: "findAll",
+			count: users.length,
+			duration,
+		});
+
+		if (duration > 1000) {
+			this.logger.warn("Slow query detected", { duration });
+		}
+
+		return users;
+	}
+}
+```
+
+## Best Practices
+
+### 1. Use Appropriate Log Levels
+
+```typescript
+// Debug - development details
+logger.debug("Cache miss for key: user:123");
+
+// Log - normal operations
+logger.log("User logged in successfully");
+
+// Warn - unusual but handled
+logger.warn("Rate limit approaching for user 123");
+
+// Error - errors that need attention
+logger.error("Database query failed", error);
+
+// Fatal - critical system errors
+logger.fatal("Unable to connect to database");
+```
+
+### 2. Include Context
+
+```typescript
+// Good - includes context
+logger.log("User created", { userId: user.id, email: user.email });
+
+// Avoid - missing context
+logger.log("User created");
+```
+
+### 3. Don't Log Sensitive Data
+
+```typescript
+// Good
+logger.log("Login attempt", { username: user.username });
+
+// Bad - logs password
+logger.log("Login attempt", { username, password });
+```
+
+### 4. Use Named Loggers
+
+```typescript
+// Good - clear context
+const logger = new Logger(MyService.name);
+
+// Avoid - generic context
+const logger = new Logger("Logger");
+```
+
+### 5. Log at the Right Level
+
+```typescript
+// Don't log everything as error
+logger.error("User not found"); // Wrong - use warn or log
+
+// Use error for actual errors
+logger.error("Database connection failed", error); // Correct
+```
+
+## Example: Complete Service with Logging
+
+```typescript
+import { Injectable, NotFoundException } from "@dwexjs/core";
+import { Logger } from "@dwexjs/logger";
+
+@Injectable()
+export class UserService {
+	private readonly logger = new Logger(UserService.name);
+
+	constructor(private readonly db: DatabaseService) {
+		this.logger.log("UserService initialized");
+	}
+
+	async findAll() {
+		this.logger.debug("Fetching all users");
+		const start = Date.now();
+
+		try {
+			const users = await this.db.users.findMany();
+			const duration = Date.now() - start;
+
+			this.logger.log("Users fetched", {
+				count: users.length,
+				duration,
+			});
+
+			return users;
+		} catch (error) {
+			this.logger.error("Failed to fetch users", {
+				error: error.message,
+				stack: error.stack,
+			});
+			throw error;
+		}
+	}
+
+	async findOne(id: string) {
+		this.logger.debug(`Finding user ${id}`);
+
+		const user = await this.db.users.findUnique({ where: { id } });
+
+		if (!user) {
+			this.logger.warn(`User not found: ${id}`);
+			throw new NotFoundException(`User #${id} not found`);
+		}
+
+		this.logger.log(`User found: ${id}`);
+		return user;
+	}
+
+	async create(data: CreateUserDto) {
+		this.logger.log("Creating user", { email: data.email });
+
+		try {
+			const user = await this.db.users.create({ data });
+
+			this.logger.log("User created successfully", {
+				userId: user.id,
+				email: user.email,
+			});
+
+			return user;
+		} catch (error) {
+			this.logger.error("Failed to create user", {
+				error: error.message,
+				email: data.email,
+			});
+			throw error;
+		}
+	}
+}
+```
+
+## Next Steps
+
+<Cards>
+	<Card title="Error Handling" href="/docs/advanced/exception-handling" />
+	<Card title="Interceptors" href="/docs/advanced/interceptors" />
+	<Card title="Testing" href="/docs/recipes/testing" />
+</Cards>

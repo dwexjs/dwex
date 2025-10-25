@@ -1,0 +1,183 @@
+---
+title: Installation
+description: Get started with Dwex in minutes
+---
+
+## Prerequisites
+
+Before you begin, ensure you have [Bun](https://bun.sh) installed on your system:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+
+Verify installation:
+
+```bash
+bun --version
+# Should output v1.0.0 or higher
+```
+
+## Quick Start
+
+The fastest way to get started is using the `create-dwex` CLI:
+
+```bash
+bun create dwex my-app
+cd my-app
+bun install
+```
+
+This creates a new Dwex project with a recommended structure and configuration.
+
+## Manual Installation
+
+If you prefer to set up your project manually:
+
+```bash
+# Create a new directory
+mkdir my-app
+cd my-app
+
+# Initialize package.json
+bun init -y
+
+# Install Dwex packages
+bun add @dwexjs/core @dwexjs/common reflect-metadata
+```
+
+### TypeScript Configuration
+
+Create a `tsconfig.json` file:
+
+```json
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"declaration": true,
+		"outDir": "./dist"
+	},
+	"include": ["src/**/*"]
+}
+```
+
+### Enable Decorators
+
+Dwex relies on decorators and metadata reflection. Ensure your `tsconfig.json` includes:
+
+```json
+{
+	"compilerOptions": {
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
+	}
+}
+```
+
+## Optional Packages
+
+Enhance your application with additional modules:
+
+### JWT Authentication
+
+```bash
+bun add @dwexjs/jwt
+```
+
+### Logging
+
+```bash
+bun add @dwexjs/logger
+```
+
+## Project Structure
+
+After installation, your project should look like this:
+
+```
+my-app/
+├── src/
+│   ├── app.module.ts
+│   ├── app.controller.ts
+│   └── main.ts
+├── package.json
+├── tsconfig.json
+└── bun.lockb
+```
+
+## Verify Installation
+
+Create a simple `src/main.ts` to test your setup:
+
+```typescript
+import "reflect-metadata";
+import { DwexFactory, Module, Controller, Get } from "@dwexjs/core";
+
+@Controller()
+class AppController {
+	@Get()
+	hello() {
+		return "Hello, Dwex!";
+	}
+}
+
+@Module({
+	controllers: [AppController],
+})
+class AppModule {}
+
+async function bootstrap() {
+	const app = await DwexFactory.create(AppModule);
+	await app.listen(3000);
+}
+
+bootstrap();
+```
+
+Run your application:
+
+```bash
+bun run src/main.ts
+```
+
+Visit `http://localhost:3000` - you should see "Hello, Dwex!"
+
+## Troubleshooting
+
+### "Cannot find module 'reflect-metadata'"
+
+Make sure you import `reflect-metadata` at the top of your entry file:
+
+```typescript
+import "reflect-metadata";
+```
+
+### Decorator errors
+
+Verify `experimentalDecorators` and `emitDecoratorMetadata` are enabled in your `tsconfig.json`.
+
+### Module resolution issues
+
+Ensure your `tsconfig.json` uses:
+
+```json
+{
+	"compilerOptions": {
+		"moduleResolution": "bundler"
+	}
+}
+```
+
+## Next Steps
+
+<Cards>
+	<Card title="First App Tutorial" href="/docs/getting-started/first-app" />
+	<Card title="Learn About Modules" href="/docs/fundamentals/modules" />
+</Cards>

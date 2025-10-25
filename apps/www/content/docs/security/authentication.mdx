@@ -1,0 +1,440 @@
+---
+title: Authentication
+description: Implement JWT-based authentication in your Dwex application
+---
+
+## Overview
+
+This guide shows you how to implement JWT (JSON Web Token) authentication in a Dwex application using the `@dwexjs/jwt` package.
+
+## Installation
+
+```bash
+bun add @dwexjs/jwt
+```
+
+## Basic Setup
+
+### 1. Configure JWT Module
+
+Register the JWT module in your app:
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { JwtModule } from "@dwexjs/jwt";
+
+@Module({
+	imports: [
+		JwtModule.register({
+			global: true,
+			secret: process.env.JWT_SECRET || "your-secret-key",
+			signOptions: {
+				expiresIn: "1h",
+			},
+			issuer: "my-app",
+		}),
+	],
+})
+export class AppModule {}
+```
+
+### 2. Create Auth Service
+
+```typescript
+import { Injectable, UnauthorizedException } from "@dwexjs/core";
+import { JwtService } from "@dwexjs/jwt";
+
+interface User {
+	id: string;
+	username: string;
+	password: string;
+}
+
+@Injectable()
+export class AuthService {
+	private users: User[] = [
+		{
+			id: "1",
+			username: "admin",
+			password: "password123", // In production, use hashed passwords!
+		},
+	];
+
+	constructor(private readonly jwtService: JwtService) {}
+
+	async login(username: string, password: string) {
+		const user = this.users.find(
+			(u) => u.username === username && u.password === password,
+		);
+
+		if (!user) {
+			throw new UnauthorizedException("Invalid credentials");
+		}
+
+		const payload = {
+			sub: user.id,
+			username: user.username,
+		};
+
+		const token = await this.jwtService.sign(payload);
+
+		return {
+			access_token: token,
+			user: {
+				id: user.id,
+				username: user.username,
+			},
+		};
+	}
+
+	async validateToken(token: string) {
+		try {
+			const payload = await this.jwtService.verify(token);
+			return payload;
+		} catch {
+			return null;
+		}
+	}
+}
+```
+
+### 3. Create Auth Controller
+
+```typescript
+import { Controller, Post, Body } from "@dwexjs/core";
+import { AuthService } from "./auth.service";
+
+@Controller("auth")
+export class AuthController {
+	constructor(private readonly authService: AuthService) {}
+
+	@Post("login")
+	async login(@Body() body: { username: string; password: string }) {
+		return await this.authService.login(body.username, body.password);
+	}
+}
+```
+
+### 4. Create Auth Guard
+
+```typescript
+import {
+	Injectable,
+	CanActivate,
+	UnauthorizedException,
+	type ExecutionContext,
+} from "@dwexjs/core";
+import { AuthService } from "./auth.service";
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+	constructor(private readonly authService: AuthService) {}
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const request = context.getRequest();
+		const authHeader = request.headers.authorization;
+
+		if (!authHeader || !authHeader.startsWith("Bearer ")) {
+			throw new UnauthorizedException("No token provided");
+		}
+
+		const token = authHeader.substring(7);
+		const payload = await this.authService.validateToken(token);
+
+		if (!payload) {
+			throw new UnauthorizedException("Invalid token");
+		}
+
+		// Attach user to request
+		request.user = payload;
+
+		return true;
+	}
+}
+```
+
+### 5. Create Auth Module
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { AuthController } from "./auth.controller";
+import { AuthService } from "./auth.service";
+import { AuthGuard } from "./auth.guard";
+
+@Module({
+	controllers: [AuthController],
+	providers: [AuthService, AuthGuard],
+	exports: [AuthGuard, AuthService],
+})
+export class AuthModule {}
+```
+
+### 6. Protect Routes
+
+```typescript
+import { Controller, Get, UseGuards, Req } from "@dwexjs/core";
+import { AuthGuard } from "./auth/auth.guard";
+
+@Controller("users")
+export class UserController {
+	@Get("me")
+	@UseGuards(AuthGuard)
+	getCurrentUser(@Req() request: Request) {
+		return request.user;
+	}
+
+	@Get("profile")
+	@UseGuards(AuthGuard)
+	getProfile(@Req() request: Request) {
+		const userId = request.user.sub;
+		return { userId, profile: "..." };
+	}
+}
+```
+
+## Testing the Flow
+
+### 1. Login
+
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "password123"}'
+```
+
+Response:
+
+```json
+{
+	"access_token": "eyJhbGciOiJIUzI1NiIs...",
+	"user": {
+		"id": "1",
+		"username": "admin"
+	}
+}
+```
+
+### 2. Access Protected Route
+
+```bash
+curl http://localhost:3000/users/me \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
+```
+
+Response:
+
+```json
+{
+	"sub": "1",
+	"username": "admin",
+	"iat": 1234567890,
+	"exp": 1234571490
+}
+```
+
+## Password Hashing
+
+**Never store plain passwords!** Use a hashing library:
+
+```bash
+bun add bcrypt
+bun add -d @types/bcrypt
+```
+
+Updated Auth Service:
+
+```typescript
+import { Injectable, UnauthorizedException } from "@dwexjs/core";
+import { JwtService } from "@dwexjs/jwt";
+import * as bcrypt from "bcrypt";
+
+@Injectable()
+export class AuthService {
+	constructor(private readonly jwtService: JwtService) {}
+
+	async register(username: string, password: string) {
+		// Hash password
+		const hashedPassword = await bcrypt.hash(password, 10);
+
+		// Store user with hashed password
+		const user = await this.db.users.create({
+			username,
+			password: hashedPassword,
+		});
+
+		return { id: user.id, username: user.username };
+	}
+
+	async login(username: string, password: string) {
+		const user = await this.db.users.findByUsername(username);
+
+		if (!user) {
+			throw new UnauthorizedException("Invalid credentials");
+		}
+
+		// Compare passwords
+		const isValid = await bcrypt.compare(password, user.password);
+
+		if (!isValid) {
+			throw new UnauthorizedException("Invalid credentials");
+		}
+
+		const token = await this.jwtService.sign({
+			sub: user.id,
+			username: user.username,
+		});
+
+		return { access_token: token };
+	}
+}
+```
+
+## Refresh Tokens
+
+Implement refresh token flow:
+
+```typescript
+@Injectable()
+export class AuthService {
+	constructor(private readonly jwtService: JwtService) {}
+
+	async login(username: string, password: string) {
+		// Validate user...
+
+		const payload = { sub: user.id, username: user.username };
+
+		const accessToken = await this.jwtService.sign(payload, {
+			expiresIn: "15m",
+		});
+
+		const refreshToken = await this.jwtService.sign(payload, {
+			expiresIn: "7d",
+		});
+
+		// Store refresh token in database
+		await this.db.refreshTokens.create({
+			userId: user.id,
+			token: refreshToken,
+		});
+
+		return {
+			access_token: accessToken,
+			refresh_token: refreshToken,
+		};
+	}
+
+	async refresh(refreshToken: string) {
+		try {
+			const payload = await this.jwtService.verify(refreshToken);
+
+			// Verify refresh token exists in database
+			const storedToken = await this.db.refreshTokens.findOne({
+				userId: payload.sub,
+				token: refreshToken,
+			});
+
+			if (!storedToken) {
+				throw new UnauthorizedException("Invalid refresh token");
+			}
+
+			// Generate new access token
+			const newAccessToken = await this.jwtService.sign({
+				sub: payload.sub,
+				username: payload.username,
+			});
+
+			return { access_token: newAccessToken };
+		} catch {
+			throw new UnauthorizedException("Invalid refresh token");
+		}
+	}
+}
+```
+
+Add refresh endpoint:
+
+```typescript
+@Controller("auth")
+export class AuthController {
+	constructor(private readonly authService: AuthService) {}
+
+	@Post("refresh")
+	async refresh(@Body("refresh_token") refreshToken: string) {
+		return await this.authService.refresh(refreshToken);
+	}
+}
+```
+
+## Public Routes
+
+Mark certain routes as public:
+
+```typescript
+import { SetMetadata } from "@dwexjs/core";
+
+export const IS_PUBLIC_KEY = "isPublic";
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+```
+
+Update AuthGuard:
+
+```typescript
+@Injectable()
+export class AuthGuard implements CanActivate {
+	constructor(
+		private readonly authService: AuthService,
+		private readonly reflector: Reflector,
+	) {}
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const isPublic = this.reflector.get<boolean>(
+			IS_PUBLIC_KEY,
+			context.getHandler(),
+		);
+
+		if (isPublic) {
+			return true;
+		}
+
+		// Normal auth check...
+	}
+}
+```
+
+Usage:
+
+```typescript
+@Controller("posts")
+export class PostController {
+	@Get()
+	@Public()
+	findAll() {
+		return []; // No authentication required
+	}
+
+	@Post()
+	@UseGuards(AuthGuard)
+	create() {
+		return {}; // Authentication required
+	}
+}
+```
+
+## Best Practices
+
+1. **Use Environment Variables** for secrets
+2. **Hash Passwords** with bcrypt or argon2
+3. **Use HTTPS** in production
+4. **Set Short Expiration** for access tokens (15-30 minutes)
+5. **Implement Refresh Tokens** for better UX
+6. **Validate Token Claims** (issuer, audience, etc.)
+7. **Log Authentication Events** for security auditing
+8. **Rate Limit** login endpoints
+
+## Next Steps
+
+<Cards>
+	<Card title="Guards" href="/docs/security/guards" />
+	<Card title="JWT Module" href="/docs/modules/jwt" />
+	<Card title="Authorization" href="/docs/security/authorization" />
+</Cards>

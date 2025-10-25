@@ -1,0 +1,393 @@
+---
+title: Guards
+description: Protect routes with authentication and authorization guards
+---
+
+## What are Guards?
+
+Guards determine whether a request should be handled by a route. They're executed **after middleware** but **before interceptors** and route handlers. Guards are perfect for authentication and authorization logic.
+
+## Creating a Guard
+
+Guards implement the `CanActivate` interface:
+
+```typescript
+import { Injectable, CanActivate, type ExecutionContext } from "@dwexjs/core";
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const request = context.getRequest();
+		const token = request.headers.authorization;
+
+		if (!token) {
+			return false; // Reject request
+		}
+
+		return true; // Allow request
+	}
+}
+```
+
+## Execution Context
+
+The `ExecutionContext` provides access to the request:
+
+```typescript
+@Injectable()
+export class RoleGuard implements CanActivate {
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const request = context.getRequest();
+
+		// Access request properties
+		const method = request.method;
+		const url = request.url;
+		const headers = request.headers;
+		const user = request.user; // If set by middleware
+
+		return true;
+	}
+}
+```
+
+## Using Guards
+
+### Route-Level Guards
+
+Apply guards to specific routes:
+
+```typescript
+import { Controller, Get, UseGuards } from "@dwexjs/core";
+import { AuthGuard } from "./auth.guard";
+
+@Controller("profile")
+export class ProfileController {
+	@Get()
+	@UseGuards(AuthGuard)
+	getProfile() {
+		return { name: "John Doe" };
+	}
+}
+```
+
+### Controller-Level Guards
+
+Apply guards to all routes in a controller:
+
+```typescript
+@Controller("admin")
+@UseGuards(AuthGuard, AdminGuard)
+export class AdminController {
+	@Get("users")
+	getUsers() {} // Protected by both guards
+
+	@Get("settings")
+	getSettings() {} // Protected by both guards
+}
+```
+
+### Multiple Guards
+
+Use multiple guards in order:
+
+```typescript
+@Controller("admin")
+@UseGuards(AuthGuard, RoleGuard, SubscriptionGuard)
+export class AdminController {
+	// Guards execute in order: Auth → Role → Subscription
+}
+```
+
+## Authentication Guard Example
+
+Full authentication guard with JWT:
+
+```typescript
+import {
+	Injectable,
+	CanActivate,
+	UnauthorizedException,
+	type ExecutionContext,
+} from "@dwexjs/core";
+import { JwtService } from "@dwexjs/jwt";
+import { Logger } from "@dwexjs/logger";
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+	private readonly logger = new Logger(AuthGuard.name);
+
+	constructor(private readonly jwtService: JwtService) {}
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const request = context.getRequest();
+
+		// Get token from Authorization header
+		const authHeader = request.headers.authorization;
+
+		if (!authHeader) {
+			this.logger.warn("No authorization header");
+			throw new UnauthorizedException("No token provided");
+		}
+
+		if (!authHeader.startsWith("Bearer ")) {
+			this.logger.warn("Invalid authorization format");
+			throw new UnauthorizedException("Invalid token format");
+		}
+
+		const token = authHeader.substring(7);
+
+		try {
+			// Verify and decode token
+			const payload = await this.jwtService.verify(token);
+
+			// Attach user to request for use in route handlers
+			request.user = payload;
+
+			return true;
+		} catch (error) {
+			this.logger.error("Token verification failed", error);
+			throw new UnauthorizedException("Invalid token");
+		}
+	}
+}
+```
+
+Usage:
+
+```typescript
+@Controller("users")
+export class UserController {
+	@Get("me")
+	@UseGuards(AuthGuard)
+	getCurrentUser(@Req() request: Request) {
+		return request.user; // Set by AuthGuard
+	}
+}
+```
+
+## Role-Based Guard
+
+Check user roles:
+
+```typescript
+import {
+	Injectable,
+	CanActivate,
+	ForbiddenException,
+	type ExecutionContext,
+} from "@dwexjs/core";
+
+@Injectable()
+export class RoleGuard implements CanActivate {
+	constructor(private readonly requiredRole: string) {}
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const request = context.getRequest();
+		const user = request.user;
+
+		if (!user) {
+			throw new ForbiddenException("User not authenticated");
+		}
+
+		if (user.role !== this.requiredRole) {
+			throw new ForbiddenException("Insufficient permissions");
+		}
+
+		return true;
+	}
+}
+```
+
+## Custom Decorator for Roles
+
+Create a custom decorator for role-based access:
+
+```typescript
+// roles.decorator.ts
+import { SetMetadata } from "@dwexjs/core";
+
+export const ROLES_KEY = "roles";
+export const Roles = (...roles: string[]) => SetMetadata(ROLES_KEY, roles);
+```
+
+```typescript
+// roles.guard.ts
+import {
+	Injectable,
+	CanActivate,
+	ForbiddenException,
+	type ExecutionContext,
+} from "@dwexjs/core";
+import { Reflector } from "@dwexjs/core";
+import { ROLES_KEY } from "./roles.decorator";
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+	constructor(private readonly reflector: Reflector) {}
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const requiredRoles = this.reflector.get<string[]>(
+			ROLES_KEY,
+			context.getHandler(),
+		);
+
+		if (!requiredRoles) {
+			return true; // No roles required
+		}
+
+		const request = context.getRequest();
+		const user = request.user;
+
+		if (!user || !requiredRoles.includes(user.role)) {
+			throw new ForbiddenException("Insufficient permissions");
+		}
+
+		return true;
+	}
+}
+```
+
+Usage:
+
+```typescript
+@Controller("admin")
+@UseGuards(AuthGuard, RolesGuard)
+export class AdminController {
+	@Get("users")
+	@Roles("admin", "moderator")
+	getUsers() {
+		return [];
+	}
+
+	@Delete("users/:id")
+	@Roles("admin")
+	deleteUser() {
+		return { deleted: true };
+	}
+}
+```
+
+## Returning False vs Throwing Exceptions
+
+Guards can reject requests two ways:
+
+### Return false
+
+```typescript
+async canActivate(context: ExecutionContext): Promise<boolean> {
+	if (!isValid) {
+		return false; // Returns 403 Forbidden
+	}
+	return true;
+}
+```
+
+### Throw exception
+
+```typescript
+async canActivate(context: ExecutionContext): Promise<boolean> {
+	if (!isValid) {
+		throw new UnauthorizedException('Invalid credentials'); // Returns 401
+	}
+	return true;
+}
+```
+
+**Best Practice**: Throw specific exceptions for better error messages:
+
+```typescript
+if (!token) throw new UnauthorizedException("No token provided");
+if (!valid) throw new ForbiddenException("Insufficient permissions");
+if (!active) throw new BadRequestException("Account suspended");
+```
+
+## Accessing Metadata
+
+Use `Reflector` to access route metadata:
+
+```typescript
+@Injectable()
+export class PublicGuard implements CanActivate {
+	constructor(private readonly reflector: Reflector) {}
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const isPublic = this.reflector.get<boolean>(
+			"isPublic",
+			context.getHandler(),
+		);
+
+		if (isPublic) {
+			return true; // Skip authentication for public routes
+		}
+
+		// Normal authentication logic
+		return this.validateToken(context);
+	}
+}
+```
+
+## Best Practices
+
+### 1. Single Responsibility
+
+Each guard should check one thing:
+
+```typescript
+// Good
+AuthGuard // Checks if user is authenticated
+RoleGuard // Checks if user has required role
+SubscriptionGuard // Checks if subscription is active
+
+// Avoid
+AuthAndRoleAndSubscriptionGuard // Checks everything
+```
+
+### 2. Compose Guards
+
+Combine multiple guards:
+
+```typescript
+@Controller("premium")
+@UseGuards(AuthGuard, SubscriptionGuard, RoleGuard)
+export class PremiumController {}
+```
+
+### 3. Informative Error Messages
+
+Provide clear error messages:
+
+```typescript
+if (!token) {
+	throw new UnauthorizedException(
+		"Access token is required. Please login first.",
+	);
+}
+```
+
+### 4. Log Security Events
+
+Log authentication failures:
+
+```typescript
+@Injectable()
+export class AuthGuard implements CanActivate {
+	private readonly logger = new Logger(AuthGuard.name);
+
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		try {
+			// Validation logic
+		} catch (error) {
+			this.logger.warn(`Authentication failed: ${error.message}`);
+			throw new UnauthorizedException();
+		}
+	}
+}
+```
+
+## Next Steps
+
+<Cards>
+	<Card title="Authentication" href="/docs/security/authentication" />
+	<Card title="JWT Module" href="/docs/modules/jwt" />
+	<Card title="Authorization" href="/docs/security/authorization" />
+</Cards>

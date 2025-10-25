@@ -1,0 +1,97 @@
+---
+title: Fundamentals
+description: Core concepts that power Dwex applications
+---
+
+## Overview
+
+Master the fundamental building blocks of Dwex applications. This section covers the core concepts you'll use every day when building with Dwex.
+
+## Core Concepts
+
+**Modules** - Organize your application into cohesive, reusable units with clear dependencies.
+
+**Controllers** - Handle HTTP requests and define your API routes using decorators.
+
+**Providers** - Create injectable services that encapsulate business logic and data access.
+
+**Middleware** - Process requests and responses with reusable middleware functions.
+
+## Architecture
+
+Dwex follows a modular architecture inspired by NestJS but optimized for Bun:
+
+```
+Application
+├── Modules (organize features)
+│   ├── Controllers (handle HTTP)
+│   ├── Providers (business logic)
+│   └── Middleware (request processing)
+└── DI Container (manages dependencies)
+```
+
+## Key Principles
+
+1. **Separation of Concerns** - Controllers handle HTTP, services handle logic
+2. **Dependency Injection** - Automatic resolution of dependencies
+3. **Modularity** - Self-contained, reusable modules
+4. **Type Safety** - Full TypeScript support throughout
+
+## Example
+
+```typescript
+// Module organizes related code
+@Module({
+	imports: [DatabaseModule],
+	controllers: [UserController],
+	providers: [UserService],
+	exports: [UserService],
+})
+export class UserModule {}
+
+// Controller handles HTTP requests
+@Controller("users")
+export class UserController {
+	constructor(private readonly userService: UserService) {}
+
+	@Get()
+	findAll() {
+		return this.userService.findAll();
+	}
+}
+
+// Provider contains business logic
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+
+	findAll() {
+		return this.db.users.findMany();
+	}
+}
+```
+
+## Learn More
+
+<Cards>
+	<Card
+		title="Modules"
+		href="/docs/fundamentals/modules"
+		description="Organize your app with the module system"
+	/>
+	<Card
+		title="Controllers"
+		href="/docs/fundamentals/controllers"
+		description="Handle HTTP requests with decorators"
+	/>
+	<Card
+		title="Providers"
+		href="/docs/fundamentals/providers"
+		description="Create injectable services with DI"
+	/>
+	<Card
+		title="Middleware"
+		href="/docs/fundamentals/middleware"
+		description="Process requests with middleware"
+	/>
+</Cards>

@@ -1,0 +1,120 @@
+---
+title: Introduction
+description: A progressive TypeScript framework for building efficient server-side applications on Bun runtime
+---
+
+## What is Dwex?
+
+Dwex is a lightweight, TypeScript-first web framework designed specifically for the Bun runtime. It brings the power of decorator-based routing and dependency injection to create maintainable, scalable server-side applications with exceptional performance.
+
+## Philosophy
+
+Dwex is built on the principle that building server-side applications should be **enjoyable**, **productive**, and **maintainable**. Inspired by modern frameworks like NestJS and Express, Dwex leverages TypeScript decorators and dependency injection to create clean, modular architecture.
+
+### Key Principles
+
+- **TypeScript-First**: Built from the ground up with TypeScript for excellent type safety and developer experience
+- **Bun-Native**: Harnesses the full power of Bun's performance and modern JavaScript features
+- **Modular Architecture**: Organize code into reusable, maintainable modules
+- **Decorator-Driven**: Intuitive decorator-based API for routes, dependencies, and middleware
+- **Dependency Injection**: Built-in DI container for managing dependencies and promoting testable code
+
+## Core Features
+
+### Decorator-Based Routing
+
+Define routes using intuitive decorators:
+
+```typescript
+@Controller("users")
+export class UserController {
+	@Get(":id")
+	findOne(@Param("id") id: string) {
+		return { id, name: "John Doe" };
+	}
+
+	@Post()
+	create(@Body() data: CreateUserDto) {
+		return { success: true, data };
+	}
+}
+```
+
+### Powerful Dependency Injection
+
+Automatic dependency resolution with scoped instances:
+
+```typescript
+@Injectable()
+export class UserService {
+	constructor(private db: DatabaseService) {}
+
+	async findUser(id: string) {
+		return this.db.query("SELECT * FROM users WHERE id = ?", [id]);
+	}
+}
+```
+
+### Modular Architecture
+
+Organize features into cohesive modules:
+
+```typescript
+@Module({
+	imports: [DatabaseModule, LoggerModule],
+	controllers: [UserController],
+	providers: [UserService],
+	exports: [UserService],
+})
+export class UserModule {}
+```
+
+### Guards & Interceptors
+
+Protect routes and transform responses:
+
+```typescript
+@Controller("admin")
+@UseGuards(AuthGuard, AdminGuard)
+export class AdminController {
+	@Get("dashboard")
+	@UseInterceptors(LoggingInterceptor)
+	getDashboard() {
+		return { stats: "..." };
+	}
+}
+```
+
+## Why Dwex?
+
+### Lightning Fast
+
+Built for Bun, Dwex delivers exceptional performance with minimal overhead. Bun's native speed combined with Dwex's efficient architecture means your APIs respond faster.
+
+### Type-Safe
+
+Full TypeScript support means fewer runtime errors and better IDE support. Catch bugs at compile time, not in production.
+
+### Developer-Friendly
+
+Familiar patterns for developers coming from NestJS, while being simpler and more lightweight. The decorator-based API is intuitive and reduces boilerplate.
+
+### Production-Ready
+
+Includes essential features out of the box: authentication, logging, exception handling, CORS, and more.
+
+## Next Steps
+
+Ready to build your first Dwex application?
+
+<Cards>
+	<Card title="Installation" href="/docs/getting-started/installation" />
+	<Card
+		title="Your First App"
+		href="/docs/getting-started/first-app"
+	/>
+	<Card
+		title="Project Structure"
+		href="/docs/getting-started/project-structure"
+	/>
+</Cards>

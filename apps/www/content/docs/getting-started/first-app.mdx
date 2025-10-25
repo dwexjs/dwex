@@ -1,0 +1,268 @@
+---
+title: Your First App
+description: Build a simple REST API with Dwex in under 5 minutes
+---
+
+## Overview
+
+In this tutorial, you'll build a simple task management API with the following endpoints:
+
+- `GET /tasks` - Get all tasks
+- `GET /tasks/:id` - Get a task by ID
+- `POST /tasks` - Create a new task
+- `DELETE /tasks/:id` - Delete a task
+
+## Step 1: Create the Project
+
+```bash
+bun create dwex task-api
+cd task-api
+bun install
+```
+
+## Step 2: Define the Task Type
+
+Create `src/task.interface.ts`:
+
+```typescript
+export interface Task {
+	id: string;
+	title: string;
+	completed: boolean;
+}
+```
+
+## Step 3: Create the Task Service
+
+Create `src/task.service.ts`:
+
+```typescript
+import { Injectable } from "@dwexjs/core";
+import type { Task } from "./task.interface";
+
+@Injectable()
+export class TaskService {
+	private tasks: Task[] = [
+		{ id: "1", title: "Learn Dwex", completed: false },
+		{ id: "2", title: "Build an API", completed: false },
+	];
+
+	findAll(): Task[] {
+		return this.tasks;
+	}
+
+	findOne(id: string): Task | undefined {
+		return this.tasks.find((task) => task.id === id);
+	}
+
+	create(title: string): Task {
+		const task: Task = {
+			id: String(Date.now()),
+			title,
+			completed: false,
+		};
+		this.tasks.push(task);
+		return task;
+	}
+
+	delete(id: string): boolean {
+		const index = this.tasks.findIndex((task) => task.id === id);
+		if (index === -1) return false;
+		this.tasks.splice(index, 1);
+		return true;
+	}
+}
+```
+
+## Step 4: Create the Task Controller
+
+Create `src/task.controller.ts`:
+
+```typescript
+import { Controller, Get, Post, Delete, Param, Body } from "@dwexjs/core";
+import { TaskService } from "./task.service";
+import type { Task } from "./task.interface";
+
+@Controller("tasks")
+export class TaskController {
+	constructor(private readonly taskService: TaskService) {}
+
+	@Get()
+	findAll(): Task[] {
+		return this.taskService.findAll();
+	}
+
+	@Get(":id")
+	findOne(@Param("id") id: string) {
+		const task = this.taskService.findOne(id);
+		if (!task) {
+			return { error: "Task not found" };
+		}
+		return task;
+	}
+
+	@Post()
+	create(@Body() body: { title: string }) {
+		return this.taskService.create(body.title);
+	}
+
+	@Delete(":id")
+	delete(@Param("id") id: string) {
+		const deleted = this.taskService.delete(id);
+		return { success: deleted };
+	}
+}
+```
+
+## Step 5: Create the App Module
+
+Create `src/app.module.ts`:
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { TaskController } from "./task.controller";
+import { TaskService } from "./task.service";
+
+@Module({
+	controllers: [TaskController],
+	providers: [TaskService],
+})
+export class AppModule {}
+```
+
+## Step 6: Bootstrap the Application
+
+Create `src/main.ts`:
+
+```typescript
+import "reflect-metadata";
+import { DwexFactory } from "@dwexjs/core";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+	const app = await DwexFactory.create(AppModule);
+
+	const port = 3000;
+	await app.listen(port);
+}
+
+bootstrap();
+```
+
+## Step 7: Run Your Application
+
+```bash
+bun run src/main.ts
+```
+
+## Test Your API
+
+### Get all tasks
+
+```bash
+curl http://localhost:3000/tasks
+```
+
+Response:
+
+```json
+[
+	{ "id": "1", "title": "Learn Dwex", "completed": false },
+	{ "id": "2", "title": "Build an API", "completed": false }
+]
+```
+
+### Get a specific task
+
+```bash
+curl http://localhost:3000/tasks/1
+```
+
+### Create a new task
+
+```bash
+curl -X POST http://localhost:3000/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Deploy to production"}'
+```
+
+### Delete a task
+
+```bash
+curl -X DELETE http://localhost:3000/tasks/1
+```
+
+## What We Built
+
+Let's break down what each part does:
+
+### Service Layer
+
+The `TaskService` handles business logic and data management. It's marked with `@Injectable()` so Dwex's DI container can manage it.
+
+### Controller Layer
+
+The `TaskController` handles HTTP requests. Decorators like `@Get()` and `@Post()` define routes. The constructor receives `TaskService` automatically via dependency injection.
+
+### Module
+
+The `AppModule` ties everything together, registering controllers and providers.
+
+### Bootstrap
+
+`DwexFactory.create()` initializes the application and dependency injection container. `app.listen()` starts the HTTP server.
+
+## Adding Logging
+
+Let's enhance our app with the logger module:
+
+```bash
+bun add @dwexjs/logger
+```
+
+Update `src/app.module.ts`:
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { LoggerModule } from "@dwexjs/logger";
+import { TaskController } from "./task.controller";
+import { TaskService } from "./task.service";
+
+@Module({
+	imports: [LoggerModule],
+	controllers: [TaskController],
+	providers: [TaskService],
+})
+export class AppModule {}
+```
+
+Update `src/task.controller.ts`:
+
+```typescript
+import { Controller, Get, Post, Delete, Param, Body } from "@dwexjs/core";
+import { Logger } from "@dwexjs/logger";
+import { TaskService } from "./task.service";
+
+@Controller("tasks")
+export class TaskController {
+	private readonly logger = new Logger(TaskController.name);
+
+	constructor(private readonly taskService: TaskService) {}
+
+	@Get()
+	findAll() {
+		this.logger.log("Fetching all tasks");
+		return this.taskService.findAll();
+	}
+
+	// ... rest of the methods
+}
+```
+
+## Next Steps
+
+<Cards>
+	<Card title="Learn About Controllers" href="/docs/fundamentals/controllers" />
+	<Card title="Dependency Injection" href="/docs/dependency-injection/providers" />
+	<Card title="Add Authentication" href="/docs/security/authentication" />
+</Cards>

@@ -1,0 +1,297 @@
+---
+title: Project Structure
+description: Understand how to organize your Dwex application
+---
+
+## Recommended Structure
+
+A typical Dwex application follows this structure:
+
+```
+my-app/
+├── src/
+│   ├── modules/
+│   │   ├── users/
+│   │   │   ├── users.controller.ts
+│   │   │   ├── users.service.ts
+│   │   │   ├── users.module.ts
+│   │   │   └── dto/
+│   │   │       ├── create-user.dto.ts
+│   │   │       └── update-user.dto.ts
+│   │   ├── auth/
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── auth.module.ts
+│   │   │   └── guards/
+│   │   │       └── auth.guard.ts
+│   │   └── database/
+│   │       ├── database.service.ts
+│   │       └── database.module.ts
+│   ├── common/
+│   │   ├── filters/
+│   │   ├── interceptors/
+│   │   ├── middleware/
+│   │   └── decorators/
+│   ├── config/
+│   │   └── app.config.ts
+│   ├── app.module.ts
+│   └── main.ts
+├── package.json
+├── tsconfig.json
+└── bun.lockb
+```
+
+## Directory Breakdown
+
+### `src/main.ts`
+
+The entry point of your application. Bootstraps the app and starts the server.
+
+```typescript
+import "reflect-metadata";
+import { DwexFactory } from "@dwexjs/core";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+	const app = await DwexFactory.create(AppModule);
+	await app.listen(3000);
+}
+
+bootstrap();
+```
+
+### `src/app.module.ts`
+
+The root module that imports all feature modules.
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { LoggerModule } from "@dwexjs/logger";
+import { UserModule } from "./modules/users/users.module";
+import { AuthModule } from "./modules/auth/auth.module";
+import { DatabaseModule } from "./modules/database/database.module";
+
+@Module({
+	imports: [LoggerModule, DatabaseModule, UserModule, AuthModule],
+})
+export class AppModule {}
+```
+
+### `src/modules/`
+
+Feature modules organized by domain. Each module contains:
+
+- **Controller**: Handles HTTP requests
+- **Service**: Contains business logic
+- **Module**: Declares module dependencies
+- **DTOs**: Data transfer objects for validation
+- **Guards/Interceptors**: Module-specific middleware
+
+**Example: Users Module**
+
+```typescript
+// users.module.ts
+@Module({
+	imports: [DatabaseModule],
+	controllers: [UserController],
+	providers: [UserService],
+	exports: [UserService],
+})
+export class UserModule {}
+```
+
+```typescript
+// users.controller.ts
+@Controller("users")
+export class UserController {
+	constructor(private readonly userService: UserService) {}
+
+	@Get()
+	findAll() {
+		return this.userService.findAll();
+	}
+}
+```
+
+```typescript
+// users.service.ts
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+
+	async findAll() {
+		return this.db.users.findMany();
+	}
+}
+```
+
+### `src/common/`
+
+Shared utilities used across modules:
+
+- **filters/**: Exception filters
+- **interceptors/**: Response transformers
+- **middleware/**: Custom middleware functions
+- **decorators/**: Custom parameter/method decorators
+
+**Example: Logging Interceptor**
+
+```typescript
+// common/interceptors/logging.interceptor.ts
+@Injectable()
+export class LoggingInterceptor implements DwexInterceptor {
+	async intercept(context: ExecutionContext, next: () => Promise<any>) {
+		const start = Date.now();
+		const result = await next();
+		const duration = Date.now() - start;
+		console.log(`Request took ${duration}ms`);
+		return result;
+	}
+}
+```
+
+### `src/config/`
+
+Configuration files for environment variables, database connections, etc.
+
+```typescript
+// config/app.config.ts
+export const appConfig = {
+	port: process.env.PORT || 3000,
+	database: {
+		url: process.env.DATABASE_URL,
+	},
+	jwt: {
+		secret: process.env.JWT_SECRET,
+		expiresIn: "1h",
+	},
+};
+```
+
+## Module Organization Patterns
+
+### Feature-First (Recommended)
+
+Organize by feature/domain:
+
+```
+src/modules/
+├── users/
+├── posts/
+├── comments/
+└── auth/
+```
+
+Each module is self-contained with its controller, service, and module file.
+
+### Layer-First
+
+Organize by technical layer:
+
+```
+src/
+├── controllers/
+├── services/
+├── repositories/
+└── models/
+```
+
+This works for smaller apps but becomes harder to maintain as the app grows.
+
+## Best Practices
+
+### 1. One Module Per Feature
+
+Each feature should have its own module. This promotes:
+
+- **Encapsulation**: Module internals are hidden
+- **Reusability**: Modules can be imported elsewhere
+- **Testability**: Easy to test in isolation
+
+### 2. Shared Module
+
+Create a `SharedModule` for commonly used providers:
+
+```typescript
+@Global()
+@Module({
+	providers: [ConfigService, CacheService],
+	exports: [ConfigService, CacheService],
+})
+export class SharedModule {}
+```
+
+### 3. DTOs for Validation
+
+Use Data Transfer Objects to define expected request shapes:
+
+```typescript
+// dto/create-user.dto.ts
+export interface CreateUserDto {
+	email: string;
+	password: string;
+	name: string;
+}
+```
+
+### 4. Barrel Exports
+
+Use `index.ts` files to simplify imports:
+
+```typescript
+// modules/users/index.ts
+export * from "./users.controller";
+export * from "./users.service";
+export * from "./users.module";
+```
+
+Now you can import as:
+
+```typescript
+import { UserModule, UserService } from "./modules/users";
+```
+
+### 5. Environment-Based Configuration
+
+Never hardcode configuration. Use environment variables:
+
+```typescript
+const config = {
+	database: {
+		host: Bun.env.DB_HOST,
+		port: Number(Bun.env.DB_PORT),
+	},
+};
+```
+
+## Monorepo Structure (Nx)
+
+For larger projects, Dwex works great with Nx workspaces:
+
+```
+my-workspace/
+├── apps/
+│   ├── api/
+│   └── admin-api/
+├── packages/
+│   ├── shared/
+│   ├── database/
+│   └── auth/
+└── nx.json
+```
+
+This allows sharing code between multiple applications.
+
+## Next Steps
+
+<Cards>
+	<Card title="Create Your First Module" href="/docs/fundamentals/modules" />
+	<Card
+		title="Understanding Controllers"
+		href="/docs/fundamentals/controllers"
+	/>
+	<Card
+		title="Dependency Injection"
+		href="/docs/dependency-injection/providers"
+	/>
+</Cards>

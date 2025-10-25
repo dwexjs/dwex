@@ -1,0 +1,451 @@
+---
+title: Providers
+description: Create injectable services with dependency injection
+---
+
+## What are Providers?
+
+Providers are classes that can be injected as dependencies. They encapsulate business logic, data access, and other reusable functionality. In Dwex, any class marked with `@Injectable()` is a provider.
+
+## Basic Provider
+
+```typescript
+import { Injectable } from "@dwexjs/core";
+
+@Injectable()
+export class UserService {
+	private users = [
+		{ id: 1, name: "Alice" },
+		{ id: 2, name: "Bob" },
+	];
+
+	findAll() {
+		return this.users;
+	}
+
+	findOne(id: number) {
+		return this.users.find((user) => user.id === id);
+	}
+}
+```
+
+## Registering Providers
+
+Register providers in a module's `providers` array:
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { UserController } from "./user.controller";
+import { UserService } from "./user.service";
+
+@Module({
+	controllers: [UserController],
+	providers: [UserService],
+})
+export class UserModule {}
+```
+
+## Dependency Injection
+
+Inject providers into controllers or other providers:
+
+```typescript
+import { Controller, Get, Injectable } from "@dwexjs/core";
+
+@Injectable()
+export class UserService {
+	findAll() {
+		return ["Alice", "Bob"];
+	}
+}
+
+@Controller("users")
+export class UserController {
+	constructor(private readonly userService: UserService) {}
+
+	@Get()
+	findAll() {
+		return this.userService.findAll();
+	}
+}
+```
+
+Dwex automatically resolves and injects `UserService` when creating `UserController`.
+
+## Constructor Injection
+
+The most common form of DI in Dwex:
+
+```typescript
+@Injectable()
+export class PostService {
+	constructor(
+		private readonly userService: UserService,
+		private readonly db: DatabaseService,
+		private readonly logger: Logger,
+	) {}
+
+	async createPost(userId: string, title: string) {
+		this.logger.log(`Creating post for user ${userId}`);
+		const user = await this.userService.findOne(userId);
+		return await this.db.posts.create({ userId, title });
+	}
+}
+```
+
+## Service Layers
+
+Organize your code with layered services:
+
+```typescript
+// Repository layer - data access
+@Injectable()
+export class UserRepository {
+	constructor(private readonly db: DatabaseService) {}
+
+	async findAll() {
+		return await this.db.users.findMany();
+	}
+
+	async create(data: CreateUserDto) {
+		return await this.db.users.create(data);
+	}
+}
+
+// Service layer - business logic
+@Injectable()
+export class UserService {
+	constructor(
+		private readonly userRepository: UserRepository,
+		private readonly emailService: EmailService,
+	) {}
+
+	async createUser(data: CreateUserDto) {
+		const user = await this.userRepository.create(data);
+		await this.emailService.sendWelcome(user.email);
+		return user;
+	}
+}
+
+// Controller layer - HTTP handling
+@Controller("users")
+export class UserController {
+	constructor(private readonly userService: UserService) {}
+
+	@Post()
+	async create(@Body() data: CreateUserDto) {
+		return await this.userService.createUser(data);
+	}
+}
+```
+
+## Provider Scopes
+
+Control the lifecycle of providers:
+
+```typescript
+import { Injectable, Scope } from "@dwexjs/core";
+
+// Singleton (default) - one instance for entire app
+@Injectable()
+export class ConfigService {}
+
+// Request-scoped - new instance per request
+@Injectable({ scope: Scope.REQUEST })
+export class RequestContextService {
+	private data = new Map();
+
+	set(key: string, value: any) {
+		this.data.set(key, value);
+	}
+
+	get(key: string) {
+		return this.data.get(key);
+	}
+}
+
+// Transient - new instance every time it's injected
+@Injectable({ scope: Scope.TRANSIENT })
+export class TemporaryService {}
+```
+
+**Best Practice**: Use `Scope.SINGLETON` (default) unless you specifically need per-request or transient instances.
+
+## Exporting Providers
+
+Make providers available to other modules:
+
+```typescript
+@Module({
+	providers: [UserService, UserRepository],
+	exports: [UserService], // UserRepository is private
+})
+export class UserModule {}
+```
+
+Other modules can now import and use `UserService`:
+
+```typescript
+@Module({
+	imports: [UserModule],
+	controllers: [PostController],
+	providers: [PostService],
+})
+export class PostModule {}
+```
+
+```typescript
+@Injectable()
+export class PostService {
+	constructor(private readonly userService: UserService) {}
+	// Can now use UserService
+}
+```
+
+## Optional Dependencies
+
+Mark dependencies as optional with `@Optional()`:
+
+```typescript
+import { Injectable, Optional } from "@dwexjs/core";
+
+@Injectable()
+export class NotificationService {
+	constructor(
+		@Optional() private readonly smsService?: SmsService,
+		private readonly emailService: EmailService,
+	) {}
+
+	async notify(user: User, message: string) {
+		// Always send email
+		await this.emailService.send(user.email, message);
+
+		// Send SMS only if service is available
+		if (this.smsService) {
+			await this.smsService.send(user.phone, message);
+		}
+	}
+}
+```
+
+## Custom Providers
+
+### Value Providers
+
+Provide a static value:
+
+```typescript
+@Module({
+	providers: [
+		{
+			provide: "API_KEY",
+			useValue: process.env.API_KEY,
+		},
+		{
+			provide: "CONFIG",
+			useValue: {
+				database: { host: "localhost" },
+				cache: { ttl: 3600 },
+			},
+		},
+	],
+})
+export class AppModule {}
+```
+
+Inject with `@Inject()`:
+
+```typescript
+import { Injectable, Inject } from "@dwexjs/core";
+
+@Injectable()
+export class ApiService {
+	constructor(@Inject("API_KEY") private readonly apiKey: string) {}
+
+	async callApi() {
+		// Use this.apiKey
+	}
+}
+```
+
+### Factory Providers
+
+Create providers dynamically:
+
+```typescript
+@Module({
+	providers: [
+		{
+			provide: "DATABASE_CONNECTION",
+			useFactory: async () => {
+				const connection = await createDatabaseConnection({
+					host: process.env.DB_HOST,
+					port: Number(process.env.DB_PORT),
+				});
+				return connection;
+			},
+		},
+	],
+})
+export class DatabaseModule {}
+```
+
+### Factory with Dependencies
+
+Factories can inject other providers:
+
+```typescript
+@Module({
+	providers: [
+		ConfigService,
+		{
+			provide: "DATABASE_CONNECTION",
+			useFactory: async (config: ConfigService) => {
+				const dbConfig = config.get("database");
+				return await createConnection(dbConfig);
+			},
+			inject: [ConfigService],
+		},
+	],
+})
+export class DatabaseModule {}
+```
+
+## Circular Dependencies
+
+Avoid circular dependencies when possible:
+
+```typescript
+// Avoid this
+@Injectable()
+export class UserService {
+	constructor(private readonly postService: PostService) {}
+}
+
+@Injectable()
+export class PostService {
+	constructor(private readonly userService: UserService) {}
+}
+```
+
+**Solutions:**
+
+1. **Restructure**: Extract common logic to a third service
+2. **Forward Reference**: Use lazy injection (if supported)
+3. **Events**: Use an event system instead of direct dependencies
+
+## Best Practices
+
+### 1. Single Responsibility
+
+Each service should have one clear purpose:
+
+```typescript
+// Good - focused responsibilities
+@Injectable()
+export class UserService {
+	/* User operations */
+}
+
+@Injectable()
+export class EmailService {
+	/* Email operations */
+}
+
+// Avoid - mixed concerns
+@Injectable()
+export class UserAndEmailService {
+	/* User and email operations */
+}
+```
+
+### 2. Use Interfaces
+
+Define contracts for your services:
+
+```typescript
+export interface IUserService {
+	findAll(): Promise<User[]>;
+	findOne(id: string): Promise<User>;
+	create(data: CreateUserDto): Promise<User>;
+}
+
+@Injectable()
+export class UserService implements IUserService {
+	async findAll() {
+		/* ... */
+	}
+	async findOne(id: string) {
+		/* ... */
+	}
+	async create(data: CreateUserDto) {
+		/* ... */
+	}
+}
+```
+
+### 3. Organize by Domain
+
+Group related services together:
+
+```
+src/modules/users/
+├── user.controller.ts
+├── user.service.ts
+├── user.repository.ts
+└── user.module.ts
+```
+
+### 4. Use Constructor Injection
+
+Prefer constructor injection over property injection:
+
+```typescript
+// Good
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+}
+
+// Avoid
+@Injectable()
+export class UserService {
+	@Inject()
+	private db: DatabaseService;
+}
+```
+
+### 5. Test-Friendly Design
+
+Design services to be easily testable:
+
+```typescript
+@Injectable()
+export class UserService {
+	constructor(
+		private readonly repository: UserRepository,
+		private readonly logger: Logger,
+	) {}
+
+	async createUser(data: CreateUserDto) {
+		this.logger.log("Creating user");
+		return await this.repository.create(data);
+	}
+}
+```
+
+Easy to mock dependencies in tests:
+
+```typescript
+const mockRepository = { create: vi.fn() };
+const mockLogger = { log: vi.fn() };
+const service = new UserService(mockRepository, mockLogger);
+```
+
+## Next Steps
+
+<Cards>
+	<Card title="Dependency Injection" href="/docs/dependency-injection/scopes" />
+	<Card title="Custom Providers" href="/docs/dependency-injection/custom-providers" />
+	<Card title="Testing" href="/docs/recipes/testing" />
+</Cards>

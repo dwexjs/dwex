@@ -1,0 +1,84 @@
+---
+title: Security
+description: Protect your application with authentication and authorization
+---
+
+## Overview
+
+Dwex provides robust security features to protect your application. Implement authentication, authorization, and access control using guards and the built-in JWT module.
+
+## Security Features
+
+**Guards** - Control access to routes based on authentication and authorization logic
+
+**JWT Authentication** - Built-in JWT module for token-based authentication
+
+**Role-Based Access** - Implement role-based access control with custom guards
+
+**Custom Decorators** - Create metadata-based security decorators
+
+## Authentication Flow
+
+```typescript
+// 1. Configure JWT module
+@Module({
+	imports: [
+		JwtModule.register({
+			secret: process.env.JWT_SECRET,
+			signOptions: { expiresIn: "1h" },
+		}),
+	],
+})
+export class AppModule {}
+
+// 2. Create auth guard
+@Injectable()
+export class AuthGuard implements CanActivate {
+	async canActivate(context: ExecutionContext): Promise<boolean> {
+		const request = context.getRequest();
+		const token = request.headers.authorization?.substring(7);
+		// Verify token...
+		return true;
+	}
+}
+
+// 3. Protect routes
+@Controller("profile")
+export class ProfileController {
+	@Get()
+	@UseGuards(AuthGuard)
+	getProfile() {
+		return { protected: true };
+	}
+}
+```
+
+## Common Patterns
+
+**Login Endpoint** - Issue JWT tokens on successful authentication
+
+**Protected Routes** - Apply guards to controllers or individual routes
+
+**Role Checks** - Validate user roles and permissions
+
+**Token Refresh** - Implement refresh token flow for better UX
+
+## Learn More
+
+<Cards>
+	<Card
+		title="Guards"
+		href="/docs/security/guards"
+		description="Create authentication and authorization guards"
+	/>
+	<Card
+		title="Authentication"
+		href="/docs/security/authentication"
+		description="Implement JWT-based authentication"
+	/>
+	<Card
+		title="JWT Module"
+		href="/docs/modules/jwt"
+		description="Sign and verify JWT tokens"
+	/>
+</Cards>

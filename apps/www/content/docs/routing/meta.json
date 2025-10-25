@@ -1,0 +1,5 @@
+{
+	"title": "Routing",
+	"icon": "Route",
+	"pages": ["http-methods", "route-parameters", "request-data", "response-handling"]
+}

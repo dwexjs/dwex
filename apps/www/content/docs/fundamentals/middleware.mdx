@@ -1,0 +1,437 @@
+---
+title: Middleware
+description: Process requests and responses with middleware functions
+---
+
+## What is Middleware?
+
+Middleware functions execute before route handlers, allowing you to process requests, modify responses, or perform cross-cutting concerns like logging, authentication, and CORS.
+
+## Built-in Middleware
+
+Dwex provides several built-in middleware functions:
+
+### CORS Middleware
+
+Enable Cross-Origin Resource Sharing:
+
+```typescript
+import { DwexFactory } from "@dwexjs/core";
+import { corsMiddleware } from "@dwexjs/core";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+	const app = await DwexFactory.create(AppModule);
+
+	// Enable CORS
+	app.use(
+		corsMiddleware({
+			origin: "https://example.com",
+			credentials: true,
+		}),
+	);
+
+	await app.listen(3000);
+}
+
+bootstrap();
+```
+
+CORS Options:
+
+```typescript
+interface CorsOptions {
+	origin?: string | string[] | ((origin: string) => boolean);
+	methods?: string | string[];
+	allowedHeaders?: string | string[];
+	exposedHeaders?: string | string[];
+	credentials?: boolean;
+	maxAge?: number;
+	preflightContinue?: boolean;
+	optionsSuccessStatus?: number;
+}
+```
+
+Examples:
+
+```typescript
+// Allow all origins
+app.use(corsMiddleware({ origin: "*" }));
+
+// Allow specific origins
+app.use(
+	corsMiddleware({
+		origin: ["https://app.com", "https://admin.app.com"],
+	}),
+);
+
+// Dynamic origin validation
+app.use(
+	corsMiddleware({
+		origin: (origin) => origin.endsWith(".myapp.com"),
+	}),
+);
+
+// Full configuration
+app.use(
+	corsMiddleware({
+		origin: "https://app.com",
+		methods: ["GET", "POST", "PUT", "DELETE"],
+		allowedHeaders: ["Content-Type", "Authorization"],
+		credentials: true,
+		maxAge: 86400,
+	}),
+);
+```
+
+### Body Parser
+
+Parse JSON request bodies (enabled by default):
+
+```typescript
+// Automatically available in all controllers
+@Post()
+create(@Body() data: CreateUserDto) {
+	return data; // Already parsed as JSON
+}
+```
+
+### Cookie Parser
+
+Parse cookies from requests (enabled by default):
+
+```typescript
+@Get()
+getCookies(@Cookies() cookies: Record<string, string>) {
+	return cookies; // Automatically parsed
+}
+
+@Get('session')
+getSession(@Cookies('sessionId') sessionId: string) {
+	return { sessionId };
+}
+```
+
+## Custom Middleware
+
+Create custom middleware functions:
+
+### Function-Based Middleware
+
+```typescript
+import type { MiddlewareFunction } from "@dwexjs/core";
+
+const loggingMiddleware: MiddlewareFunction = (req, res, next) => {
+	console.log(`${req.method} ${req.url}`);
+	next();
+};
+
+// Apply globally
+app.use(loggingMiddleware);
+```
+
+### Class-Based Middleware
+
+```typescript
+import { Injectable, type DwexMiddleware } from "@dwexjs/core";
+
+@Injectable()
+export class LoggerMiddleware implements DwexMiddleware {
+	use(req: any, res: any, next: () => void) {
+		console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+		next();
+	}
+}
+```
+
+Register in module:
+
+```typescript
+import { Module } from "@dwexjs/core";
+import { LoggerMiddleware } from "./logger.middleware";
+
+@Module({
+	providers: [LoggerMiddleware],
+})
+export class AppModule {}
+```
+
+Apply to controllers:
+
+```typescript
+import { Controller, Get, UseMiddleware } from "@dwexjs/core";
+import { LoggerMiddleware } from "./logger.middleware";
+
+@Controller("users")
+@UseMiddleware(LoggerMiddleware)
+export class UserController {
+	@Get()
+	findAll() {
+		return [];
+	}
+}
+```
+
+## Global Middleware
+
+Apply middleware to all routes:
+
+```typescript
+async function bootstrap() {
+	const app = await DwexFactory.create(AppModule);
+
+	// CORS
+	app.use(corsMiddleware({ origin: "*" }));
+
+	// Custom logging
+	app.use((req, res, next) => {
+		console.log(`${req.method} ${req.url}`);
+		next();
+	});
+
+	await app.listen(3000);
+}
+```
+
+## Controller-Specific Middleware
+
+Apply middleware to specific controllers:
+
+```typescript
+import { Controller, Get, UseMiddleware } from "@dwexjs/core";
+import { AuthMiddleware } from "./auth.middleware";
+import { LoggerMiddleware } from "./logger.middleware";
+
+@Controller("admin")
+@UseMiddleware(AuthMiddleware, LoggerMiddleware)
+export class AdminController {
+	@Get()
+	dashboard() {
+		return { message: "Admin Dashboard" };
+	}
+}
+```
+
+## Middleware Examples
+
+### Authentication Middleware
+
+```typescript
+import { Injectable, UnauthorizedException } from "@dwexjs/core";
+import type { DwexMiddleware } from "@dwexjs/core";
+
+@Injectable()
+export class AuthMiddleware implements DwexMiddleware {
+	use(req: any, res: any, next: () => void) {
+		const token = req.headers.authorization;
+
+		if (!token) {
+			throw new UnauthorizedException("No token provided");
+		}
+
+		try {
+			const decoded = verifyToken(token);
+			req.user = decoded;
+			next();
+		} catch (error) {
+			throw new UnauthorizedException("Invalid token");
+		}
+	}
+}
+```
+
+### Rate Limiting
+
+```typescript
+const rateLimiter: MiddlewareFunction = (() => {
+	const requests = new Map<string, number[]>();
+
+	return (req, res, next) => {
+		const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+		const now = Date.now();
+		const windowMs = 60000; // 1 minute
+		const maxRequests = 100;
+
+		if (!requests.has(ip)) {
+			requests.set(ip, []);
+		}
+
+		const ipRequests = requests.get(ip)!;
+		const recentRequests = ipRequests.filter((time) => now - time < windowMs);
+
+		if (recentRequests.length >= maxRequests) {
+			res.statusCode = 429;
+			res.end("Too Many Requests");
+			return;
+		}
+
+		recentRequests.push(now);
+		requests.set(ip, recentRequests);
+		next();
+	};
+})();
+
+app.use(rateLimiter);
+```
+
+### Request ID
+
+```typescript
+import { v4 as uuid } from "uuid";
+
+const requestIdMiddleware: MiddlewareFunction = (req, res, next) => {
+	req.id = uuid();
+	res.setHeader("X-Request-Id", req.id);
+	next();
+};
+```
+
+### Timing Middleware
+
+```typescript
+const timingMiddleware: MiddlewareFunction = (req, res, next) => {
+	const start = Date.now();
+
+	// Hook into response finish
+	res.on("finish", () => {
+		const duration = Date.now() - start;
+		console.log(`${req.method} ${req.url} - ${duration}ms`);
+	});
+
+	next();
+};
+```
+
+### Security Headers
+
+```typescript
+const securityHeadersMiddleware: MiddlewareFunction = (req, res, next) => {
+	res.setHeader("X-Content-Type-Options", "nosniff");
+	res.setHeader("X-Frame-Options", "DENY");
+	res.setHeader("X-XSS-Protection", "1; mode=block");
+	res.setHeader(
+		"Strict-Transport-Security",
+		"max-age=31536000; includeSubDomains",
+	);
+	next();
+};
+```
+
+## Middleware Order
+
+Middleware executes in the order it's registered:
+
+```typescript
+app.use(corsMiddleware());
+app.use(loggingMiddleware); // Runs after CORS
+app.use(authMiddleware); // Runs after logging
+```
+
+Controller middleware runs after global middleware:
+
+```typescript
+// Execution order:
+// 1. Global middleware (app.use)
+// 2. Controller middleware (@UseMiddleware)
+// 3. Route handler
+```
+
+## Error Handling in Middleware
+
+Throw exceptions from middleware:
+
+```typescript
+const validateApiKey: MiddlewareFunction = (req, res, next) => {
+	const apiKey = req.headers["x-api-key"];
+
+	if (!apiKey) {
+		throw new UnauthorizedException("API key required");
+	}
+
+	if (apiKey !== process.env.API_KEY) {
+		throw new ForbiddenException("Invalid API key");
+	}
+
+	next();
+};
+```
+
+## Best Practices
+
+### 1. Always Call `next()`
+
+Unless you're ending the response, always call `next()`:
+
+```typescript
+// Good
+const middleware = (req, res, next) => {
+	console.log("Processing...");
+	next();
+};
+
+// Bad (blocks all requests)
+const middleware = (req, res, next) => {
+	console.log("Processing...");
+	// Forgot next()!
+};
+```
+
+### 2. Use Class Middleware for DI
+
+When you need dependencies, use class-based middleware:
+
+```typescript
+@Injectable()
+export class AuthMiddleware implements DwexMiddleware {
+	constructor(
+		private readonly jwtService: JwtService,
+		private readonly logger: Logger,
+	) {}
+
+	use(req: any, res: any, next: () => void) {
+		this.logger.log("Validating token");
+		const valid = this.jwtService.verify(req.headers.authorization);
+		if (valid) next();
+	}
+}
+```
+
+### 3. Keep Middleware Focused
+
+Each middleware should have one responsibility:
+
+```typescript
+// Good - separate concerns
+app.use(corsMiddleware());
+app.use(loggingMiddleware);
+app.use(authMiddleware);
+
+// Avoid - too much in one middleware
+app.use(corsAndLoggingAndAuthMiddleware);
+```
+
+### 4. Document Side Effects
+
+Clearly document what middleware modifies:
+
+```typescript
+/**
+ * Attaches user object to request after validating JWT token.
+ * Adds `req.user` property.
+ */
+@Injectable()
+export class AuthMiddleware implements DwexMiddleware {
+	use(req: any, res: any, next: () => void) {
+		req.user = this.validateAndDecodeToken(req);
+		next();
+	}
+}
+```
+
+## Next Steps
+
+<Cards>
+	<Card title="Guards" href="/docs/security/guards" />
+	<Card title="Interceptors" href="/docs/advanced/interceptors" />
+	<Card title="Exception Handling" href="/docs/advanced/exception-handling" />
+</Cards>
