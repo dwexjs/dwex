@@ -1,8 +1,4 @@
-import {
-	Injectable,
-	CanActivate,
-	type ExecutionContext,
-} from "@dwexjs/core";
+import { Injectable, CanActivate, type ExecutionContext } from "@dwexjs/core";
 import { Logger } from "@dwexjs/logger";
 import { AuthService } from "./auth.service";
 
@@ -12,47 +8,48 @@ import { AuthService } from "./auth.service";
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
-	private readonly logger = new Logger(AuthGuard.name);
-	private readonly authService = new AuthService();
+  private readonly logger = new Logger(AuthGuard.name);
 
-	async canActivate(context: ExecutionContext): Promise<boolean> {
-		const request = context.getRequest();
+  constructor(private readonly authService: AuthService) {}
 
-		// Get Authorization header
-		const authHeader = request.headers.authorization;
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.getRequest();
 
-		if (!authHeader) {
-			this.logger.warn("No authorization header found");
-			return false;
-		}
+    // Get Authorization header
+    const authHeader = request.headers.authorization;
 
-		// Check if it starts with "Bearer "
-		if (!authHeader.startsWith("Bearer ")) {
-			this.logger.warn("Invalid authorization header format");
-			return false;
-		}
+    if (!authHeader) {
+      this.logger.warn("No authorization header found");
+      return false;
+    }
 
-		// Extract token
-		const token = authHeader.substring(7);
+    // Check if it starts with "Bearer "
+    if (!authHeader.startsWith("Bearer ")) {
+      this.logger.warn("Invalid authorization header format");
+      return false;
+    }
 
-		if (!token) {
-			this.logger.warn("No token found in authorization header");
-			return false;
-		}
+    // Extract token
+    const token = authHeader.substring(7);
 
-		// Validate token
-		const payload = await this.authService.validateToken(token);
+    if (!token) {
+      this.logger.warn("No token found in authorization header");
+      return false;
+    }
 
-		if (!payload) {
-			this.logger.warn("Invalid or expired token");
-			return false;
-		}
+    // Validate token
+    const payload = await this.authService.validateToken(token);
 
-		// Attach user payload to request
-		request.user = payload;
+    if (!payload) {
+      this.logger.warn("Invalid or expired token");
+      return false;
+    }
 
-		this.logger.log(`User authenticated: ${payload.username}`);
+    // Attach user payload to request
+    request.user = payload;
 
-		return true;
-	}
+    this.logger.log(`User authenticated: ${payload.username}`);
+
+    return true;
+  }
 }
