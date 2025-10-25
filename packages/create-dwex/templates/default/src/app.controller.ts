@@ -1,0 +1,34 @@
+import { Controller, Get, Injectable } from "@dwexjs/core";
+import { Logger } from "@dwexjs/logger";
+
+/**
+ * Main application controller
+ */
+@Injectable()
+@Controller()
+export class AppController {
+	private readonly logger = new Logger(AppController.name);
+
+	/**
+	 * Root endpoint
+	 */
+	@Get()
+	root() {
+		this.logger.log("Root endpoint called");
+		return {
+			message: "Hello from <%= projectName %>!",
+			timestamp: new Date().toISOString(),
+		};
+	}
+
+	/**
+	 * Health check endpoint
+	 */
+	@Get("health")
+	health() {
+		return {
+			status: "ok",
+			timestamp: new Date().toISOString(),
+		};
+	}
+}

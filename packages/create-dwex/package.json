@@ -1,13 +1,18 @@
 {
-	"name": "@dwexjs/create-dwex",
+	"name": "create-dwex",
 	"version": "0.0.1",
+	"description": "Scaffolding tool for Dwex applications",
 	"type": "module",
+	"bin": {
+		"create-dwex": "./dist/index.js"
+	},
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
+			"@dwex/source": "./src/index.ts",
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js",
 			"default": "./dist/index.js"
@@ -15,9 +20,17 @@
 	},
 	"files": [
 		"dist",
+		"templates",
 		"!**/*.tsbuildinfo"
 	],
 	"dependencies": {
+		"@clack/prompts": "^0.8.2",
+		"ejs": "^3.1.10",
+		"picocolors": "^1.1.1",
 		"tslib": "^2.3.0"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/ejs": "^3.1.5"
 	}
 }
