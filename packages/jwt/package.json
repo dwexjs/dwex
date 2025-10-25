@@ -18,6 +18,9 @@
 		"!**/*.tsbuildinfo"
 	],
 	"dependencies": {
+		"@dwexjs/common": "*",
+		"jose": "^5.9.6",
+		"reflect-metadata": "^0.2.2",
 		"tslib": "^2.3.0"
 	}
 }
