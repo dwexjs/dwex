@@ -10,6 +10,7 @@
 	"dependencies": {
 		"@dwexjs/common": "*",
 		"@dwexjs/core": "*",
+		"@dwexjs/jwt": "*",
 		"@dwexjs/logger": "*",
 		"reflect-metadata": "^0.2.2"
 	},
