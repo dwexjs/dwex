@@ -42,12 +42,20 @@ export async function processTemplateFiles(
 
 	for (const entry of entries) {
 		const sourcePath = join(sourceDir, entry.name);
-		const targetPath = join(targetDir, entry.name);
+		let targetPath = join(targetDir, entry.name);
 
 		if (entry.isDirectory()) {
 			await mkdir(targetPath, { recursive: true });
 			await processTemplateFiles(sourcePath, targetPath, config);
 		} else {
+			// Check if file has .ejs extension
+			const hasEjsExtension = entry.name.endsWith(".ejs");
+
+			// If file ends with .ejs, remove the extension from target path
+			if (hasEjsExtension) {
+				targetPath = targetPath.slice(0, -4); // Remove .ejs extension
+			}
+
 			// Process file with EJS
 			const content = await Bun.file(sourcePath).text();
 			const rendered = ejs.render(content, config);
