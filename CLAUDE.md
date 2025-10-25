@@ -38,7 +38,7 @@
 - **Decorator-based**: Uses TypeScript decorators extensively (`@Controller`, `@Injectable`, `@Get`, etc.)
 - **Dependency Injection**: reflect-metadata based DI system
 - **Scoped instances**: Support for singleton, request, and transient scopes
-- **Modular**: Module-based architecture similar to NestJS
+- **Modular**: Module-based architecture with hierarchical dependency injection
 
 ## Development Guidelines
 
@@ -48,6 +48,19 @@
 - Build: `bun nx run-many -t build` or `bun nx run <project>:build`
 - Test: `bun nx run <project>:test`
 - Typecheck: `bun nx run <project>:typecheck`
+
+### Bun Runtime APIs
+
+- **Always prefer Bun APIs over Node.js modules** for file system operations, networking, and other runtime features
+- **File I/O**: Use `Bun.file()`, `Bun.write()`, and the `BunFile` API instead of Node.js `fs` module
+  - Reading: `await Bun.file("path").text()`, `await Bun.file("path").json()`
+  - Writing: `await Bun.write("path", data)`
+  - See: https://bun.sh/docs/api/file-io
+- **Environment Variables**: Use `Bun.env` instead of `process.env`
+- **Shell Commands**: Use `Bun.$` for shell scripting instead of `child_process`
+- **HTTP Server**: Use `Bun.serve()` for HTTP servers
+- **Path Operations**: Use `import.meta` for current file paths instead of `__dirname` and `__filename`
+- Only use Node.js built-in modules when Bun doesn't provide an equivalent API
 
 ### File Structure
 
