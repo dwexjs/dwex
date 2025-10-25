@@ -20,7 +20,6 @@ export class DwexApplication {
 	private readonly requestHandler: RequestHandler;
 	private readonly globalMiddleware: MiddlewareFunction[] = [];
 	private server?: ReturnType<typeof Bun.serve>;
-	private logger?: any; // Optional logger instance
 	private instanceLoaderLogger?: any;
 	private routesResolverLogger?: any;
 	private routerExplorerLogger?: any;
@@ -42,17 +41,10 @@ export class DwexApplication {
 		// Try to create logger instances (if LoggerModule was imported)
 		try {
 			const { Logger } = await import("@dwexjs/logger");
-			this.logger = new Logger("DwexFactory");
 			this.instanceLoaderLogger = new Logger("InstanceLoader");
 			this.routesResolverLogger = new Logger("RoutesResolver");
 			this.routerExplorerLogger = new Logger("RouterExplorer");
 			this.dwexAppLogger = new Logger("DwexApplication");
-
-			// Log startup message
-			this.logger.log("Starting Dwex application...");
-
-			// Second scan to log module initialization
-			await this.scanModule(this.rootModule, false, true);
 		} catch (error) {
 			// Logger not available, that's okay
 		}
@@ -94,14 +86,18 @@ export class DwexApplication {
 			error: this.handleError.bind(this),
 		});
 
+		// Print banner with all info at the very top
+		this.printStartupBanner();
+
+		// Log module initialization
+		await this.scanModule(this.rootModule, false, true);
+
 		// Log all registered routes
 		this.logRoutes();
 
 		// Log completion message
 		if (this.dwexAppLogger) {
-			this.dwexAppLogger.log(
-				`Dwex application successfully started on ${this.server.port}`,
-			);
+			this.dwexAppLogger.log("Ready");
 		}
 	}
 
@@ -343,6 +339,30 @@ export class DwexApplication {
 				this.router.registerController(controller, ControllerClass);
 			}
 		}
+	}
+
+	/**
+	 * Prints startup banner with all server information
+	 */
+	private printStartupBanner(): void {
+		if (!this.server) return;
+
+		const version = "0.0.1";
+		const pid = process.pid;
+		const port = this.server.port;
+		const hostname = this.server.hostname;
+
+		// Colors - Purple/Pink theme
+		const pink = "\x1b[38;2;228;90;146m"; // #E45A92
+		const dim = "\x1b[90m";
+		const reset = "\x1b[39m";
+
+		console.log("");
+		console.log(`  ${pink}◆${reset} Dwex ${dim}v${version}${reset}`);
+		console.log("");
+		console.log(`  ${dim}Local:${reset}   http://${hostname}:${port}`);
+		console.log(`  ${dim}PID:${reset}     ${pid}`);
+		console.log("");
 	}
 
 	/**

@@ -69,39 +69,37 @@ export class Logger {
 				write(chunk: Buffer, _encoding: string, callback: () => void) {
 					try {
 						const log = JSON.parse(chunk.toString());
-						const { pid, time, msg, context, level } = log;
+						const { time, msg, context, level } = log;
 
-						// Map pino level numbers to level names and colors
+						// Map pino level numbers to level names and colors - Purple/Pink theme
 						const levelMap: Record<
 							number,
 							{ name: string; color: string }
 						> = {
-							10: { name: "TRACE", color: "\x1b[90m" }, // gray
-							20: { name: "DEBUG", color: "\x1b[36m" }, // cyan
-							30: { name: "LOG", color: "\x1b[32m" }, // green
-							40: { name: "WARN", color: "\x1b[38;2;255;189;189m" }, // #FFBDBD
-							50: { name: "ERROR", color: "\x1b[38;2;255;164;164m" }, // #FFA4A4
-							60: { name: "FATAL", color: "\x1b[91m" }, // bright red
+							10: { name: "TRACE", color: "\x1b[38;2;255;172;172m" }, // #FFACAC
+							20: { name: "DEBUG", color: "\x1b[38;2;255;172;172m" }, // #FFACAC
+							30: { name: "LOG", color: "\x1b[38;2;228;90;146m" }, // #E45A92
+							40: { name: "WARN", color: "\x1b[38;2;93;47;119m" }, // #5D2F77
+							50: { name: "ERROR", color: "\x1b[38;2;62;30;104m" }, // #3E1E68
+							60: { name: "FATAL", color: "\x1b[38;2;62;30;104m" }, // #3E1E68
 						};
 
 						const levelInfo = levelMap[level] || {
 							name: "LOG",
-							color: "\x1b[32m",
+							color: "\x1b[38;2;228;90;146m",
 						};
 
+						// Format time as HH:MM:SS
 						const date = new Date(time);
-						const day = String(date.getDate()).padStart(2, "0");
-						const month = String(date.getMonth() + 1).padStart(2, "0");
-						const year = date.getFullYear();
 						const hours = String(date.getHours()).padStart(2, "0");
 						const minutes = String(date.getMinutes()).padStart(2, "0");
 						const seconds = String(date.getSeconds()).padStart(2, "0");
-						const formattedTime = `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+						const formattedTime = `${hours}:${minutes}:${seconds}`;
 
-						// #BADFDB for [Dwex], level-specific color for level, #FCF9EA for [context]
+						// Minimal format: HH:MM:SS  LEVEL [SERVICE] MESSAGE
 						// Pad level name to 5 characters for consistent alignment (spacing before)
 						const paddedLevel = levelInfo.name.padStart(5, " ");
-						const formatted = `\x1b[38;2;186;223;219m[Dwex]\x1b[39m ${pid} - ${formattedTime} ${levelInfo.color}${paddedLevel}\x1b[39m \x1b[38;2;252;249;234m[${context || ""}]\x1b[39m ${msg}`;
+						const formatted = `\x1b[90m${formattedTime}\x1b[39m ${levelInfo.color}${paddedLevel}\x1b[39m \x1b[38;2;228;90;146m[${context || "App"}]\x1b[39m ${msg}`;
 						console.log(formatted);
 					} catch (error) {
 						// Fallback if parsing fails
