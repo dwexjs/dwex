@@ -71,22 +71,22 @@ export class Logger {
 						const log = JSON.parse(chunk.toString());
 						const { time, msg, context, level } = log;
 
-						// Map pino level numbers to level names and colors - Purple/Pink theme
+						// Map pino level numbers to level names and colors
 						const levelMap: Record<
 							number,
 							{ name: string; color: string }
 						> = {
-							10: { name: "TRACE", color: "\x1b[38;2;255;172;172m" }, // #FFACAC
-							20: { name: "DEBUG", color: "\x1b[38;2;255;172;172m" }, // #FFACAC
-							30: { name: "LOG", color: "\x1b[38;2;228;90;146m" }, // #E45A92
-							40: { name: "WARN", color: "\x1b[38;2;93;47;119m" }, // #5D2F77
-							50: { name: "ERROR", color: "\x1b[38;2;62;30;104m" }, // #3E1E68
-							60: { name: "FATAL", color: "\x1b[38;2;62;30;104m" }, // #3E1E68
+							10: { name: "TRACE", color: "\x1b[38;2;186;223;219m" }, // #BADFDB
+							20: { name: "DEBUG", color: "\x1b[38;2;186;223;219m" }, // #BADFDB
+							30: { name: "LOG", color: "\x1b[38;2;252;249;234m" }, // #FCF9EA
+							40: { name: "WARN", color: "\x1b[38;2;255;189;189m" }, // #FFBDBD
+							50: { name: "ERROR", color: "\x1b[38;2;255;164;164m" }, // #FFA4A4
+							60: { name: "FATAL", color: "\x1b[38;2;255;164;164m" }, // #FFA4A4
 						};
 
 						const levelInfo = levelMap[level] || {
 							name: "LOG",
-							color: "\x1b[38;2;228;90;146m",
+							color: "\x1b[38;2;252;249;234m",
 						};
 
 						// Format time as HH:MM:SS
@@ -99,7 +99,7 @@ export class Logger {
 						// Minimal format: HH:MM:SS  LEVEL [SERVICE] MESSAGE
 						// Pad level name to 5 characters for consistent alignment (spacing before)
 						const paddedLevel = levelInfo.name.padStart(5, " ");
-						const formatted = `\x1b[90m${formattedTime}\x1b[39m ${levelInfo.color}${paddedLevel}\x1b[39m \x1b[38;2;228;90;146m[${context || "App"}]\x1b[39m ${msg}`;
+						const formatted = `\x1b[90m${formattedTime}\x1b[39m ${levelInfo.color}${paddedLevel}\x1b[39m \x1b[38;2;186;223;219m[${context || "App"}]\x1b[39m ${msg}`;
 						console.log(formatted);
 					} catch (error) {
 						// Fallback if parsing fails

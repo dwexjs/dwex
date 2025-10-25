@@ -87,7 +87,7 @@ export class DwexApplication {
 		});
 
 		// Print banner with all info at the very top
-		this.printStartupBanner();
+		await this.printStartupBanner();
 
 		// Log module initialization
 		await this.scanModule(this.rootModule, false, true);
@@ -344,10 +344,14 @@ export class DwexApplication {
 	/**
 	 * Prints startup banner with all server information
 	 */
-	private printStartupBanner(): void {
+	private async printStartupBanner(): Promise<void> {
 		if (!this.server) return;
 
-		const version = "0.0.1";
+		// Read version from package.json
+		const packageJsonPath = new URL("../package.json", import.meta.url);
+		const packageJson = await Bun.file(packageJsonPath).json();
+		const version = packageJson.version;
+
 		const pid = process.pid;
 		const port = this.server.port;
 		const hostname = this.server.hostname;
