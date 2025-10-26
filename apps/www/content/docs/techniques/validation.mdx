@@ -1,0 +1,39 @@
+---
+title: Validation
+description: Validate request data with decorators and schemas
+---
+
+## Validation
+
+Learn how to validate incoming request data using class-validator and DTOs.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Dwex integrates with class-validator for declarative validation of request data.
+
+## Example
+
+```typescript
+import { IsString, IsEmail, MinLength } from "class-validator";
+
+export class CreateUserDto {
+	@IsString()
+	@MinLength(3)
+	name: string;
+
+	@IsEmail()
+	email: string;
+}
+```
+
+## Topics Covered
+
+- DTO validation
+- Custom validators
+- Validation pipes
+- Error messages
+- Nested validation

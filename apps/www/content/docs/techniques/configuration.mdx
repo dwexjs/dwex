@@ -1,0 +1,39 @@
+---
+title: Configuration
+description: Manage application configuration across environments
+---
+
+## Configuration
+
+Learn how to manage configuration and environment variables in Dwex applications.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Dwex makes it easy to work with environment variables and configuration using Bun's native APIs.
+
+## Using Bun.env
+
+```typescript
+@Injectable()
+export class ConfigService {
+	get apiUrl() {
+		return Bun.env.API_URL || "http://localhost:3000";
+	}
+
+	get port() {
+		return Number(Bun.env.PORT) || 3000;
+	}
+}
+```
+
+## Topics Covered
+
+- Environment variables with `Bun.env`
+- Configuration modules
+- Type-safe configuration
+- Environment-specific config
+- Validation

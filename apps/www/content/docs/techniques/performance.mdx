@@ -1,0 +1,51 @@
+---
+title: Performance
+description: Optimize your application for maximum performance
+---
+
+## Performance
+
+Learn how to optimize your Dwex applications for maximum performance.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Leverage Bun's performance and optimize your Dwex applications for production.
+
+## Key Optimization Areas
+
+- **Bun Runtime** - Take advantage of Bun's speed
+- **Caching** - Implement effective caching strategies
+- **Database Queries** - Optimize database access patterns
+- **Async Operations** - Use async/await effectively
+- **Module Loading** - Lazy load modules when needed
+
+## Example: Caching
+
+```typescript
+@Injectable()
+export class UserService {
+	private cache = new Map();
+
+	async findOne(id: string) {
+		if (this.cache.has(id)) {
+			return this.cache.get(id);
+		}
+
+		const user = await this.db.findOne(id);
+		this.cache.set(id, user);
+		return user;
+	}
+}
+```
+
+## Topics Covered
+
+- Performance monitoring
+- Caching strategies
+- Database optimization
+- Memory management
+- Benchmarking

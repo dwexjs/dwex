@@ -1,0 +1,41 @@
+---
+title: Error Handling
+description: Handle errors and exceptions gracefully
+---
+
+## Error Handling
+
+Learn how to handle errors and exceptions in your Dwex applications.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Dwex provides built-in error handling mechanisms and exception filters.
+
+## Example
+
+```typescript
+import { HttpException, HttpStatus } from "@dwex/common";
+
+@Injectable()
+export class UserService {
+	findOne(id: string) {
+		const user = this.db.findOne(id);
+		if (!user) {
+			throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+		}
+		return user;
+	}
+}
+```
+
+## Topics Covered
+
+- HTTP exceptions
+- Custom exceptions
+- Exception filters
+- Global error handling
+- Error responses

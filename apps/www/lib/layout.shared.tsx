@@ -1,9 +1,19 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import Image from "next/image";
 
 export function baseOptions(): BaseLayoutProps {
 	return {
 		nav: {
-			title: "Dwex",
+			title: (
+				<Image
+					src="/dwex.png"
+					alt="Dwex Logo"
+					width={32}
+					height={32}
+					className="rounded-lg"
+				/>
+			),
+			transparentMode: "top",
 		},
 		links: [
 			{

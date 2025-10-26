@@ -44,6 +44,10 @@
 }
 
 :root {
+  /* Fumadocs UI Theme */
+  --color-fd-primary: hsl(0, 59%, 58%);
+
+  /* Shadcn UI Theme */
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -79,6 +83,10 @@
 }
 
 .dark {
+  /* Fumadocs UI Theme */
+  --color-fd-primary: hsl(0, 59%, 58%);
+
+  /* Shadcn UI Theme */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

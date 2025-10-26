@@ -1,0 +1,38 @@
+---
+title: File Upload
+description: Handle file uploads with multipart/form-data
+---
+
+## File Upload
+
+Learn how to handle file uploads in Dwex applications.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Handle file uploads using multipart/form-data with Bun's native file handling capabilities.
+
+## Example
+
+```typescript
+@Controller("upload")
+export class UploadController {
+	@Post()
+	async uploadFile(@Body() body: FormData) {
+		const file = body.get("file") as File;
+		await Bun.write(`./uploads/${file.name}`, file);
+		return { filename: file.name, size: file.size };
+	}
+}
+```
+
+## Topics Covered
+
+- File upload handling
+- Multipart/form-data
+- File validation
+- Storage strategies
+- Bun.write API

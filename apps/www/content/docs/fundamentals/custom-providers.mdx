@@ -1,0 +1,37 @@
+---
+title: Custom Providers
+description: Advanced provider configurations for complex scenarios
+---
+
+## Custom Providers
+
+Learn how to create custom provider configurations for advanced dependency injection patterns.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Provider Types
+
+Dwex supports several provider types:
+
+- `useClass` - Provide a class implementation
+- `useValue` - Provide a static value
+- `useFactory` - Provide a factory function
+- `useExisting` - Alias an existing provider
+
+## Example
+
+```typescript
+@Module({
+	providers: [
+		{
+			provide: "CONFIG",
+			useFactory: () => ({
+				apiUrl: Bun.env.API_URL,
+			}),
+		},
+	],
+})
+export class AppModule {}
+```

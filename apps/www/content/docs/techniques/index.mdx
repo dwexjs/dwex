@@ -1,0 +1,79 @@
+---
+title: Techniques
+description: Advanced techniques for building production-ready applications
+---
+
+## Techniques
+
+Learn advanced techniques and best practices for building robust, production-ready Dwex applications.
+
+## What You'll Learn
+
+This section covers practical implementation patterns and advanced features you'll need for real-world applications.
+
+## Topics
+
+**Configuration** - Manage application configuration across environments.
+
+**Validation** - Validate request data with decorators and schemas.
+
+**Error Handling** - Handle errors gracefully and provide meaningful responses.
+
+**Caching** - Implement caching strategies for better performance.
+
+**Cookies** - Work with HTTP cookies for session management.
+
+**CORS** - Configure Cross-Origin Resource Sharing for your API.
+
+**File Upload** - Handle file uploads with multipart/form-data.
+
+**Performance** - Optimize your application for maximum performance.
+
+## Example: Validation
+
+```typescript
+import { IsString, IsEmail, MinLength } from "class-validator";
+
+export class CreateUserDto {
+	@IsString()
+	@MinLength(3)
+	name: string;
+
+	@IsEmail()
+	email: string;
+}
+
+@Controller("users")
+export class UserController {
+	@Post()
+	create(@Body() dto: CreateUserDto) {
+		// dto is automatically validated
+		return this.userService.create(dto);
+	}
+}
+```
+
+## Learn More
+
+<Cards>
+	<Card
+		title="Configuration"
+		href="/docs/techniques/configuration"
+		description="Manage app configuration and environment variables"
+	/>
+	<Card
+		title="Validation"
+		href="/docs/techniques/validation"
+		description="Validate request data with decorators"
+	/>
+	<Card
+		title="Error Handling"
+		href="/docs/techniques/error-handling"
+		description="Handle errors and exceptions gracefully"
+	/>
+	<Card
+		title="Performance"
+		href="/docs/techniques/performance"
+		description="Optimize your application performance"
+	/>
+</Cards>

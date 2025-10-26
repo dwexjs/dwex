@@ -1,0 +1,35 @@
+---
+title: CORS
+description: Configure Cross-Origin Resource Sharing
+---
+
+## CORS
+
+Learn how to configure CORS in your Dwex applications.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Configure Cross-Origin Resource Sharing to allow your API to be accessed from different domains.
+
+## Example
+
+```typescript
+const app = await DwexFactory.create(AppModule, {
+	cors: {
+		origin: "https://example.com",
+		credentials: true,
+	},
+});
+```
+
+## Topics Covered
+
+- CORS configuration
+- Allowed origins
+- Credentials
+- Headers and methods
+- Preflight requests

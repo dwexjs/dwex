@@ -1,13 +1,12 @@
 {
 	"title": "Documentation",
 	"pages": [
-		"index",
 		"getting-started",
+		"overview",
 		"fundamentals",
-		"routing",
+		"techniques",
 		"security",
 		"openapi",
-		"modules",
 		"api"
 	]
 }

@@ -1,0 +1,27 @@
+---
+title: Injection Scopes
+description: Control the lifecycle of your providers with scopes
+---
+
+## Injection Scopes
+
+Control how and when providers are instantiated with injection scopes.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Available Scopes
+
+- **Singleton** (default) - One instance per application
+- **Request** - New instance per request
+- **Transient** - New instance every time it's injected
+
+## Example
+
+```typescript
+@Injectable({ scope: Scope.REQUEST })
+export class RequestScopedService {
+	// New instance for each HTTP request
+}
+```

@@ -1,0 +1,34 @@
+---
+title: Dependency Injection
+description: Understanding the DI container and dependency resolution in Dwex
+---
+
+## Dependency Injection
+
+Learn how Dwex's dependency injection system works and how to leverage it in your applications.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Dwex uses a powerful dependency injection container inspired by NestJS, optimized for Bun's performance.
+
+## Basic Usage
+
+```typescript
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+}
+```
+
+## Topics Covered
+
+- How the DI container works
+- Constructor injection
+- Property injection
+- Injection tokens
+- Provider registration
+- Dependency resolution

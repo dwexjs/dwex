@@ -1,0 +1,37 @@
+---
+title: Dynamic Modules
+description: Build configurable, reusable modules
+---
+
+## Dynamic Modules
+
+Create modules that can be configured dynamically at runtime.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Dynamic modules allow you to create reusable modules that can be configured when they're imported.
+
+## Example
+
+```typescript
+@Module({})
+export class DatabaseModule {
+	static forRoot(options: DatabaseOptions): DynamicModule {
+		return {
+			module: DatabaseModule,
+			providers: [
+				{
+					provide: "DATABASE_OPTIONS",
+					useValue: options,
+				},
+				DatabaseService,
+			],
+			exports: [DatabaseService],
+		};
+	}
+}
+```

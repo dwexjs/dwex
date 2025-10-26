@@ -1,0 +1,41 @@
+---
+title: Cookies
+description: Work with HTTP cookies for session management
+---
+
+## Cookies
+
+Learn how to work with HTTP cookies in Dwex applications.
+
+<Callout type="info">
+This page is under construction. Documentation coming soon!
+</Callout>
+
+## Overview
+
+Dwex provides utilities for working with HTTP cookies for session management and authentication.
+
+## Example
+
+```typescript
+@Controller("auth")
+export class AuthController {
+	@Get("login")
+	login(@Res() res: Response) {
+		res.cookie("session", "token", {
+			httpOnly: true,
+			secure: true,
+			maxAge: 3600000,
+		});
+		return res.json({ success: true });
+	}
+}
+```
+
+## Topics Covered
+
+- Setting cookies
+- Reading cookies
+- Cookie options
+- Signed cookies
+- Session management

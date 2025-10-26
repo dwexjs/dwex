@@ -1,97 +1,80 @@
 ---
 title: Fundamentals
-description: Core concepts that power Dwex applications
+description: Advanced dependency injection and module concepts
 ---
 
-## Overview
+## Advanced Concepts
 
-Master the fundamental building blocks of Dwex applications. This section covers the core concepts you'll use every day when building with Dwex.
+Deep dive into the powerful dependency injection system and advanced module features that make Dwex applications scalable and maintainable.
 
-## Core Concepts
+## Dependency Injection
 
-**Modules** - Organize your application into cohesive, reusable units with clear dependencies.
+Dwex provides a sophisticated DI container that manages the lifecycle of your application components. Learn how to leverage custom providers, injection scopes, and advanced patterns.
 
-**Controllers** - Handle HTTP requests and define your API routes using decorators.
+## Module System
 
-**Providers** - Create injectable services that encapsulate business logic and data access.
+Go beyond basic module organization to understand dynamic modules, lazy loading, circular dependencies, and module references.
 
-**Middleware** - Process requests and responses with reusable middleware functions.
+## Key Topics
 
-## Architecture
+**Dependency Injection** - Understanding the DI container and how dependencies are resolved.
 
-Dwex follows a modular architecture inspired by NestJS but optimized for Bun:
+**Custom Providers** - Create custom provider configurations for advanced use cases.
 
-```
-Application
-├── Modules (organize features)
-│   ├── Controllers (handle HTTP)
-│   ├── Providers (business logic)
-│   └── Middleware (request processing)
-└── DI Container (manages dependencies)
-```
+**Injection Scopes** - Control the lifecycle of your providers with singleton, request, and transient scopes.
 
-## Key Principles
+**Dynamic Modules** - Build configurable, reusable modules that can be customized at runtime.
 
-1. **Separation of Concerns** - Controllers handle HTTP, services handle logic
-2. **Dependency Injection** - Automatic resolution of dependencies
-3. **Modularity** - Self-contained, reusable modules
-4. **Type Safety** - Full TypeScript support throughout
+**Circular Dependencies** - Handle and resolve circular dependencies between modules.
 
-## Example
+**Module Reference** - Access the DI container programmatically to resolve dependencies dynamically.
+
+**Testing** - Write testable code with dependency injection and learn testing strategies.
+
+## Example: Custom Provider
 
 ```typescript
-// Module organizes related code
 @Module({
-	imports: [DatabaseModule],
-	controllers: [UserController],
-	providers: [UserService],
-	exports: [UserService],
+	providers: [
+		{
+			provide: "CONFIG",
+			useFactory: () => ({
+				apiUrl: Bun.env.API_URL,
+				timeout: Number(Bun.env.TIMEOUT) || 5000,
+			}),
+		},
+		{
+			provide: ApiService,
+			useClass: Bun.env.NODE_ENV === "production"
+				? ProductionApiService
+				: DevelopmentApiService,
+		},
+	],
 })
-export class UserModule {}
-
-// Controller handles HTTP requests
-@Controller("users")
-export class UserController {
-	constructor(private readonly userService: UserService) {}
-
-	@Get()
-	findAll() {
-		return this.userService.findAll();
-	}
-}
-
-// Provider contains business logic
-@Injectable()
-export class UserService {
-	constructor(private readonly db: DatabaseService) {}
-
-	findAll() {
-		return this.db.users.findMany();
-	}
-}
+export class AppModule {}
 ```
 
 ## Learn More
 
 <Cards>
 	<Card
-		title="Modules"
-		href="/docs/fundamentals/modules"
-		description="Organize your app with the module system"
+		title="Dependency Injection"
+		href="/docs/fundamentals/dependency-injection"
+		description="Master the DI container and injection patterns"
 	/>
 	<Card
-		title="Controllers"
-		href="/docs/fundamentals/controllers"
-		description="Handle HTTP requests with decorators"
+		title="Custom Providers"
+		href="/docs/fundamentals/custom-providers"
+		description="Create advanced provider configurations"
 	/>
 	<Card
-		title="Providers"
-		href="/docs/fundamentals/providers"
-		description="Create injectable services with DI"
+		title="Injection Scopes"
+		href="/docs/fundamentals/injection-scopes"
+		description="Control provider lifecycle and scope"
 	/>
 	<Card
-		title="Middleware"
-		href="/docs/fundamentals/middleware"
-		description="Process requests with middleware"
+		title="Dynamic Modules"
+		href="/docs/fundamentals/dynamic-modules"
+		description="Build configurable, reusable modules"
 	/>
 </Cards>

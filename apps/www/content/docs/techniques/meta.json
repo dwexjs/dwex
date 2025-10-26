@@ -1,0 +1,15 @@
+{
+	"title": "Techniques",
+	"icon": "Wrench",
+	"pages": [
+		"configuration",
+		"validation",
+		"error-handling",
+		"caching",
+		"logger",
+		"cookies",
+		"cors",
+		"file-upload",
+		"performance"
+	]
+}

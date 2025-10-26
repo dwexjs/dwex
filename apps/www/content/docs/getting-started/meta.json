@@ -1,5 +1,5 @@
 {
 	"title": "Getting Started",
-	"icon": "BookOpen",
+	"icon": "Info",
 	"pages": ["introduction", "installation", "first-app", "project-structure"]
 }

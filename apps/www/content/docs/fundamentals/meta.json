@@ -1,5 +1,10 @@
 {
 	"title": "Fundamentals",
-	"icon": "Box",
-	"pages": ["modules", "controllers", "providers", "middleware"]
+	"icon": "Layers",
+	"pages": [
+		"dependency-injection",
+		"custom-providers",
+		"injection-scopes",
+		"dynamic-modules"
+	]
 }
