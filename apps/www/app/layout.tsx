@@ -9,6 +9,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
 	title: "Dwex - Lightweight. Typed. Lightning-fast Web Framework.",
+	metadataBase: new URL("https://dwex.dev"),
 };
 
 export default function Layout({ children }: LayoutProps<"/">) {
