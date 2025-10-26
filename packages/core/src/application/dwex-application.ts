@@ -348,7 +348,7 @@ export class DwexApplication {
     if (!this.server) return;
 
     // Read version from package.json
-    const packageJsonPath = new URL("../package.json", import.meta.url);
+    const packageJsonPath = new URL("../../package.json", import.meta.url);
     const packageJson = await Bun.file(packageJsonPath).json();
     const version = packageJson.version;
 
