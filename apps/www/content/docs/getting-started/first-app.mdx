@@ -26,9 +26,9 @@ Create `src/task.interface.ts`:
 
 ```typescript
 export interface Task {
-	id: string;
-	title: string;
-	completed: boolean;
+  id: string;
+  title: string;
+  completed: boolean;
 }
 ```
 
@@ -37,40 +37,40 @@ export interface Task {
 Create `src/task.service.ts`:
 
 ```typescript
-import { Injectable } from "@dwexjs/core";
+import { Injectable } from "@dwex/core";
 import type { Task } from "./task.interface";
 
 @Injectable()
 export class TaskService {
-	private tasks: Task[] = [
-		{ id: "1", title: "Learn Dwex", completed: false },
-		{ id: "2", title: "Build an API", completed: false },
-	];
+  private tasks: Task[] = [
+    { id: "1", title: "Learn Dwex", completed: false },
+    { id: "2", title: "Build an API", completed: false },
+  ];
 
-	findAll(): Task[] {
-		return this.tasks;
-	}
+  findAll(): Task[] {
+    return this.tasks;
+  }
 
-	findOne(id: string): Task | undefined {
-		return this.tasks.find((task) => task.id === id);
-	}
+  findOne(id: string): Task | undefined {
+    return this.tasks.find((task) => task.id === id);
+  }
 
-	create(title: string): Task {
-		const task: Task = {
-			id: String(Date.now()),
-			title,
-			completed: false,
-		};
-		this.tasks.push(task);
-		return task;
-	}
+  create(title: string): Task {
+    const task: Task = {
+      id: String(Date.now()),
+      title,
+      completed: false,
+    };
+    this.tasks.push(task);
+    return task;
+  }
 
-	delete(id: string): boolean {
-		const index = this.tasks.findIndex((task) => task.id === id);
-		if (index === -1) return false;
-		this.tasks.splice(index, 1);
-		return true;
-	}
+  delete(id: string): boolean {
+    const index = this.tasks.findIndex((task) => task.id === id);
+    if (index === -1) return false;
+    this.tasks.splice(index, 1);
+    return true;
+  }
 }
 ```
 
@@ -79,38 +79,38 @@ export class TaskService {
 Create `src/task.controller.ts`:
 
 ```typescript
-import { Controller, Get, Post, Delete, Param, Body } from "@dwexjs/core";
+import { Controller, Get, Post, Delete, Param, Body } from "@dwex/core";
 import { TaskService } from "./task.service";
 import type { Task } from "./task.interface";
 
 @Controller("tasks")
 export class TaskController {
-	constructor(private readonly taskService: TaskService) {}
+  constructor(private readonly taskService: TaskService) {}
 
-	@Get()
-	findAll(): Task[] {
-		return this.taskService.findAll();
-	}
+  @Get()
+  findAll(): Task[] {
+    return this.taskService.findAll();
+  }
 
-	@Get(":id")
-	findOne(@Param("id") id: string) {
-		const task = this.taskService.findOne(id);
-		if (!task) {
-			return { error: "Task not found" };
-		}
-		return task;
-	}
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    const task = this.taskService.findOne(id);
+    if (!task) {
+      return { error: "Task not found" };
+    }
+    return task;
+  }
 
-	@Post()
-	create(@Body() body: { title: string }) {
-		return this.taskService.create(body.title);
-	}
+  @Post()
+  create(@Body() body: { title: string }) {
+    return this.taskService.create(body.title);
+  }
 
-	@Delete(":id")
-	delete(@Param("id") id: string) {
-		const deleted = this.taskService.delete(id);
-		return { success: deleted };
-	}
+  @Delete(":id")
+  delete(@Param("id") id: string) {
+    const deleted = this.taskService.delete(id);
+    return { success: deleted };
+  }
 }
 ```
 
@@ -119,13 +119,13 @@ export class TaskController {
 Create `src/app.module.ts`:
 
 ```typescript
-import { Module } from "@dwexjs/core";
+import { Module } from "@dwex/core";
 import { TaskController } from "./task.controller";
 import { TaskService } from "./task.service";
 
 @Module({
-	controllers: [TaskController],
-	providers: [TaskService],
+  controllers: [TaskController],
+  providers: [TaskService],
 })
 export class AppModule {}
 ```
@@ -136,14 +136,14 @@ Create `src/main.ts`:
 
 ```typescript
 import "reflect-metadata";
-import { DwexFactory } from "@dwexjs/core";
+import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
-	const app = await DwexFactory.create(AppModule);
+  const app = await DwexFactory.create(AppModule);
 
-	const port = 3000;
-	await app.listen(port);
+  const port = 3000;
+  await app.listen(port);
 }
 
 bootstrap();
@@ -167,8 +167,8 @@ Response:
 
 ```json
 [
-	{ "id": "1", "title": "Learn Dwex", "completed": false },
-	{ "id": "2", "title": "Build an API", "completed": false }
+  { "id": "1", "title": "Learn Dwex", "completed": false },
+  { "id": "2", "title": "Build an API", "completed": false }
 ]
 ```
 
@@ -217,21 +217,21 @@ The `AppModule` ties everything together, registering controllers and providers.
 Let's enhance our app with the logger module:
 
 ```bash
-bun add @dwexjs/logger
+bun add @dwex/logger
 ```
 
 Update `src/app.module.ts`:
 
 ```typescript
-import { Module } from "@dwexjs/core";
-import { LoggerModule } from "@dwexjs/logger";
+import { Module } from "@dwex/core";
+import { LoggerModule } from "@dwex/logger";
 import { TaskController } from "./task.controller";
 import { TaskService } from "./task.service";
 
 @Module({
-	imports: [LoggerModule],
-	controllers: [TaskController],
-	providers: [TaskService],
+  imports: [LoggerModule],
+  controllers: [TaskController],
+  providers: [TaskService],
 })
 export class AppModule {}
 ```
@@ -239,30 +239,33 @@ export class AppModule {}
 Update `src/task.controller.ts`:
 
 ```typescript
-import { Controller, Get, Post, Delete, Param, Body } from "@dwexjs/core";
-import { Logger } from "@dwexjs/logger";
+import { Controller, Get, Post, Delete, Param, Body } from "@dwex/core";
+import { Logger } from "@dwex/logger";
 import { TaskService } from "./task.service";
 
 @Controller("tasks")
 export class TaskController {
-	private readonly logger = new Logger(TaskController.name);
+  private readonly logger = new Logger(TaskController.name);
 
-	constructor(private readonly taskService: TaskService) {}
+  constructor(private readonly taskService: TaskService) {}
 
-	@Get()
-	findAll() {
-		this.logger.log("Fetching all tasks");
-		return this.taskService.findAll();
-	}
+  @Get()
+  findAll() {
+    this.logger.log("Fetching all tasks");
+    return this.taskService.findAll();
+  }
 
-	// ... rest of the methods
+  // ... rest of the methods
 }
 ```
 
 ## Next Steps
 
 <Cards>
-	<Card title="Learn About Controllers" href="/docs/fundamentals/controllers" />
-	<Card title="Dependency Injection" href="/docs/dependency-injection/providers" />
-	<Card title="Add Authentication" href="/docs/security/authentication" />
+  <Card title="Learn About Controllers" href="/docs/fundamentals/controllers" />
+  <Card
+    title="Dependency Injection"
+    href="/docs/dependency-injection/providers"
+  />
+  <Card title="Add Authentication" href="/docs/security/authentication" />
 </Cards>

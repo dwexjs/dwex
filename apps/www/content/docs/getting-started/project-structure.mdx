@@ -49,12 +49,12 @@ The entry point of your application. Bootstraps the app and starts the server.
 
 ```typescript
 import "reflect-metadata";
-import { DwexFactory } from "@dwexjs/core";
+import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
-	const app = await DwexFactory.create(AppModule);
-	await app.listen(3000);
+  const app = await DwexFactory.create(AppModule);
+  await app.listen(3000);
 }
 
 bootstrap();
@@ -65,14 +65,14 @@ bootstrap();
 The root module that imports all feature modules.
 
 ```typescript
-import { Module } from "@dwexjs/core";
-import { LoggerModule } from "@dwexjs/logger";
+import { Module } from "@dwex/core";
+import { LoggerModule } from "@dwex/logger";
 import { UserModule } from "./modules/users/users.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { DatabaseModule } from "./modules/database/database.module";
 
 @Module({
-	imports: [LoggerModule, DatabaseModule, UserModule, AuthModule],
+  imports: [LoggerModule, DatabaseModule, UserModule, AuthModule],
 })
 export class AppModule {}
 ```
@@ -92,10 +92,10 @@ Feature modules organized by domain. Each module contains:
 ```typescript
 // users.module.ts
 @Module({
-	imports: [DatabaseModule],
-	controllers: [UserController],
-	providers: [UserService],
-	exports: [UserService],
+  imports: [DatabaseModule],
+  controllers: [UserController],
+  providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}
 ```
@@ -104,12 +104,12 @@ export class UserModule {}
 // users.controller.ts
 @Controller("users")
 export class UserController {
-	constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-	@Get()
-	findAll() {
-		return this.userService.findAll();
-	}
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
 }
 ```
 
@@ -117,11 +117,11 @@ export class UserController {
 // users.service.ts
 @Injectable()
 export class UserService {
-	constructor(private readonly db: DatabaseService) {}
+  constructor(private readonly db: DatabaseService) {}
 
-	async findAll() {
-		return this.db.users.findMany();
-	}
+  async findAll() {
+    return this.db.users.findMany();
+  }
 }
 ```
 
@@ -140,13 +140,13 @@ Shared utilities used across modules:
 // common/interceptors/logging.interceptor.ts
 @Injectable()
 export class LoggingInterceptor implements DwexInterceptor {
-	async intercept(context: ExecutionContext, next: () => Promise<any>) {
-		const start = Date.now();
-		const result = await next();
-		const duration = Date.now() - start;
-		console.log(`Request took ${duration}ms`);
-		return result;
-	}
+  async intercept(context: ExecutionContext, next: () => Promise<any>) {
+    const start = Date.now();
+    const result = await next();
+    const duration = Date.now() - start;
+    console.log(`Request took ${duration}ms`);
+    return result;
+  }
 }
 ```
 
@@ -157,14 +157,14 @@ Configuration files for environment variables, database connections, etc.
 ```typescript
 // config/app.config.ts
 export const appConfig = {
-	port: process.env.PORT || 3000,
-	database: {
-		url: process.env.DATABASE_URL,
-	},
-	jwt: {
-		secret: process.env.JWT_SECRET,
-		expiresIn: "1h",
-	},
+  port: process.env.PORT || 3000,
+  database: {
+    url: process.env.DATABASE_URL,
+  },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: "1h",
+  },
 };
 ```
 
@@ -215,8 +215,8 @@ Create a `SharedModule` for commonly used providers:
 ```typescript
 @Global()
 @Module({
-	providers: [ConfigService, CacheService],
-	exports: [ConfigService, CacheService],
+  providers: [ConfigService, CacheService],
+  exports: [ConfigService, CacheService],
 })
 export class SharedModule {}
 ```
@@ -228,9 +228,9 @@ Use Data Transfer Objects to define expected request shapes:
 ```typescript
 // dto/create-user.dto.ts
 export interface CreateUserDto {
-	email: string;
-	password: string;
-	name: string;
+  email: string;
+  password: string;
+  name: string;
 }
 ```
 
@@ -257,10 +257,10 @@ Never hardcode configuration. Use environment variables:
 
 ```typescript
 const config = {
-	database: {
-		host: Bun.env.DB_HOST,
-		port: Number(Bun.env.DB_PORT),
-	},
+  database: {
+    host: Bun.env.DB_HOST,
+    port: Number(Bun.env.DB_PORT),
+  },
 };
 ```
 
@@ -285,13 +285,13 @@ This allows sharing code between multiple applications.
 ## Next Steps
 
 <Cards>
-	<Card title="Create Your First Module" href="/docs/fundamentals/modules" />
-	<Card
-		title="Understanding Controllers"
-		href="/docs/fundamentals/controllers"
-	/>
-	<Card
-		title="Dependency Injection"
-		href="/docs/dependency-injection/providers"
-	/>
+  <Card title="Create Your First Module" href="/docs/fundamentals/modules" />
+  <Card
+    title="Understanding Controllers"
+    href="/docs/fundamentals/controllers"
+  />
+  <Card
+    title="Dependency Injection"
+    href="/docs/dependency-injection/providers"
+  />
 </Cards>

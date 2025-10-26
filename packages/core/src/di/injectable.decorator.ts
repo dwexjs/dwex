@@ -1,18 +1,18 @@
 import "reflect-metadata";
-import { INJECTABLE, SCOPE } from "@dwexjs/common";
-import type { Scope } from "@dwexjs/common";
+import type { Scope } from "@dwex/common";
+import { INJECTABLE, SCOPE } from "@dwex/common";
 
 /**
  * Options for the Injectable decorator.
  */
 export interface InjectableOptions {
-	/**
-	 * The scope of the injectable.
-	 * - SINGLETON: Single instance shared across the application (default)
-	 * - REQUEST: New instance per request
-	 * - TRANSIENT: New instance every time it's injected
-	 */
-	scope?: Scope;
+  /**
+   * The scope of the injectable.
+   * - SINGLETON: Single instance shared across the application (default)
+   * - REQUEST: New instance per request
+   * - TRANSIENT: New instance every time it's injected
+   */
+  scope?: Scope;
 }
 
 /**
@@ -38,11 +38,11 @@ export interface InjectableOptions {
  * ```
  */
 export function Injectable(options?: InjectableOptions): ClassDecorator {
-	return (target: Function) => {
-		Reflect.defineMetadata(INJECTABLE, true, target);
+  return (target: Function) => {
+    Reflect.defineMetadata(INJECTABLE, true, target);
 
-		if (options?.scope) {
-			Reflect.defineMetadata(SCOPE, options.scope, target);
-		}
-	};
+    if (options?.scope) {
+      Reflect.defineMetadata(SCOPE, options.scope, target);
+    }
+  };
 }

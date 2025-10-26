@@ -1,5 +1,5 @@
 {
-  "name": "@dwexjs/jwt",
+  "name": "@dwex/jwt",
   "version": "1.0.0-beta.1",
   "type": "module",
   "main": "./dist/index.js",
@@ -18,7 +18,7 @@
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
-    "@dwexjs/common": "1.0.0-beta.1",
+    "@dwex/common": "1.0.0-beta.1",
     "jose": "^5.9.6",
     "reflect-metadata": "^0.2.2",
     "tslib": "^2.3.0"

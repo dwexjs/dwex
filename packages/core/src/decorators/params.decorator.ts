@@ -1,31 +1,31 @@
 import "reflect-metadata";
-import { ROUTE_PARAMS } from "@dwexjs/common";
+import { ROUTE_PARAMS } from "@dwex/common";
 
 /**
  * Route parameter metadata.
  */
 export interface RouteParamMetadata {
-	index: number;
-	type: ParamType;
-	data?: string;
-	pipes?: any[];
+  index: number;
+  type: ParamType;
+  data?: string;
+  pipes?: any[];
 }
 
 /**
  * Parameter types.
  */
 export enum ParamType {
-	BODY = "body",
-	QUERY = "query",
-	PARAM = "param",
-	HEADERS = "headers",
-	COOKIES = "cookies",
-	REQUEST = "request",
-	RESPONSE = "response",
-	NEXT = "next",
-	SESSION = "session",
-	IP = "ip",
-	HOST = "host",
+  BODY = "body",
+  QUERY = "query",
+  PARAM = "param",
+  HEADERS = "headers",
+  COOKIES = "cookies",
+  REQUEST = "request",
+  RESPONSE = "response",
+  NEXT = "next",
+  SESSION = "session",
+  IP = "ip",
+  HOST = "host",
 }
 
 /**
@@ -36,29 +36,29 @@ export enum ParamType {
  * @returns Parameter decorator
  */
 function createParamDecorator(
-	type: ParamType,
-	data?: string,
+  type: ParamType,
+  data?: string
 ): ParameterDecorator {
-	return (
-		target: object,
-		propertyKey: string | symbol | undefined,
-		parameterIndex: number,
-	) => {
-		const handler = propertyKey
-			? (target.constructor as any).prototype[propertyKey]
-			: target;
+  return (
+    target: object,
+    propertyKey: string | symbol | undefined,
+    parameterIndex: number
+  ) => {
+    const handler = propertyKey
+      ? (target.constructor as any).prototype[propertyKey]
+      : target;
 
-		const existingParams: RouteParamMetadata[] =
-			Reflect.getOwnMetadata(ROUTE_PARAMS, handler) || [];
+    const existingParams: RouteParamMetadata[] =
+      Reflect.getOwnMetadata(ROUTE_PARAMS, handler) || [];
 
-		existingParams.push({
-			index: parameterIndex,
-			type,
-			data,
-		});
+    existingParams.push({
+      index: parameterIndex,
+      type,
+      data,
+    });
 
-		Reflect.defineMetadata(ROUTE_PARAMS, existingParams, handler);
-	};
+    Reflect.defineMetadata(ROUTE_PARAMS, existingParams, handler);
+  };
 }
 
 /**
@@ -84,7 +84,7 @@ function createParamDecorator(
  * ```
  */
 export function Body(property?: string): ParameterDecorator {
-	return createParamDecorator(ParamType.BODY, property);
+  return createParamDecorator(ParamType.BODY, property);
 }
 
 /**
@@ -110,7 +110,7 @@ export function Body(property?: string): ParameterDecorator {
  * ```
  */
 export function Param(param?: string): ParameterDecorator {
-	return createParamDecorator(ParamType.PARAM, param);
+  return createParamDecorator(ParamType.PARAM, param);
 }
 
 /**
@@ -136,7 +136,7 @@ export function Param(param?: string): ParameterDecorator {
  * ```
  */
 export function Query(query?: string): ParameterDecorator {
-	return createParamDecorator(ParamType.QUERY, query);
+  return createParamDecorator(ParamType.QUERY, query);
 }
 
 /**
@@ -162,7 +162,7 @@ export function Query(query?: string): ParameterDecorator {
  * ```
  */
 export function Headers(header?: string): ParameterDecorator {
-	return createParamDecorator(ParamType.HEADERS, header);
+  return createParamDecorator(ParamType.HEADERS, header);
 }
 
 /**
@@ -188,7 +188,7 @@ export function Headers(header?: string): ParameterDecorator {
  * ```
  */
 export function Cookies(cookie?: string): ParameterDecorator {
-	return createParamDecorator(ParamType.COOKIES, cookie);
+  return createParamDecorator(ParamType.COOKIES, cookie);
 }
 
 /**
@@ -205,7 +205,7 @@ export function Cookies(cookie?: string): ParameterDecorator {
  * ```
  */
 export function Req(): ParameterDecorator {
-	return createParamDecorator(ParamType.REQUEST);
+  return createParamDecorator(ParamType.REQUEST);
 }
 
 /**
@@ -227,7 +227,7 @@ export const Request = Req;
  * ```
  */
 export function Res(): ParameterDecorator {
-	return createParamDecorator(ParamType.RESPONSE);
+  return createParamDecorator(ParamType.RESPONSE);
 }
 
 /**
@@ -249,7 +249,7 @@ export const Response = Res;
  * ```
  */
 export function Next(): ParameterDecorator {
-	return createParamDecorator(ParamType.NEXT);
+  return createParamDecorator(ParamType.NEXT);
 }
 
 /**
@@ -266,7 +266,7 @@ export function Next(): ParameterDecorator {
  * ```
  */
 export function Session(): ParameterDecorator {
-	return createParamDecorator(ParamType.SESSION);
+  return createParamDecorator(ParamType.SESSION);
 }
 
 /**
@@ -283,7 +283,7 @@ export function Session(): ParameterDecorator {
  * ```
  */
 export function Ip(): ParameterDecorator {
-	return createParamDecorator(ParamType.IP);
+  return createParamDecorator(ParamType.IP);
 }
 
 /**
@@ -300,5 +300,5 @@ export function Ip(): ParameterDecorator {
  * ```
  */
 export function Host(): ParameterDecorator {
-	return createParamDecorator(ParamType.HOST);
+  return createParamDecorator(ParamType.HOST);
 }

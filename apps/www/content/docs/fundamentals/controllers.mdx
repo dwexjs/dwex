@@ -10,14 +10,14 @@ Controllers are responsible for handling incoming HTTP requests and returning re
 ## Basic Controller
 
 ```typescript
-import { Controller, Get } from "@dwexjs/core";
+import { Controller, Get } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Get()
-	findAll() {
-		return ["Alice", "Bob", "Charlie"];
-	}
+  @Get()
+  findAll() {
+    return ["Alice", "Bob", "Charlie"];
+  }
 }
 ```
 
@@ -32,11 +32,11 @@ The `@Controller()` decorator defines a base path:
 ```typescript
 @Controller("users") // Base path: /users
 export class UserController {
-	@Get() // Handles: GET /users
-	findAll() {}
+  @Get() // Handles: GET /users
+  findAll() {}
 
-	@Get("profile") // Handles: GET /users/profile
-	getProfile() {}
+  @Get("profile") // Handles: GET /users/profile
+  getProfile() {}
 }
 ```
 
@@ -47,15 +47,15 @@ Controllers can have no base path:
 ```typescript
 @Controller() // No base path
 export class AppController {
-	@Get() // Handles: GET /
-	home() {
-		return "Welcome!";
-	}
+  @Get() // Handles: GET /
+  home() {
+    return "Welcome!";
+  }
 
-	@Get("health") // Handles: GET /health
-	health() {
-		return "OK";
-	}
+  @Get("health") // Handles: GET /health
+  health() {
+    return "OK";
+  }
 }
 ```
 
@@ -64,34 +64,34 @@ export class AppController {
 Dwex provides decorators for all standard HTTP methods:
 
 ```typescript
-import { Controller, Get, Post, Put, Delete, Patch } from "@dwexjs/core";
+import { Controller, Get, Post, Put, Delete, Patch } from "@dwex/core";
 
 @Controller("posts")
 export class PostController {
-	@Get()
-	findAll() {
-		return [];
-	}
+  @Get()
+  findAll() {
+    return [];
+  }
 
-	@Post()
-	create() {
-		return { id: 1 };
-	}
+  @Post()
+  create() {
+    return { id: 1 };
+  }
 
-	@Put(":id")
-	update() {
-		return { updated: true };
-	}
+  @Put(":id")
+  update() {
+    return { updated: true };
+  }
 
-	@Patch(":id")
-	partialUpdate() {
-		return { updated: true };
-	}
+  @Patch(":id")
+  partialUpdate() {
+    return { updated: true };
+  }
 
-	@Delete(":id")
-	remove() {
-		return { deleted: true };
-	}
+  @Delete(":id")
+  remove() {
+    return { deleted: true };
+  }
 }
 ```
 
@@ -100,14 +100,14 @@ export class PostController {
 Handle any HTTP method with `@All()`:
 
 ```typescript
-import { Controller, All } from "@dwexjs/core";
+import { Controller, All } from "@dwex/core";
 
 @Controller("webhook")
 export class WebhookController {
-	@All()
-	handleWebhook() {
-		return "Webhook received";
-	}
+  @All()
+  handleWebhook() {
+    return "Webhook received";
+  }
 }
 ```
 
@@ -116,22 +116,19 @@ export class WebhookController {
 Extract values from the URL path:
 
 ```typescript
-import { Controller, Get, Param } from "@dwexjs/core";
+import { Controller, Get, Param } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Get(":id")
-	findOne(@Param("id") id: string) {
-		return { id, name: "John Doe" };
-	}
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return { id, name: "John Doe" };
+  }
 
-	@Get(":userId/posts/:postId")
-	findPost(
-		@Param("userId") userId: string,
-		@Param("postId") postId: string,
-	) {
-		return { userId, postId };
-	}
+  @Get(":userId/posts/:postId")
+  findPost(@Param("userId") userId: string, @Param("postId") postId: string) {
+    return { userId, postId };
+  }
 }
 ```
 
@@ -153,20 +150,20 @@ findPost(@Param() params: { userId: string; postId: string }) {
 Access query strings with `@Query()`:
 
 ```typescript
-import { Controller, Get, Query } from "@dwexjs/core";
+import { Controller, Get, Query } from "@dwex/core";
 
 @Controller("search")
 export class SearchController {
-	@Get()
-	search(@Query("q") query: string, @Query("limit") limit: string) {
-		return { query, limit };
-	}
+  @Get()
+  search(@Query("q") query: string, @Query("limit") limit: string) {
+    return { query, limit };
+  }
 
-	// Or get all query params
-	@Get("advanced")
-	advancedSearch(@Query() query: Record<string, string>) {
-		return query;
-	}
+  // Or get all query params
+  @Get("advanced")
+  advancedSearch(@Query() query: Record<string, string>) {
+    return query;
+  }
 }
 ```
 
@@ -177,20 +174,20 @@ Request: `GET /search?q=typescript&limit=10`
 Access request body with `@Body()`:
 
 ```typescript
-import { Controller, Post, Body } from "@dwexjs/core";
+import { Controller, Post, Body } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Post()
-	create(@Body() data: { name: string; email: string }) {
-		return { id: 1, ...data };
-	}
+  @Post()
+  create(@Body() data: { name: string; email: string }) {
+    return { id: 1, ...data };
+  }
 
-	// Or specific property
-	@Post("register")
-	register(@Body("email") email: string) {
-		return { email };
-	}
+  // Or specific property
+  @Post("register")
+  register(@Body("email") email: string) {
+    return { email };
+  }
 }
 ```
 
@@ -199,20 +196,20 @@ export class UserController {
 Access request headers with `@Headers()`:
 
 ```typescript
-import { Controller, Get, Headers } from "@dwexjs/core";
+import { Controller, Get, Headers } from "@dwex/core";
 
 @Controller("api")
 export class ApiController {
-	@Get("version")
-	getVersion(@Headers("user-agent") userAgent: string) {
-		return { userAgent };
-	}
+  @Get("version")
+  getVersion(@Headers("user-agent") userAgent: string) {
+    return { userAgent };
+  }
 
-	// Or all headers
-	@Get("info")
-	getInfo(@Headers() headers: Record<string, string>) {
-		return { headers };
-	}
+  // Or all headers
+  @Get("info")
+  getInfo(@Headers() headers: Record<string, string>) {
+    return { headers };
+  }
 }
 ```
 
@@ -221,14 +218,14 @@ export class ApiController {
 Access cookies with `@Cookies()`:
 
 ```typescript
-import { Controller, Get, Cookies } from "@dwexjs/core";
+import { Controller, Get, Cookies } from "@dwex/core";
 
 @Controller("session")
 export class SessionController {
-	@Get()
-	getSession(@Cookies("sessionId") sessionId: string) {
-		return { sessionId };
-	}
+  @Get()
+  getSession(@Cookies("sessionId") sessionId: string) {
+    return { sessionId };
+  }
 }
 ```
 
@@ -237,14 +234,14 @@ export class SessionController {
 Access the raw request/response:
 
 ```typescript
-import { Controller, Get, Req, Res } from "@dwexjs/core";
+import { Controller, Get, Req, Res } from "@dwex/core";
 
 @Controller("raw")
 export class RawController {
-	@Get()
-	handle(@Req() request: Request, @Res() response: Response) {
-		return { url: request.url, method: request.method };
-	}
+  @Get()
+  handle(@Req() request: Request, @Res() response: Response) {
+    return { url: request.url, method: request.method };
+  }
 }
 ```
 
@@ -272,20 +269,20 @@ Response:
 Throw exceptions to return error status codes:
 
 ```typescript
-import { Controller, Get, Param, NotFoundException } from "@dwexjs/core";
+import { Controller, Get, Param, NotFoundException } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Get(":id")
-	findOne(@Param("id") id: string) {
-		const user = this.users.find((u) => u.id === id);
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    const user = this.users.find((u) => u.id === id);
 
-		if (!user) {
-			throw new NotFoundException("User not found");
-		}
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
 
-		return user;
-	}
+    return user;
+  }
 }
 ```
 
@@ -306,23 +303,23 @@ download(@Res() response: Response) {
 Controllers can inject services via constructor:
 
 ```typescript
-import { Controller, Get, Injectable } from "@dwexjs/core";
+import { Controller, Get, Injectable } from "@dwex/core";
 
 @Injectable()
 class UserService {
-	findAll() {
-		return ["Alice", "Bob"];
-	}
+  findAll() {
+    return ["Alice", "Bob"];
+  }
 }
 
 @Controller("users")
 export class UserController {
-	constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-	@Get()
-	findAll() {
-		return this.userService.findAll();
-	}
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
 }
 ```
 
@@ -330,8 +327,8 @@ Register both in a module:
 
 ```typescript
 @Module({
-	controllers: [UserController],
-	providers: [UserService],
+  controllers: [UserController],
+  providers: [UserService],
 })
 export class UserModule {}
 ```
@@ -343,17 +340,17 @@ Route handlers can be async:
 ```typescript
 @Controller("users")
 export class UserController {
-	constructor(private readonly db: DatabaseService) {}
+  constructor(private readonly db: DatabaseService) {}
 
-	@Get()
-	async findAll() {
-		return await this.db.users.findMany();
-	}
+  @Get()
+  async findAll() {
+    return await this.db.users.findMany();
+  }
 
-	@Post()
-	async create(@Body() data: CreateUserDto) {
-		return await this.db.users.create(data);
-	}
+  @Post()
+  async create(@Body() data: CreateUserDto) {
+    return await this.db.users.create(data);
+  }
 }
 ```
 
@@ -362,19 +359,19 @@ export class UserController {
 Get client IP and hostname:
 
 ```typescript
-import { Controller, Get, Ip, Host } from "@dwexjs/core";
+import { Controller, Get, Ip, Host } from "@dwex/core";
 
 @Controller("info")
 export class InfoController {
-	@Get("ip")
-	getIp(@Ip() ip: string) {
-		return { ip };
-	}
+  @Get("ip")
+  getIp(@Ip() ip: string) {
+    return { ip };
+  }
 
-	@Get("host")
-	getHost(@Host() host: string) {
-		return { host };
-	}
+  @Get("host")
+  getHost(@Host() host: string) {
+    return { host };
+  }
 }
 ```
 
@@ -388,23 +385,23 @@ Controllers should delegate business logic to services:
 // Good
 @Controller("users")
 export class UserController {
-	constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-	@Get()
-	findAll() {
-		return this.userService.findAll();
-	}
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
 }
 
 // Avoid
 @Controller("users")
 export class UserController {
-	@Get()
-	findAll() {
-		// Complex logic in controller
-		const users = database.query("SELECT * FROM users");
-		return users.map((u) => transformUser(u));
-	}
+  @Get()
+  findAll() {
+    // Complex logic in controller
+    const users = database.query("SELECT * FROM users");
+    return users.map((u) => transformUser(u));
+  }
 }
 ```
 
@@ -455,7 +452,7 @@ async findOne(@Param('id') id: string) {
 ## Next Steps
 
 <Cards>
-	<Card title="Routing" href="/docs/routing/http-methods" />
-	<Card title="Request Data" href="/docs/routing/request-data" />
-	<Card title="Guards" href="/docs/security/guards" />
+  <Card title="Routing" href="/docs/routing/http-methods" />
+  <Card title="Request Data" href="/docs/routing/request-data" />
+  <Card title="Guards" href="/docs/security/guards" />
 </Cards>

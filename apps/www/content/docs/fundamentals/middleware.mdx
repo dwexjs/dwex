@@ -16,22 +16,22 @@ Dwex provides several built-in middleware functions:
 Enable Cross-Origin Resource Sharing:
 
 ```typescript
-import { DwexFactory } from "@dwexjs/core";
-import { corsMiddleware } from "@dwexjs/core";
+import { DwexFactory } from "@dwex/core";
+import { corsMiddleware } from "@dwex/core";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
-	const app = await DwexFactory.create(AppModule);
+  const app = await DwexFactory.create(AppModule);
 
-	// Enable CORS
-	app.use(
-		corsMiddleware({
-			origin: "https://example.com",
-			credentials: true,
-		}),
-	);
+  // Enable CORS
+  app.use(
+    corsMiddleware({
+      origin: "https://example.com",
+      credentials: true,
+    })
+  );
 
-	await app.listen(3000);
+  await app.listen(3000);
 }
 
 bootstrap();
@@ -41,14 +41,14 @@ CORS Options:
 
 ```typescript
 interface CorsOptions {
-	origin?: string | string[] | ((origin: string) => boolean);
-	methods?: string | string[];
-	allowedHeaders?: string | string[];
-	exposedHeaders?: string | string[];
-	credentials?: boolean;
-	maxAge?: number;
-	preflightContinue?: boolean;
-	optionsSuccessStatus?: number;
+  origin?: string | string[] | ((origin: string) => boolean);
+  methods?: string | string[];
+  allowedHeaders?: string | string[];
+  exposedHeaders?: string | string[];
+  credentials?: boolean;
+  maxAge?: number;
+  preflightContinue?: boolean;
+  optionsSuccessStatus?: number;
 }
 ```
 
@@ -60,27 +60,27 @@ app.use(corsMiddleware({ origin: "*" }));
 
 // Allow specific origins
 app.use(
-	corsMiddleware({
-		origin: ["https://app.com", "https://admin.app.com"],
-	}),
+  corsMiddleware({
+    origin: ["https://app.com", "https://admin.app.com"],
+  })
 );
 
 // Dynamic origin validation
 app.use(
-	corsMiddleware({
-		origin: (origin) => origin.endsWith(".myapp.com"),
-	}),
+  corsMiddleware({
+    origin: (origin) => origin.endsWith(".myapp.com"),
+  })
 );
 
 // Full configuration
 app.use(
-	corsMiddleware({
-		origin: "https://app.com",
-		methods: ["GET", "POST", "PUT", "DELETE"],
-		allowedHeaders: ["Content-Type", "Authorization"],
-		credentials: true,
-		maxAge: 86400,
-	}),
+  corsMiddleware({
+    origin: "https://app.com",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    maxAge: 86400,
+  })
 );
 ```
 
@@ -119,11 +119,11 @@ Create custom middleware functions:
 ### Function-Based Middleware
 
 ```typescript
-import type { MiddlewareFunction } from "@dwexjs/core";
+import type { MiddlewareFunction } from "@dwex/core";
 
 const loggingMiddleware: MiddlewareFunction = (req, res, next) => {
-	console.log(`${req.method} ${req.url}`);
-	next();
+  console.log(`${req.method} ${req.url}`);
+  next();
 };
 
 // Apply globally
@@ -133,25 +133,25 @@ app.use(loggingMiddleware);
 ### Class-Based Middleware
 
 ```typescript
-import { Injectable, type DwexMiddleware } from "@dwexjs/core";
+import { Injectable, type DwexMiddleware } from "@dwex/core";
 
 @Injectable()
 export class LoggerMiddleware implements DwexMiddleware {
-	use(req: any, res: any, next: () => void) {
-		console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-		next();
-	}
+  use(req: any, res: any, next: () => void) {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+  }
 }
 ```
 
 Register in module:
 
 ```typescript
-import { Module } from "@dwexjs/core";
+import { Module } from "@dwex/core";
 import { LoggerMiddleware } from "./logger.middleware";
 
 @Module({
-	providers: [LoggerMiddleware],
+  providers: [LoggerMiddleware],
 })
 export class AppModule {}
 ```
@@ -159,16 +159,16 @@ export class AppModule {}
 Apply to controllers:
 
 ```typescript
-import { Controller, Get, UseMiddleware } from "@dwexjs/core";
+import { Controller, Get, UseMiddleware } from "@dwex/core";
 import { LoggerMiddleware } from "./logger.middleware";
 
 @Controller("users")
 @UseMiddleware(LoggerMiddleware)
 export class UserController {
-	@Get()
-	findAll() {
-		return [];
-	}
+  @Get()
+  findAll() {
+    return [];
+  }
 }
 ```
 
@@ -178,18 +178,18 @@ Apply middleware to all routes:
 
 ```typescript
 async function bootstrap() {
-	const app = await DwexFactory.create(AppModule);
+  const app = await DwexFactory.create(AppModule);
 
-	// CORS
-	app.use(corsMiddleware({ origin: "*" }));
+  // CORS
+  app.use(corsMiddleware({ origin: "*" }));
 
-	// Custom logging
-	app.use((req, res, next) => {
-		console.log(`${req.method} ${req.url}`);
-		next();
-	});
+  // Custom logging
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+  });
 
-	await app.listen(3000);
+  await app.listen(3000);
 }
 ```
 
@@ -198,17 +198,17 @@ async function bootstrap() {
 Apply middleware to specific controllers:
 
 ```typescript
-import { Controller, Get, UseMiddleware } from "@dwexjs/core";
+import { Controller, Get, UseMiddleware } from "@dwex/core";
 import { AuthMiddleware } from "./auth.middleware";
 import { LoggerMiddleware } from "./logger.middleware";
 
 @Controller("admin")
 @UseMiddleware(AuthMiddleware, LoggerMiddleware)
 export class AdminController {
-	@Get()
-	dashboard() {
-		return { message: "Admin Dashboard" };
-	}
+  @Get()
+  dashboard() {
+    return { message: "Admin Dashboard" };
+  }
 }
 ```
 
@@ -217,26 +217,26 @@ export class AdminController {
 ### Authentication Middleware
 
 ```typescript
-import { Injectable, UnauthorizedException } from "@dwexjs/core";
-import type { DwexMiddleware } from "@dwexjs/core";
+import { Injectable, UnauthorizedException } from "@dwex/core";
+import type { DwexMiddleware } from "@dwex/core";
 
 @Injectable()
 export class AuthMiddleware implements DwexMiddleware {
-	use(req: any, res: any, next: () => void) {
-		const token = req.headers.authorization;
+  use(req: any, res: any, next: () => void) {
+    const token = req.headers.authorization;
 
-		if (!token) {
-			throw new UnauthorizedException("No token provided");
-		}
+    if (!token) {
+      throw new UnauthorizedException("No token provided");
+    }
 
-		try {
-			const decoded = verifyToken(token);
-			req.user = decoded;
-			next();
-		} catch (error) {
-			throw new UnauthorizedException("Invalid token");
-		}
-	}
+    try {
+      const decoded = verifyToken(token);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      throw new UnauthorizedException("Invalid token");
+    }
+  }
 }
 ```
 
@@ -244,31 +244,31 @@ export class AuthMiddleware implements DwexMiddleware {
 
 ```typescript
 const rateLimiter: MiddlewareFunction = (() => {
-	const requests = new Map<string, number[]>();
+  const requests = new Map<string, number[]>();
 
-	return (req, res, next) => {
-		const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-		const now = Date.now();
-		const windowMs = 60000; // 1 minute
-		const maxRequests = 100;
+  return (req, res, next) => {
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const now = Date.now();
+    const windowMs = 60000; // 1 minute
+    const maxRequests = 100;
 
-		if (!requests.has(ip)) {
-			requests.set(ip, []);
-		}
+    if (!requests.has(ip)) {
+      requests.set(ip, []);
+    }
 
-		const ipRequests = requests.get(ip)!;
-		const recentRequests = ipRequests.filter((time) => now - time < windowMs);
+    const ipRequests = requests.get(ip)!;
+    const recentRequests = ipRequests.filter((time) => now - time < windowMs);
 
-		if (recentRequests.length >= maxRequests) {
-			res.statusCode = 429;
-			res.end("Too Many Requests");
-			return;
-		}
+    if (recentRequests.length >= maxRequests) {
+      res.statusCode = 429;
+      res.end("Too Many Requests");
+      return;
+    }
 
-		recentRequests.push(now);
-		requests.set(ip, recentRequests);
-		next();
-	};
+    recentRequests.push(now);
+    requests.set(ip, recentRequests);
+    next();
+  };
 })();
 
 app.use(rateLimiter);
@@ -280,9 +280,9 @@ app.use(rateLimiter);
 import { v4 as uuid } from "uuid";
 
 const requestIdMiddleware: MiddlewareFunction = (req, res, next) => {
-	req.id = uuid();
-	res.setHeader("X-Request-Id", req.id);
-	next();
+  req.id = uuid();
+  res.setHeader("X-Request-Id", req.id);
+  next();
 };
 ```
 
@@ -290,15 +290,15 @@ const requestIdMiddleware: MiddlewareFunction = (req, res, next) => {
 
 ```typescript
 const timingMiddleware: MiddlewareFunction = (req, res, next) => {
-	const start = Date.now();
+  const start = Date.now();
 
-	// Hook into response finish
-	res.on("finish", () => {
-		const duration = Date.now() - start;
-		console.log(`${req.method} ${req.url} - ${duration}ms`);
-	});
+  // Hook into response finish
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(`${req.method} ${req.url} - ${duration}ms`);
+  });
 
-	next();
+  next();
 };
 ```
 
@@ -306,14 +306,14 @@ const timingMiddleware: MiddlewareFunction = (req, res, next) => {
 
 ```typescript
 const securityHeadersMiddleware: MiddlewareFunction = (req, res, next) => {
-	res.setHeader("X-Content-Type-Options", "nosniff");
-	res.setHeader("X-Frame-Options", "DENY");
-	res.setHeader("X-XSS-Protection", "1; mode=block");
-	res.setHeader(
-		"Strict-Transport-Security",
-		"max-age=31536000; includeSubDomains",
-	);
-	next();
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader(
+    "Strict-Transport-Security",
+    "max-age=31536000; includeSubDomains"
+  );
+  next();
 };
 ```
 
@@ -342,17 +342,17 @@ Throw exceptions from middleware:
 
 ```typescript
 const validateApiKey: MiddlewareFunction = (req, res, next) => {
-	const apiKey = req.headers["x-api-key"];
+  const apiKey = req.headers["x-api-key"];
 
-	if (!apiKey) {
-		throw new UnauthorizedException("API key required");
-	}
+  if (!apiKey) {
+    throw new UnauthorizedException("API key required");
+  }
 
-	if (apiKey !== process.env.API_KEY) {
-		throw new ForbiddenException("Invalid API key");
-	}
+  if (apiKey !== process.env.API_KEY) {
+    throw new ForbiddenException("Invalid API key");
+  }
 
-	next();
+  next();
 };
 ```
 
@@ -365,14 +365,14 @@ Unless you're ending the response, always call `next()`:
 ```typescript
 // Good
 const middleware = (req, res, next) => {
-	console.log("Processing...");
-	next();
+  console.log("Processing...");
+  next();
 };
 
 // Bad (blocks all requests)
 const middleware = (req, res, next) => {
-	console.log("Processing...");
-	// Forgot next()!
+  console.log("Processing...");
+  // Forgot next()!
 };
 ```
 
@@ -383,16 +383,16 @@ When you need dependencies, use class-based middleware:
 ```typescript
 @Injectable()
 export class AuthMiddleware implements DwexMiddleware {
-	constructor(
-		private readonly jwtService: JwtService,
-		private readonly logger: Logger,
-	) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly logger: Logger
+  ) {}
 
-	use(req: any, res: any, next: () => void) {
-		this.logger.log("Validating token");
-		const valid = this.jwtService.verify(req.headers.authorization);
-		if (valid) next();
-	}
+  use(req: any, res: any, next: () => void) {
+    this.logger.log("Validating token");
+    const valid = this.jwtService.verify(req.headers.authorization);
+    if (valid) next();
+  }
 }
 ```
 
@@ -421,17 +421,17 @@ Clearly document what middleware modifies:
  */
 @Injectable()
 export class AuthMiddleware implements DwexMiddleware {
-	use(req: any, res: any, next: () => void) {
-		req.user = this.validateAndDecodeToken(req);
-		next();
-	}
+  use(req: any, res: any, next: () => void) {
+    req.user = this.validateAndDecodeToken(req);
+    next();
+  }
 }
 ```
 
 ## Next Steps
 
 <Cards>
-	<Card title="Guards" href="/docs/security/guards" />
-	<Card title="Interceptors" href="/docs/advanced/interceptors" />
-	<Card title="Exception Handling" href="/docs/advanced/exception-handling" />
+  <Card title="Guards" href="/docs/security/guards" />
+  <Card title="Interceptors" href="/docs/advanced/interceptors" />
+  <Card title="Exception Handling" href="/docs/advanced/exception-handling" />
 </Cards>

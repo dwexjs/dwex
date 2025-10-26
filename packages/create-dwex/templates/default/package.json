@@ -1,22 +1,22 @@
 {
-	"name": "<%= projectName %>",
-	"version": "0.0.1",
-	"type": "module",
-	"private": true,
-	"scripts": {
-		"dev": "bun run --watch src/main.ts",
-		"start": "bun run src/main.ts"
-	},
-	"dependencies": {
-		"@dwexjs/common": "^<%= version %>",
-		"@dwexjs/core": "^<%= version %>",
-		"@dwexjs/logger": "^<%= version %>",
-		"reflect-metadata": "^0.2.2"
-	},
-	"devDependencies": {
-		"@types/bun": "^1.0.0"
-	},
-	"peerDependencies": {
-		"typescript": "^5"
-	}
+  "name": "<%= projectName %>",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --watch src/main.ts",
+    "start": "bun run src/main.ts"
+  },
+  "dependencies": {
+    "@dwex/common": "^<%= version %>",
+    "@dwex/core": "^<%= version %>",
+    "@dwex/logger": "^<%= version %>",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
 }

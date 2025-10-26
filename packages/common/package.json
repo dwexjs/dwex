@@ -1,5 +1,5 @@
 {
-  "name": "@dwexjs/common",
+  "name": "@dwex/common",
   "version": "1.0.0-beta.1",
   "type": "module",
   "main": "./dist/index.js",

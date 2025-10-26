@@ -14,23 +14,24 @@ Dwex provides decorators for all standard HTTP methods. Each decorator defines h
 Handle HTTP GET requests:
 
 ```typescript
-import { Controller, Get } from "@dwexjs/core";
+import { Controller, Get } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Get()
-	findAll() {
-		return ["Alice", "Bob", "Charlie"];
-	}
+  @Get()
+  findAll() {
+    return ["Alice", "Bob", "Charlie"];
+  }
 
-	@Get("active")
-	findActive() {
-		return ["Alice"];
-	}
+  @Get("active")
+  findActive() {
+    return ["Alice"];
+  }
 }
 ```
 
 Routes:
+
 - `GET /users` → `findAll()`
 - `GET /users/active` → `findActive()`
 
@@ -39,19 +40,19 @@ Routes:
 Handle HTTP POST requests (create resources):
 
 ```typescript
-import { Controller, Post, Body } from "@dwexjs/core";
+import { Controller, Post, Body } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Post()
-	create(@Body() data: CreateUserDto) {
-		return { id: 1, ...data };
-	}
+  @Post()
+  create(@Body() data: CreateUserDto) {
+    return { id: 1, ...data };
+  }
 
-	@Post("bulk")
-	createMany(@Body() users: CreateUserDto[]) {
-		return users.map((user, i) => ({ id: i + 1, ...user }));
-	}
+  @Post("bulk")
+  createMany(@Body() users: CreateUserDto[]) {
+    return users.map((user, i) => ({ id: i + 1, ...user }));
+  }
 }
 ```
 
@@ -60,14 +61,14 @@ export class UserController {
 Handle HTTP PUT requests (full update):
 
 ```typescript
-import { Controller, Put, Param, Body } from "@dwexjs/core";
+import { Controller, Put, Param, Body } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Put(":id")
-	update(@Param("id") id: string, @Body() data: UpdateUserDto) {
-		return { id, ...data, updated: true };
-	}
+  @Put(":id")
+  update(@Param("id") id: string, @Body() data: UpdateUserDto) {
+    return { id, ...data, updated: true };
+  }
 }
 ```
 
@@ -76,14 +77,14 @@ export class UserController {
 Handle HTTP PATCH requests (partial update):
 
 ```typescript
-import { Controller, Patch, Param, Body } from "@dwexjs/core";
+import { Controller, Patch, Param, Body } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Patch(":id")
-	partialUpdate(@Param("id") id: string, @Body() data: Partial<UpdateUserDto>) {
-		return { id, ...data, updated: true };
-	}
+  @Patch(":id")
+  partialUpdate(@Param("id") id: string, @Body() data: Partial<UpdateUserDto>) {
+    return { id, ...data, updated: true };
+  }
 }
 ```
 
@@ -92,19 +93,19 @@ export class UserController {
 Handle HTTP DELETE requests:
 
 ```typescript
-import { Controller, Delete, Param } from "@dwexjs/core";
+import { Controller, Delete, Param } from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Delete(":id")
-	remove(@Param("id") id: string) {
-		return { id, deleted: true };
-	}
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return { id, deleted: true };
+  }
 
-	@Delete()
-	removeAll() {
-		return { deleted: true, count: 10 };
-	}
+  @Delete()
+  removeAll() {
+    return { deleted: true, count: 10 };
+  }
 }
 ```
 
@@ -113,14 +114,14 @@ export class UserController {
 Handle HTTP OPTIONS requests (CORS preflight):
 
 ```typescript
-import { Controller, Options } from "@dwexjs/core";
+import { Controller, Options } from "@dwex/core";
 
 @Controller("api")
 export class ApiController {
-	@Options()
-	options() {
-		return null;
-	}
+  @Options()
+  options() {
+    return null;
+  }
 }
 ```
 
@@ -129,14 +130,14 @@ export class ApiController {
 Handle HTTP HEAD requests:
 
 ```typescript
-import { Controller, Head } from "@dwexjs/core";
+import { Controller, Head } from "@dwex/core";
 
 @Controller("health")
 export class HealthController {
-	@Head()
-	check() {
-		return;
-	}
+  @Head()
+  check() {
+    return;
+  }
 }
 ```
 
@@ -145,15 +146,15 @@ export class HealthController {
 Handle all HTTP methods:
 
 ```typescript
-import { Controller, All, Req } from "@dwexjs/core";
+import { Controller, All, Req } from "@dwex/core";
 
 @Controller("webhook")
 export class WebhookController {
-	@All()
-	handleWebhook(@Req() request: Request) {
-		console.log(`Received ${request.method} request`);
-		return { received: true };
-	}
+  @All()
+  handleWebhook(@Req() request: Request) {
+    console.log(`Received ${request.method} request`);
+    return { received: true };
+  }
 }
 ```
 
@@ -164,24 +165,25 @@ You can have multiple methods on the same path:
 ```typescript
 @Controller("posts")
 export class PostController {
-	@Get(":id")
-	findOne(@Param("id") id: string) {
-		return { id, title: "Post Title" };
-	}
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return { id, title: "Post Title" };
+  }
 
-	@Put(":id")
-	update(@Param("id") id: string, @Body() data: UpdatePostDto) {
-		return { id, ...data };
-	}
+  @Put(":id")
+  update(@Param("id") id: string, @Body() data: UpdatePostDto) {
+    return { id, ...data };
+  }
 
-	@Delete(":id")
-	remove(@Param("id") id: string) {
-		return { id, deleted: true };
-	}
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return { id, deleted: true };
+  }
 }
 ```
 
 Routes:
+
 - `GET /posts/:id`
 - `PUT /posts/:id`
 - `DELETE /posts/:id`
@@ -193,29 +195,29 @@ Follow REST conventions for consistency:
 ```typescript
 @Controller("articles")
 export class ArticleController {
-	// GET /articles - List all articles
-	@Get()
-	findAll() {}
+  // GET /articles - List all articles
+  @Get()
+  findAll() {}
 
-	// POST /articles - Create new article
-	@Post()
-	create(@Body() data: CreateArticleDto) {}
+  // POST /articles - Create new article
+  @Post()
+  create(@Body() data: CreateArticleDto) {}
 
-	// GET /articles/:id - Get single article
-	@Get(":id")
-	findOne(@Param("id") id: string) {}
+  // GET /articles/:id - Get single article
+  @Get(":id")
+  findOne(@Param("id") id: string) {}
 
-	// PUT /articles/:id - Replace article
-	@Put(":id")
-	replace(@Param("id") id: string, @Body() data: ReplaceArticleDto) {}
+  // PUT /articles/:id - Replace article
+  @Put(":id")
+  replace(@Param("id") id: string, @Body() data: ReplaceArticleDto) {}
 
-	// PATCH /articles/:id - Update article fields
-	@Patch(":id")
-	update(@Param("id") id: string, @Body() data: UpdateArticleDto) {}
+  // PATCH /articles/:id - Update article fields
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() data: UpdateArticleDto) {}
 
-	// DELETE /articles/:id - Delete article
-	@Delete(":id")
-	remove(@Param("id") id: string) {}
+  // DELETE /articles/:id - Delete article
+  @Delete(":id")
+  remove(@Param("id") id: string) {}
 }
 ```
 
@@ -226,26 +228,26 @@ Create nested resource routes:
 ```typescript
 @Controller("users/:userId/posts")
 export class UserPostController {
-	// GET /users/:userId/posts
-	@Get()
-	findUserPosts(@Param("userId") userId: string) {
-		return [];
-	}
+  // GET /users/:userId/posts
+  @Get()
+  findUserPosts(@Param("userId") userId: string) {
+    return [];
+  }
 
-	// POST /users/:userId/posts
-	@Post()
-	createUserPost(@Param("userId") userId: string, @Body() data: CreatePostDto) {
-		return { userId, ...data };
-	}
+  // POST /users/:userId/posts
+  @Post()
+  createUserPost(@Param("userId") userId: string, @Body() data: CreatePostDto) {
+    return { userId, ...data };
+  }
 
-	// GET /users/:userId/posts/:postId
-	@Get(":postId")
-	findUserPost(
-		@Param("userId") userId: string,
-		@Param("postId") postId: string,
-	) {
-		return { userId, postId };
-	}
+  // GET /users/:userId/posts/:postId
+  @Get(":postId")
+  findUserPost(
+    @Param("userId") userId: string,
+    @Param("postId") postId: string
+  ) {
+    return { userId, postId };
+  }
 }
 ```
 
@@ -256,23 +258,23 @@ All methods support async/await:
 ```typescript
 @Controller("users")
 export class UserController {
-	constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-	@Get()
-	async findAll() {
-		return await this.userService.findAll();
-	}
+  @Get()
+  async findAll() {
+    return await this.userService.findAll();
+  }
 
-	@Post()
-	async create(@Body() data: CreateUserDto) {
-		return await this.userService.create(data);
-	}
+  @Post()
+  async create(@Body() data: CreateUserDto) {
+    return await this.userService.create(data);
+  }
 
-	@Delete(":id")
-	async remove(@Param("id") id: string) {
-		await this.userService.remove(id);
-		return { success: true };
-	}
+  @Delete(":id")
+  async remove(@Param("id") id: string) {
+    await this.userService.remove(id);
+    return { success: true };
+  }
 }
 ```
 
@@ -290,33 +292,33 @@ Throw exceptions for error status codes:
 
 ```typescript
 import {
-	Controller,
-	Get,
-	Post,
-	Param,
-	Body,
-	NotFoundException,
-	BadRequestException,
-} from "@dwexjs/core";
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  NotFoundException,
+  BadRequestException,
+} from "@dwex/core";
 
 @Controller("users")
 export class UserController {
-	@Get(":id")
-	findOne(@Param("id") id: string) {
-		const user = this.findUserById(id);
-		if (!user) {
-			throw new NotFoundException("User not found");
-		}
-		return user;
-	}
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    const user = this.findUserById(id);
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    return user;
+  }
 
-	@Post()
-	create(@Body() data: CreateUserDto) {
-		if (!data.email) {
-			throw new BadRequestException("Email is required");
-		}
-		return this.createUser(data);
-	}
+  @Post()
+  create(@Body() data: CreateUserDto) {
+    if (!data.email) {
+      throw new BadRequestException("Email is required");
+    }
+    return this.createUser(data);
+  }
 }
 ```
 
@@ -389,7 +391,7 @@ create(@Body() data: CreateUserDto) {
 ## Next Steps
 
 <Cards>
-	<Card title="Route Parameters" href="/docs/routing/route-parameters" />
-	<Card title="Request Data" href="/docs/routing/request-data" />
-	<Card title="Response Handling" href="/docs/routing/response-handling" />
+  <Card title="Route Parameters" href="/docs/routing/route-parameters" />
+  <Card title="Request Data" href="/docs/routing/request-data" />
+  <Card title="Response Handling" href="/docs/routing/response-handling" />
 </Cards>

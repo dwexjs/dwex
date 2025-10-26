@@ -35,63 +35,63 @@ Your app is now running at `http://localhost:3000` 🚀
 ## Example
 
 ```typescript
-import { Controller, Get, Post, Body } from "@dwexjs/core";
-import { Injectable } from "@dwexjs/core";
+import { Controller, Get, Post, Body } from "@dwex/core";
+import { Injectable } from "@dwex/core";
 
 @Injectable()
 class UserService {
-	private users = [{ id: 1, name: "Alice" }];
+  private users = [{ id: 1, name: "Alice" }];
 
-	findAll() {
-		return this.users;
-	}
+  findAll() {
+    return this.users;
+  }
 
-	create(name: string) {
-		const user = { id: this.users.length + 1, name };
-		this.users.push(user);
-		return user;
-	}
+  create(name: string) {
+    const user = { id: this.users.length + 1, name };
+    this.users.push(user);
+    return user;
+  }
 }
 
 @Controller("users")
 class UserController {
-	constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-	@Get()
-	findAll() {
-		return this.userService.findAll();
-	}
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
 
-	@Post()
-	create(@Body("name") name: string) {
-		return this.userService.create(name);
-	}
+  @Post()
+  create(@Body("name") name: string) {
+    return this.userService.create(name);
+  }
 }
 ```
 
 ## Learn More
 
 <Cards>
-	<Card
-		title="Getting Started"
-		href="/docs/getting-started/introduction"
-		description="Install Dwex and create your first application"
-	/>
-	<Card
-		title="Fundamentals"
-		href="/docs/fundamentals/modules"
-		description="Learn about modules, controllers, and providers"
-	/>
-	<Card
-		title="Security"
-		href="/docs/security/guards"
-		description="Implement authentication and authorization"
-	/>
-	<Card
-		title="API Reference"
-		href="/docs/api/decorators"
-		description="Complete API documentation"
-	/>
+  <Card
+    title="Getting Started"
+    href="/docs/getting-started/introduction"
+    description="Install Dwex and create your first application"
+  />
+  <Card
+    title="Fundamentals"
+    href="/docs/fundamentals/modules"
+    description="Learn about modules, controllers, and providers"
+  />
+  <Card
+    title="Security"
+    href="/docs/security/guards"
+    description="Implement authentication and authorization"
+  />
+  <Card
+    title="API Reference"
+    href="/docs/api/decorators"
+    description="Complete API documentation"
+  />
 </Cards>
 
 ## Community & Support

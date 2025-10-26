@@ -12,13 +12,13 @@ Modules are the fundamental building blocks of a Dwex application. A module is a
 Here's a simple module:
 
 ```typescript
-import { Module } from "@dwexjs/core";
+import { Module } from "@dwex/core";
 import { UserController } from "./user.controller";
 import { UserService } from "./user.service";
 
 @Module({
-	controllers: [UserController],
-	providers: [UserService],
+  controllers: [UserController],
+  providers: [UserService],
 })
 export class UserModule {}
 ```
@@ -33,7 +33,7 @@ Controllers defined in this module. These handle incoming HTTP requests.
 
 ```typescript
 @Module({
-	controllers: [UserController, ProfileController],
+  controllers: [UserController, ProfileController],
 })
 export class UserModule {}
 ```
@@ -44,7 +44,7 @@ Injectable services and other providers available in this module.
 
 ```typescript
 @Module({
-	providers: [UserService, EmailService, ValidationPipe],
+  providers: [UserService, EmailService, ValidationPipe],
 })
 export class UserModule {}
 ```
@@ -55,9 +55,9 @@ Other modules whose exported providers should be available in this module.
 
 ```typescript
 @Module({
-	imports: [DatabaseModule, LoggerModule],
-	controllers: [UserController],
-	providers: [UserService],
+  imports: [DatabaseModule, LoggerModule],
+  controllers: [UserController],
+  providers: [UserService],
 })
 export class UserModule {}
 ```
@@ -68,8 +68,8 @@ Providers that should be available to other modules that import this module.
 
 ```typescript
 @Module({
-	providers: [UserService, UserRepository],
-	exports: [UserService], // UserRepository is private to this module
+  providers: [UserService, UserRepository],
+  exports: [UserService], // UserRepository is private to this module
 })
 export class UserModule {}
 ```
@@ -80,9 +80,9 @@ To use providers from another module, import that module:
 
 ```typescript
 @Module({
-	imports: [UserModule], // Imports UserService
-	controllers: [PostController],
-	providers: [PostService],
+  imports: [UserModule], // Imports UserService
+  controllers: [PostController],
+  providers: [PostService],
 })
 export class PostModule {}
 ```
@@ -92,12 +92,12 @@ Now `PostService` can inject `UserService`:
 ```typescript
 @Injectable()
 export class PostService {
-	constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
-	async createPost(userId: string, title: string) {
-		const user = await this.userService.findOne(userId);
-		// ...
-	}
+  async createPost(userId: string, title: string) {
+    const user = await this.userService.findOne(userId);
+    // ...
+  }
 }
 ```
 
@@ -106,12 +106,12 @@ export class PostService {
 If a module should be available everywhere without explicit imports, mark it as global:
 
 ```typescript
-import { Module, Global } from "@dwexjs/core";
+import { Module, Global } from "@dwex/core";
 
 @Global()
 @Module({
-	providers: [ConfigService, CacheService],
-	exports: [ConfigService, CacheService],
+  providers: [ConfigService, CacheService],
+  exports: [ConfigService, CacheService],
 })
 export class SharedModule {}
 ```
@@ -127,23 +127,23 @@ Dynamic modules allow configuration at runtime. This is useful for modules that 
 ### Creating a Dynamic Module
 
 ```typescript
-import { Module, type DynamicModule } from "@dwexjs/core";
+import { Module, type DynamicModule } from "@dwex/core";
 
 @Module({})
 export class DatabaseModule {
-	static forRoot(options: DatabaseOptions): DynamicModule {
-		return {
-			module: DatabaseModule,
-			providers: [
-				{
-					provide: "DATABASE_OPTIONS",
-					useValue: options,
-				},
-				DatabaseService,
-			],
-			exports: [DatabaseService],
-		};
-	}
+  static forRoot(options: DatabaseOptions): DynamicModule {
+    return {
+      module: DatabaseModule,
+      providers: [
+        {
+          provide: "DATABASE_OPTIONS",
+          useValue: options,
+        },
+        DatabaseService,
+      ],
+      exports: [DatabaseService],
+    };
+  }
 }
 ```
 
@@ -151,13 +151,13 @@ export class DatabaseModule {
 
 ```typescript
 @Module({
-	imports: [
-		DatabaseModule.forRoot({
-			host: "localhost",
-			port: 5432,
-			database: "myapp",
-		}),
-	],
+  imports: [
+    DatabaseModule.forRoot({
+      host: "localhost",
+      port: 5432,
+      database: "myapp",
+    }),
+  ],
 })
 export class AppModule {}
 ```
@@ -169,23 +169,23 @@ For configuration that requires async initialization:
 ```typescript
 @Module({})
 export class DatabaseModule {
-	static async forRootAsync(
-		options: DatabaseAsyncOptions,
-	): Promise<DynamicModule> {
-		const config = await options.useFactory();
+  static async forRootAsync(
+    options: DatabaseAsyncOptions
+  ): Promise<DynamicModule> {
+    const config = await options.useFactory();
 
-		return {
-			module: DatabaseModule,
-			providers: [
-				{
-					provide: "DATABASE_OPTIONS",
-					useValue: config,
-				},
-				DatabaseService,
-			],
-			exports: [DatabaseService],
-		};
-	}
+    return {
+      module: DatabaseModule,
+      providers: [
+        {
+          provide: "DATABASE_OPTIONS",
+          useValue: config,
+        },
+        DatabaseService,
+      ],
+      exports: [DatabaseService],
+    };
+  }
 }
 ```
 
@@ -193,14 +193,14 @@ Usage:
 
 ```typescript
 @Module({
-	imports: [
-		await DatabaseModule.forRootAsync({
-			useFactory: async () => {
-				const config = await loadConfig();
-				return config.database;
-			},
-		}),
-	],
+  imports: [
+    await DatabaseModule.forRootAsync({
+      useFactory: async () => {
+        const config = await loadConfig();
+        return config.database;
+      },
+    }),
+  ],
 })
 export class AppModule {}
 ```
@@ -211,8 +211,8 @@ You can re-export imported modules to simplify imports:
 
 ```typescript
 @Module({
-	imports: [UserModule, PostModule, CommentModule],
-	exports: [UserModule, PostModule, CommentModule],
+  imports: [UserModule, PostModule, CommentModule],
+  exports: [UserModule, PostModule, CommentModule],
 })
 export class ContentModule {}
 ```
@@ -221,7 +221,7 @@ Now other modules only need to import `ContentModule`:
 
 ```typescript
 @Module({
-	imports: [ContentModule], // Gets User, Post, and Comment modules
+  imports: [ContentModule], // Gets User, Post, and Comment modules
 })
 export class AppModule {}
 ```
@@ -233,10 +233,10 @@ Organize your app by features:
 ```typescript
 // user.module.ts
 @Module({
-	imports: [DatabaseModule],
-	controllers: [UserController],
-	providers: [UserService, UserRepository],
-	exports: [UserService],
+  imports: [DatabaseModule],
+  controllers: [UserController],
+  providers: [UserService, UserRepository],
+  exports: [UserService],
 })
 export class UserModule {}
 ```
@@ -244,10 +244,10 @@ export class UserModule {}
 ```typescript
 // auth.module.ts
 @Module({
-	imports: [UserModule, JwtModule],
-	controllers: [AuthController],
-	providers: [AuthService, AuthGuard],
-	exports: [AuthGuard],
+  imports: [UserModule, JwtModule],
+  controllers: [AuthController],
+  providers: [AuthService, AuthGuard],
+  exports: [AuthGuard],
 })
 export class AuthModule {}
 ```
@@ -255,7 +255,7 @@ export class AuthModule {}
 ```typescript
 // app.module.ts
 @Module({
-	imports: [UserModule, AuthModule],
+  imports: [UserModule, AuthModule],
 })
 export class AppModule {}
 ```
@@ -265,7 +265,7 @@ export class AppModule {}
 Every application has exactly one root module passed to `DwexFactory.create()`:
 
 ```typescript
-import { DwexFactory } from "@dwexjs/core";
+import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
 
 const app = await DwexFactory.create(AppModule);
@@ -275,13 +275,13 @@ The root module typically imports all feature modules:
 
 ```typescript
 @Module({
-	imports: [
-		LoggerModule,
-		DatabaseModule.forRoot({ url: process.env.DATABASE_URL }),
-		UserModule,
-		AuthModule,
-		PostModule,
-	],
+  imports: [
+    LoggerModule,
+    DatabaseModule.forRoot({ url: process.env.DATABASE_URL }),
+    UserModule,
+    AuthModule,
+    PostModule,
+  ],
 })
 export class AppModule {}
 ```
@@ -311,8 +311,8 @@ Keep module internals private:
 
 ```typescript
 @Module({
-	providers: [UserService, UserRepository, UserValidator],
-	exports: [UserService], // Only expose the service
+  providers: [UserService, UserRepository, UserValidator],
+  exports: [UserService], // Only expose the service
 })
 export class UserModule {}
 ```
@@ -324,8 +324,8 @@ Create a `SharedModule` for truly common utilities:
 ```typescript
 @Global()
 @Module({
-	providers: [ConfigService, LoggerService],
-	exports: [ConfigService, LoggerService],
+  providers: [ConfigService, LoggerService],
+  exports: [ConfigService, LoggerService],
 })
 export class SharedModule {}
 ```
@@ -346,7 +346,7 @@ export class PublicModule {}
 ## Next Steps
 
 <Cards>
-	<Card title="Controllers" href="/docs/fundamentals/controllers" />
-	<Card title="Providers & DI" href="/docs/fundamentals/providers" />
-	<Card title="Middleware" href="/docs/fundamentals/middleware" />
+  <Card title="Controllers" href="/docs/fundamentals/controllers" />
+  <Card title="Providers & DI" href="/docs/fundamentals/providers" />
+  <Card title="Middleware" href="/docs/fundamentals/middleware" />
 </Cards>

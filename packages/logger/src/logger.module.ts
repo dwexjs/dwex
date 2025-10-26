@@ -1,26 +1,26 @@
 import "reflect-metadata";
+import {
+  GLOBAL_MODULE,
+  MODULE_METADATA,
+  type ModuleMetadata,
+} from "@dwex/common";
 import { Logger } from "./logger.service.js";
 import { LOGGER_TOKEN, type LoggerOptions } from "./logger.types.js";
-import {
-	MODULE_METADATA,
-	GLOBAL_MODULE,
-	type ModuleMetadata,
-} from "@dwexjs/common";
 
 /**
  * Options for configuring the LoggerModule
  */
 export interface LoggerModuleOptions {
-	/**
-	 * Make the logger available globally
-	 * @default true
-	 */
-	isGlobal?: boolean;
+  /**
+   * Make the logger available globally
+   * @default true
+   */
+  isGlobal?: boolean;
 
-	/**
-	 * Logger configuration options
-	 */
-	options?: LoggerOptions;
+  /**
+   * Logger configuration options
+   */
+  options?: LoggerOptions;
 }
 
 /**
@@ -44,40 +44,40 @@ export interface LoggerModuleOptions {
  * ```
  */
 export class LoggerModule {
-	static forRoot(config?: LoggerModuleOptions): any {
-		// Initialize the global logger with the provided options
-		Logger.initialize(config?.options);
+  static forRoot(config?: LoggerModuleOptions): any {
+    // Initialize the global logger with the provided options
+    Logger.initialize(config?.options);
 
-		const metadata: ModuleMetadata = {
-			providers: [
-				{
-					provide: LOGGER_TOKEN,
-					useClass: Logger,
-				},
-			],
-			exports: [LOGGER_TOKEN],
-		};
+    const metadata: ModuleMetadata = {
+      providers: [
+        {
+          provide: LOGGER_TOKEN,
+          useClass: Logger,
+        },
+      ],
+      exports: [LOGGER_TOKEN],
+    };
 
-		// Set metadata manually without decorators
-		Reflect.defineMetadata(MODULE_METADATA, metadata, LoggerModule);
+    // Set metadata manually without decorators
+    Reflect.defineMetadata(MODULE_METADATA, metadata, LoggerModule);
 
-		if (config?.isGlobal !== false) {
-			Reflect.defineMetadata(GLOBAL_MODULE, true, LoggerModule);
-		}
+    if (config?.isGlobal !== false) {
+      Reflect.defineMetadata(GLOBAL_MODULE, true, LoggerModule);
+    }
 
-		return LoggerModule;
-	}
+    return LoggerModule;
+  }
 }
 
 // Set default metadata
 const defaultMetadata: ModuleMetadata = {
-	providers: [
-		{
-			provide: LOGGER_TOKEN,
-			useClass: Logger,
-		},
-	],
-	exports: [LOGGER_TOKEN],
+  providers: [
+    {
+      provide: LOGGER_TOKEN,
+      useClass: Logger,
+    },
+  ],
+  exports: [LOGGER_TOKEN],
 };
 Reflect.defineMetadata(MODULE_METADATA, defaultMetadata, LoggerModule);
 Reflect.defineMetadata(GLOBAL_MODULE, true, LoggerModule);

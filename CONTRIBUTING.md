@@ -92,7 +92,7 @@ Use `bun nx` for all tasks:
 
 ```bash
 # Build specific package
-bun nx run @dwexjs/core:build
+bun nx run @dwex/core:build
 
 # Run affected tests
 bun nx affected -t test

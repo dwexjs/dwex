@@ -13,7 +13,7 @@
 ## Monorepo Structure
 
 - Nx workspace with packages under `packages/*`
-- Main packages: `@dwexjs/core`, `@dwexjs/common`, `@dwexjs/jwt`, `@dwexjs/logger`
+- Main packages: `@dwex/core`, `@dwex/common`, `@dwex/jwt`, `@dwex/logger`
 - Examples located in `examples/*`
 
 ## Code Style

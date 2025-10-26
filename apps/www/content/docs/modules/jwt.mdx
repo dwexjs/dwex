@@ -6,7 +6,7 @@ description: JSON Web Token authentication and signing
 ## Installation
 
 ```bash
-bun add @dwexjs/jwt
+bun add @dwex/jwt
 ```
 
 ## Basic Configuration
@@ -14,18 +14,18 @@ bun add @dwexjs/jwt
 Register the JWT module in your app:
 
 ```typescript
-import { Module } from "@dwexjs/core";
-import { JwtModule } from "@dwexjs/jwt";
+import { Module } from "@dwex/core";
+import { JwtModule } from "@dwex/jwt";
 
 @Module({
-	imports: [
-		JwtModule.register({
-			secret: "your-secret-key",
-			signOptions: {
-				expiresIn: "1h",
-			},
-		}),
-	],
+  imports: [
+    JwtModule.register({
+      secret: "your-secret-key",
+      signOptions: {
+        expiresIn: "1h",
+      },
+    }),
+  ],
 })
 export class AppModule {}
 ```
@@ -36,15 +36,15 @@ Make JWT available everywhere:
 
 ```typescript
 @Module({
-	imports: [
-		JwtModule.register({
-			global: true, // Available in all modules
-			secret: process.env.JWT_SECRET,
-			signOptions: {
-				expiresIn: "15m",
-			},
-		}),
-	],
+  imports: [
+    JwtModule.register({
+      global: true, // Available in all modules
+      secret: process.env.JWT_SECRET,
+      signOptions: {
+        expiresIn: "15m",
+      },
+    }),
+  ],
 })
 export class AppModule {}
 ```
@@ -53,14 +53,14 @@ export class AppModule {}
 
 ```typescript
 interface JwtModuleOptions {
-	global?: boolean;
-	secret: string;
-	publicKey?: string;
-	privateKey?: string;
-	signOptions?: JwtSignOptions;
-	verifyOptions?: JwtVerifyOptions;
-	issuer?: string;
-	audience?: string;
+  global?: boolean;
+  secret: string;
+  publicKey?: string;
+  privateKey?: string;
+  signOptions?: JwtSignOptions;
+  verifyOptions?: JwtVerifyOptions;
+  issuer?: string;
+  audience?: string;
 }
 ```
 
@@ -68,13 +68,13 @@ interface JwtModuleOptions {
 
 ```typescript
 JwtModule.register({
-	secret: "secret",
-	signOptions: {
-		expiresIn: "1h", // or '60m', '3600s', 3600
-		issuer: "my-app",
-		audience: "my-app-users",
-		subject: "auth",
-	},
+  secret: "secret",
+  signOptions: {
+    expiresIn: "1h", // or '60m', '3600s', 3600
+    issuer: "my-app",
+    audience: "my-app-users",
+    subject: "auth",
+  },
 });
 ```
 
@@ -83,35 +83,35 @@ JwtModule.register({
 Inject `JwtService` to sign and verify tokens:
 
 ```typescript
-import { Injectable } from "@dwexjs/core";
-import { JwtService } from "@dwexjs/jwt";
+import { Injectable } from "@dwex/core";
+import { JwtService } from "@dwex/jwt";
 
 @Injectable()
 export class AuthService {
-	constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) {}
 
-	async login(user: User) {
-		const payload = {
-			sub: user.id,
-			username: user.username,
-			email: user.email,
-		};
+  async login(user: User) {
+    const payload = {
+      sub: user.id,
+      username: user.username,
+      email: user.email,
+    };
 
-		const token = await this.jwtService.sign(payload);
+    const token = await this.jwtService.sign(payload);
 
-		return {
-			access_token: token,
-		};
-	}
+    return {
+      access_token: token,
+    };
+  }
 
-	async validateToken(token: string) {
-		try {
-			const payload = await this.jwtService.verify(token);
-			return payload;
-		} catch (error) {
-			return null;
-		}
-	}
+  async validateToken(token: string) {
+    try {
+      const payload = await this.jwtService.verify(token);
+      return payload;
+    } catch (error) {
+      return null;
+    }
+  }
 }
 ```
 
@@ -121,8 +121,8 @@ export class AuthService {
 
 ```typescript
 const token = await this.jwtService.sign({
-	sub: "user-id",
-	username: "john",
+  sub: "user-id",
+  username: "john",
 });
 ```
 
@@ -132,13 +132,13 @@ Override default options per token:
 
 ```typescript
 const token = await this.jwtService.sign(
-	{
-		sub: "user-id",
-	},
-	{
-		expiresIn: "7d",
-		audience: "admin-users",
-	},
+  {
+    sub: "user-id",
+  },
+  {
+    expiresIn: "7d",
+    audience: "admin-users",
+  }
 );
 ```
 
@@ -146,19 +146,19 @@ const token = await this.jwtService.sign(
 
 ```typescript
 interface TokenPayload {
-	sub: string; // Subject (user ID)
-	username: string;
-	email: string;
-	role: string;
-	permissions: string[];
+  sub: string; // Subject (user ID)
+  username: string;
+  email: string;
+  role: string;
+  permissions: string[];
 }
 
 const token = await this.jwtService.sign<TokenPayload>({
-	sub: user.id,
-	username: user.username,
-	email: user.email,
-	role: user.role,
-	permissions: user.permissions,
+  sub: user.id,
+  username: user.username,
+  email: user.email,
+  role: user.role,
+  permissions: user.permissions,
 });
 ```
 
@@ -168,10 +168,10 @@ const token = await this.jwtService.sign<TokenPayload>({
 
 ```typescript
 try {
-	const payload = await this.jwtService.verify(token);
-	console.log(payload.sub); // user ID
+  const payload = await this.jwtService.verify(token);
+  console.log(payload.sub); // user ID
 } catch (error) {
-	console.error("Invalid token");
+  console.error("Invalid token");
 }
 ```
 
@@ -179,8 +179,8 @@ try {
 
 ```typescript
 interface TokenPayload {
-	sub: string;
-	username: string;
+  sub: string;
+  username: string;
 }
 
 const payload = await this.jwtService.verify<TokenPayload>(token);
@@ -232,12 +232,12 @@ openssl rsa -in private.key -pubout -out public.key
 import { readFileSync } from "fs";
 
 JwtModule.register({
-	privateKey: readFileSync("./private.key", "utf8"),
-	publicKey: readFileSync("./public.key", "utf8"),
-	signOptions: {
-		algorithm: "RS256",
-		expiresIn: "1h",
-	},
+  privateKey: readFileSync("./private.key", "utf8"),
+  publicKey: readFileSync("./public.key", "utf8"),
+  signOptions: {
+    algorithm: "RS256",
+    expiresIn: "1h",
+  },
 });
 ```
 
@@ -258,39 +258,39 @@ Create different tokens for different purposes:
 ```typescript
 @Injectable()
 export class TokenService {
-	constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) {}
 
-	// Short-lived access token
-	async createAccessToken(userId: string) {
-		return await this.jwtService.sign(
-			{ sub: userId, type: "access" },
-			{ expiresIn: "15m" },
-		);
-	}
+  // Short-lived access token
+  async createAccessToken(userId: string) {
+    return await this.jwtService.sign(
+      { sub: userId, type: "access" },
+      { expiresIn: "15m" }
+    );
+  }
 
-	// Long-lived refresh token
-	async createRefreshToken(userId: string) {
-		return await this.jwtService.sign(
-			{ sub: userId, type: "refresh" },
-			{ expiresIn: "7d" },
-		);
-	}
+  // Long-lived refresh token
+  async createRefreshToken(userId: string) {
+    return await this.jwtService.sign(
+      { sub: userId, type: "refresh" },
+      { expiresIn: "7d" }
+    );
+  }
 
-	// Email verification token
-	async createEmailToken(email: string) {
-		return await this.jwtService.sign(
-			{ email, type: "email-verification" },
-			{ expiresIn: "24h" },
-		);
-	}
+  // Email verification token
+  async createEmailToken(email: string) {
+    return await this.jwtService.sign(
+      { email, type: "email-verification" },
+      { expiresIn: "24h" }
+    );
+  }
 
-	async verifyAccessToken(token: string) {
-		const payload = await this.jwtService.verify(token);
-		if (payload.type !== "access") {
-			throw new Error("Invalid token type");
-		}
-		return payload;
-	}
+  async verifyAccessToken(token: string) {
+    const payload = await this.jwtService.verify(token);
+    if (payload.type !== "access") {
+      throw new Error("Invalid token type");
+    }
+    return payload;
+  }
 }
 ```
 
@@ -299,7 +299,7 @@ export class TokenService {
 Handle different JWT errors:
 
 ```typescript
-import { UnauthorizedException } from "@dwexjs/core";
+import { UnauthorizedException } from "@dwex/core";
 
 async validateToken(token: string) {
 	try {
@@ -325,10 +325,10 @@ async validateToken(token: string) {
 
 ```typescript
 JwtModule.register({
-	secret: process.env.JWT_SECRET!,
-	signOptions: {
-		expiresIn: process.env.JWT_EXPIRES_IN || "1h",
-	},
+  secret: process.env.JWT_SECRET!,
+  signOptions: {
+    expiresIn: process.env.JWT_EXPIRES_IN || "1h",
+  },
 });
 ```
 
@@ -337,10 +337,10 @@ JwtModule.register({
 ```typescript
 // Access tokens: 15-30 minutes
 JwtModule.register({
-	secret: process.env.JWT_SECRET,
-	signOptions: {
-		expiresIn: "15m",
-	},
+  secret: process.env.JWT_SECRET,
+  signOptions: {
+    expiresIn: "15m",
+  },
 });
 ```
 
@@ -349,14 +349,14 @@ JwtModule.register({
 ```typescript
 // Good - minimal payload
 const token = await this.jwtService.sign({
-	sub: user.id,
-	role: user.role,
+  sub: user.id,
+  role: user.role,
 });
 
 // Avoid - too much data
 const token = await this.jwtService.sign({
-	...user, // Don't include everything
-	password: user.password, // Never include sensitive data!
+  ...user, // Don't include everything
+  password: user.password, // Never include sensitive data!
 });
 ```
 
@@ -367,12 +367,12 @@ const payload = await this.jwtService.verify(token);
 
 // Validate issuer
 if (payload.iss !== "my-app") {
-	throw new UnauthorizedException("Invalid issuer");
+  throw new UnauthorizedException("Invalid issuer");
 }
 
 // Validate audience
 if (payload.aud !== "my-app-users") {
-	throw new UnauthorizedException("Invalid audience");
+  throw new UnauthorizedException("Invalid audience");
 }
 ```
 
@@ -385,66 +385,63 @@ Regularly rotate JWT secrets in production.
 ```typescript
 @Injectable()
 export class AuthService {
-	constructor(
-		private readonly jwtService: JwtService,
-		private readonly userService: UserService,
-	) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService
+  ) {}
 
-	async login(username: string, password: string) {
-		const user = await this.userService.validateCredentials(
-			username,
-			password,
-		);
+  async login(username: string, password: string) {
+    const user = await this.userService.validateCredentials(username, password);
 
-		if (!user) {
-			throw new UnauthorizedException("Invalid credentials");
-		}
+    if (!user) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
 
-		const accessToken = await this.jwtService.sign({
-			sub: user.id,
-			username: user.username,
-			role: user.role,
-		});
+    const accessToken = await this.jwtService.sign({
+      sub: user.id,
+      username: user.username,
+      role: user.role,
+    });
 
-		const refreshToken = await this.jwtService.sign(
-			{
-				sub: user.id,
-				type: "refresh",
-			},
-			{
-				expiresIn: "7d",
-			},
-		);
+    const refreshToken = await this.jwtService.sign(
+      {
+        sub: user.id,
+        type: "refresh",
+      },
+      {
+        expiresIn: "7d",
+      }
+    );
 
-		return {
-			access_token: accessToken,
-			refresh_token: refreshToken,
-			expires_in: 900, // 15 minutes in seconds
-		};
-	}
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_in: 900, // 15 minutes in seconds
+    };
+  }
 
-	async refresh(refreshToken: string) {
-		const payload = await this.jwtService.verify(refreshToken);
+  async refresh(refreshToken: string) {
+    const payload = await this.jwtService.verify(refreshToken);
 
-		if (payload.type !== "refresh") {
-			throw new UnauthorizedException("Invalid token type");
-		}
+    if (payload.type !== "refresh") {
+      throw new UnauthorizedException("Invalid token type");
+    }
 
-		const newAccessToken = await this.jwtService.sign({
-			sub: payload.sub,
-		});
+    const newAccessToken = await this.jwtService.sign({
+      sub: payload.sub,
+    });
 
-		return {
-			access_token: newAccessToken,
-		};
-	}
+    return {
+      access_token: newAccessToken,
+    };
+  }
 }
 ```
 
 ## Next Steps
 
 <Cards>
-	<Card title="Authentication Guide" href="/docs/security/authentication" />
-	<Card title="Guards" href="/docs/security/guards" />
-	<Card title="Authorization" href="/docs/security/authorization" />
+  <Card title="Authentication Guide" href="/docs/security/authentication" />
+  <Card title="Guards" href="/docs/security/guards" />
+  <Card title="Authorization" href="/docs/security/authorization" />
 </Cards>

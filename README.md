@@ -45,7 +45,7 @@ cd my-app
 bun install
 
 # Or manually
-bun add @dwexjs/core @dwexjs/common reflect-metadata
+bun add @dwex/core @dwex/common reflect-metadata
 ```
 
 ## Support

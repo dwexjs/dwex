@@ -68,10 +68,10 @@
     "examples/basic": {
       "name": "basic",
       "dependencies": {
-        "@dwexjs/common": "*",
-        "@dwexjs/core": "*",
-        "@dwexjs/jwt": "*",
-        "@dwexjs/logger": "*",
+        "@dwex/common": "*",
+        "@dwex/core": "*",
+        "@dwex/jwt": "*",
+        "@dwex/logger": "*",
         "reflect-metadata": "^0.2.2",
       },
       "devDependencies": {
@@ -82,18 +82,18 @@
       },
     },
     "packages/common": {
-      "name": "@dwexjs/common",
+      "name": "@dwex/common",
       "version": "1.0.0-beta.1",
       "dependencies": {
         "tslib": "^2.3.0",
       },
     },
     "packages/core": {
-      "name": "@dwexjs/core",
+      "name": "@dwex/core",
       "version": "1.0.0-beta.1",
       "dependencies": {
-        "@dwexjs/common": "*",
-        "@dwexjs/logger": "*",
+        "@dwex/common": "1.0.0-beta.1",
+        "@dwex/logger": "1.0.0-beta.1",
         "cookie": "^1.0.2",
         "reflect-metadata": "^0.2.2",
         "tslib": "^2.3.0",
@@ -120,20 +120,20 @@
       },
     },
     "packages/jwt": {
-      "name": "@dwexjs/jwt",
+      "name": "@dwex/jwt",
       "version": "1.0.0-beta.1",
       "dependencies": {
-        "@dwexjs/common": "*",
+        "@dwex/common": "1.0.0-beta.1",
         "jose": "^5.9.6",
         "reflect-metadata": "^0.2.2",
         "tslib": "^2.3.0",
       },
     },
     "packages/logger": {
-      "name": "@dwexjs/logger",
+      "name": "@dwex/logger",
       "version": "1.0.0-beta.1",
       "dependencies": {
-        "@dwexjs/common": "*",
+        "@dwex/common": "1.0.0-beta.1",
         "pino": "^10.1.0",
         "pino-pretty": "^13.1.2",
         "reflect-metadata": "^0.2.2",
@@ -370,13 +370,13 @@
 
     "@cypress/request": ["@cypress/request@3.0.9", "", { "dependencies": { "aws-sign2": "~0.7.0", "aws4": "^1.8.0", "caseless": "~0.12.0", "combined-stream": "~1.0.6", "extend": "~3.0.2", "forever-agent": "~0.6.1", "form-data": "~4.0.4", "http-signature": "~1.4.0", "is-typedarray": "~1.0.0", "isstream": "~0.1.2", "json-stringify-safe": "~5.0.1", "mime-types": "~2.1.19", "performance-now": "^2.1.0", "qs": "6.14.0", "safe-buffer": "^5.1.2", "tough-cookie": "^5.0.0", "tunnel-agent": "^0.6.0", "uuid": "^8.3.2" } }, "sha512-I3l7FdGRXluAS44/0NguwWlO83J18p0vlr2FYHrJkWdNYhgVoiYo61IXPqaOsL+vNxU1ZqMACzItGK3/KKDsdw=="],
 
-    "@dwexjs/common": ["@dwexjs/common@workspace:packages/common"],
+    "@dwex/common": ["@dwex/common@workspace:packages/common"],
 
-    "@dwexjs/core": ["@dwexjs/core@workspace:packages/core"],
+    "@dwex/core": ["@dwex/core@workspace:packages/core"],
 
-    "@dwexjs/jwt": ["@dwexjs/jwt@workspace:packages/jwt"],
+    "@dwex/jwt": ["@dwex/jwt@workspace:packages/jwt"],
 
-    "@dwexjs/logger": ["@dwexjs/logger@workspace:packages/logger"],
+    "@dwex/logger": ["@dwex/logger@workspace:packages/logger"],
 
     "@emnapi/core": ["@emnapi/core@1.6.0", "", { "dependencies": { "@emnapi/wasi-threads": "1.1.0", "tslib": "^2.4.0" } }, "sha512-zq/ay+9fNIJJtJiZxdTnXS20PllcYMX3OE23ESc4HK/bdYu3cOWYVhsOhVnXALfU/uqJIxn5NBPd9z4v+SfoSg=="],
 
@@ -2168,7 +2168,7 @@
 
     "@babel/preset-env/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
-    "@dwexjs/jwt/jose": ["jose@5.10.0", "", {}, "sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg=="],
+    "@dwex/jwt/jose": ["jose@5.10.0", "", {}, "sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg=="],
 
     "@isaacs/cliui/string-width": ["string-width@5.1.2", "", { "dependencies": { "eastasianwidth": "^0.2.0", "emoji-regex": "^9.2.2", "strip-ansi": "^7.0.1" } }, "sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA=="],
 

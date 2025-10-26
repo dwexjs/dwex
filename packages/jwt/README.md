@@ -1,11 +1,11 @@
-# @dwexjs/jwt
+# @dwex/jwt
 
 JWT utilities for Dwex applications using the secure [jose](https://github.com/panva/jose) library.
 
 ## Installation
 
 ```bash
-bun add @dwexjs/jwt
+bun add @dwex/jwt
 ```
 
 ## Features
@@ -21,28 +21,28 @@ bun add @dwexjs/jwt
 ### Quick Start
 
 ```typescript
-import { JwtService } from '@dwexjs/jwt';
+import { JwtService } from "@dwex/jwt";
 
 const jwtService = new JwtService({
   secret: process.env.JWT_SECRET,
-  expiresIn: '1h'
+  expiresIn: "1h",
 });
 
 // Sign a token
-const token = await jwtService.sign({ userId: 123, role: 'admin' });
+const token = await jwtService.sign({ userId: 123, role: "admin" });
 
 // Verify a token
 const result = await jwtService.verify(token);
 if (result.valid) {
-  console.log('User ID:', result.payload.userId);
+  console.log("User ID:", result.payload.userId);
 }
 ```
 
 ### With Dependency Injection
 
 ```typescript
-import { Module } from '@dwexjs/core';
-import { JwtModule } from '@dwexjs/jwt';
+import { Module } from "@dwex/core";
+import { JwtModule } from "@dwex/jwt";
 
 @Module({
   imports: [
@@ -50,12 +50,12 @@ import { JwtModule } from '@dwexjs/jwt';
       isGlobal: true,
       options: {
         secret: process.env.JWT_SECRET,
-        expiresIn: '1h',
-        issuer: 'my-app',
-        algorithm: 'HS256'
-      }
-    })
-  ]
+        expiresIn: "1h",
+        issuer: "my-app",
+        algorithm: "HS256",
+      },
+    }),
+  ],
 })
 export class AppModule {}
 ```
@@ -63,14 +63,14 @@ export class AppModule {}
 ### Building an Auth Service
 
 ```typescript
-import { Injectable } from '@dwexjs/core';
-import { JwtService } from '@dwexjs/jwt';
+import { Injectable } from "@dwex/core";
+import { JwtService } from "@dwex/jwt";
 
 @Injectable()
 export class AuthService {
   private readonly jwtService = new JwtService({
     secret: process.env.JWT_SECRET,
-    expiresIn: '7d'
+    expiresIn: "7d",
   });
 
   async login(username: string, password: string) {
@@ -78,17 +78,17 @@ export class AuthService {
     const user = await this.validateUser(username, password);
 
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new Error("Invalid credentials");
     }
 
     const payload = {
       sub: user.id,
       username: user.username,
-      email: user.email
+      email: user.email,
     };
 
     return {
-      access_token: await this.jwtService.sign(payload)
+      access_token: await this.jwtService.sign(payload),
     };
   }
 
@@ -102,20 +102,20 @@ export class AuthService {
 ### Creating an Auth Guard
 
 ```typescript
-import { Injectable, CanActivate, ExecutionContext } from '@dwexjs/core';
-import { JwtService } from '@dwexjs/jwt';
+import { Injectable, CanActivate, ExecutionContext } from "@dwex/core";
+import { JwtService } from "@dwex/jwt";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   private readonly jwtService = new JwtService({
-    secret: process.env.JWT_SECRET
+    secret: process.env.JWT_SECRET,
   });
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.getRequest();
     const authHeader = request.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return false;
     }
 
@@ -136,21 +136,21 @@ export class AuthGuard implements CanActivate {
 ### Using the Auth Guard
 
 ```typescript
-import { Controller, Get, UseGuards } from '@dwexjs/core';
-import { AuthGuard } from './auth.guard';
+import { Controller, Get, UseGuards } from "@dwex/core";
+import { AuthGuard } from "./auth.guard";
 
-@Controller('users')
+@Controller("users")
 @UseGuards(AuthGuard)
 export class UserController {
-  @Get('profile')
+  @Get("profile")
   getProfile() {
-    return { message: 'This route is protected' };
+    return { message: "This route is protected" };
   }
 
-  @Get('admin')
+  @Get("admin")
   @UseGuards(AdminGuard)
   adminOnly() {
-    return { message: 'This requires admin role' };
+    return { message: "This requires admin role" };
   }
 }
 ```
@@ -166,7 +166,7 @@ Signs a payload and returns a JWT token.
 ```typescript
 const token = await jwtService.sign(
   { userId: 123 },
-  { expiresIn: '7d', issuer: 'my-app' }
+  { expiresIn: "7d", issuer: "my-app" }
 );
 ```
 
@@ -197,12 +197,12 @@ const payload = jwtService.decode(token);
 
 ```typescript
 interface JwtModuleOptions {
-  secret?: string;           // Secret for HS* algorithms
-  publicKey?: string;        // Public key for RS*/ES* algorithms
-  privateKey?: string;       // Private key for RS*/ES* algorithms
-  algorithm?: string;        // Default: 'HS256'
-  expiresIn?: string;        // Default: '1h'
-  issuer?: string;           // Token issuer
+  secret?: string; // Secret for HS* algorithms
+  publicKey?: string; // Public key for RS*/ES* algorithms
+  privateKey?: string; // Private key for RS*/ES* algorithms
+  algorithm?: string; // Default: 'HS256'
+  expiresIn?: string; // Default: '1h'
+  issuer?: string; // Token issuer
   audience?: string | string[]; // Token audience
 }
 ```

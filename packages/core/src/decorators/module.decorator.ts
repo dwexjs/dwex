@@ -1,9 +1,9 @@
 import "reflect-metadata";
 import {
-	MODULE_METADATA,
-	GLOBAL_MODULE,
-	type ModuleMetadata,
-} from "@dwexjs/common";
+  GLOBAL_MODULE,
+  MODULE_METADATA,
+  type ModuleMetadata,
+} from "@dwex/common";
 
 /**
  * Defines a module. Modules are used to organize the application structure
@@ -24,9 +24,9 @@ import {
  * ```
  */
 export function Module(metadata: ModuleMetadata): ClassDecorator {
-	return (target: Function) => {
-		Reflect.defineMetadata(MODULE_METADATA, metadata, target);
-	};
+  return (target: Function) => {
+    Reflect.defineMetadata(MODULE_METADATA, metadata, target);
+  };
 }
 
 /**
@@ -46,7 +46,7 @@ export function Module(metadata: ModuleMetadata): ClassDecorator {
  * ```
  */
 export function Global(): ClassDecorator {
-	return (target: Function) => {
-		Reflect.defineMetadata(GLOBAL_MODULE, true, target);
-	};
+  return (target: Function) => {
+    Reflect.defineMetadata(GLOBAL_MODULE, true, target);
+  };
 }

@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { ROUTE_PATH, HTTP_METHOD, RequestMethod } from "@dwexjs/common";
+import { HTTP_METHOD, RequestMethod, ROUTE_PATH } from "@dwex/common";
 
 /**
  * Creates a route handler decorator for a specific HTTP method.
@@ -9,17 +9,17 @@ import { ROUTE_PATH, HTTP_METHOD, RequestMethod } from "@dwexjs/common";
  * @returns Method decorator
  */
 function createMethodDecorator(method: RequestMethod) {
-	return (path = ""): MethodDecorator => {
-		return (
-			target: object,
-			propertyKey: string | symbol,
-			descriptor: PropertyDescriptor,
-		) => {
-			Reflect.defineMetadata(ROUTE_PATH, path, descriptor.value);
-			Reflect.defineMetadata(HTTP_METHOD, method, descriptor.value);
-			return descriptor;
-		};
-	};
+  return (path = ""): MethodDecorator => {
+    return (
+      target: object,
+      propertyKey: string | symbol,
+      descriptor: PropertyDescriptor
+    ) => {
+      Reflect.defineMetadata(ROUTE_PATH, path, descriptor.value);
+      Reflect.defineMetadata(HTTP_METHOD, method, descriptor.value);
+      return descriptor;
+    };
+  };
 }
 
 /**

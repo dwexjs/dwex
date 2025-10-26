@@ -43,7 +43,7 @@ cd my-app
 bun init -y
 
 # Install Dwex packages
-bun add @dwexjs/core @dwexjs/common reflect-metadata
+bun add @dwex/core @dwex/common reflect-metadata
 ```
 
 ### TypeScript Configuration
@@ -52,19 +52,19 @@ Create a `tsconfig.json` file:
 
 ```json
 {
-	"compilerOptions": {
-		"target": "ES2022",
-		"module": "ESNext",
-		"moduleResolution": "bundler",
-		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true,
-		"declaration": true,
-		"outDir": "./dist"
-	},
-	"include": ["src/**/*"]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"]
 }
 ```
 
@@ -74,10 +74,10 @@ Dwex relies on decorators and metadata reflection. Ensure your `tsconfig.json` i
 
 ```json
 {
-	"compilerOptions": {
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true
-	}
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
 }
 ```
 
@@ -88,13 +88,13 @@ Enhance your application with additional modules:
 ### JWT Authentication
 
 ```bash
-bun add @dwexjs/jwt
+bun add @dwex/jwt
 ```
 
 ### Logging
 
 ```bash
-bun add @dwexjs/logger
+bun add @dwex/logger
 ```
 
 ## Project Structure
@@ -118,24 +118,24 @@ Create a simple `src/main.ts` to test your setup:
 
 ```typescript
 import "reflect-metadata";
-import { DwexFactory, Module, Controller, Get } from "@dwexjs/core";
+import { DwexFactory, Module, Controller, Get } from "@dwex/core";
 
 @Controller()
 class AppController {
-	@Get()
-	hello() {
-		return "Hello, Dwex!";
-	}
+  @Get()
+  hello() {
+    return "Hello, Dwex!";
+  }
 }
 
 @Module({
-	controllers: [AppController],
+  controllers: [AppController],
 })
 class AppModule {}
 
 async function bootstrap() {
-	const app = await DwexFactory.create(AppModule);
-	await app.listen(3000);
+  const app = await DwexFactory.create(AppModule);
+  await app.listen(3000);
 }
 
 bootstrap();
@@ -169,15 +169,15 @@ Ensure your `tsconfig.json` uses:
 
 ```json
 {
-	"compilerOptions": {
-		"moduleResolution": "bundler"
-	}
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  }
 }
 ```
 
 ## Next Steps
 
 <Cards>
-	<Card title="First App Tutorial" href="/docs/getting-started/first-app" />
-	<Card title="Learn About Modules" href="/docs/fundamentals/modules" />
+  <Card title="First App Tutorial" href="/docs/getting-started/first-app" />
+  <Card title="Learn About Modules" href="/docs/fundamentals/modules" />
 </Cards>

@@ -1,4 +1,4 @@
-# @dwexjs/logger
+# @dwex/logger
 
 A powerful, flexible logging package for Dwex framework, built on top of Pino. Provides colorful console output, file logging, and context tracking for better debugging and monitoring.
 
@@ -15,7 +15,7 @@ A powerful, flexible logging package for Dwex framework, built on top of Pino. P
 ## Installation
 
 ```bash
-bun add @dwexjs/logger
+bun add @dwex/logger
 ```
 
 ## Quick Start
@@ -23,7 +23,7 @@ bun add @dwexjs/logger
 ### Basic Usage
 
 ```typescript
-import { Logger } from "@dwexjs/logger";
+import { Logger } from "@dwex/logger";
 
 const logger = new Logger();
 
@@ -37,8 +37,8 @@ logger.debug("Request payload", { userId: "123", action: "update" });
 ### With Dependency Injection
 
 ```typescript
-import { Module } from "@dwexjs/core";
-import { LoggerModule, Logger } from "@dwexjs/logger";
+import { Module } from "@dwex/core";
+import { LoggerModule, Logger } from "@dwex/logger";
 
 @Module({
   imports: [
