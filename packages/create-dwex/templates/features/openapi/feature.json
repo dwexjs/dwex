@@ -1,0 +1,18 @@
+{
+	"$schema": "../feature.schema.json",
+	"id": "openapi",
+	"name": "OpenAPI Documentation",
+	"description": "Add OpenAPI/Swagger documentation with interactive UI at /docs",
+	"dependencies": {
+		"@dwex/openapi": "^<%= version %>"
+	},
+	"mainAdditions": {
+		"imports": [
+			"import { setupOpenApi } from \"./openapi.setup.js\";"
+		],
+		"beforeListen": [
+			"\t// Setup OpenAPI documentation",
+			"\tsetupOpenApi(app);"
+		]
+	}
+}

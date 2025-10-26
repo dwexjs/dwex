@@ -2,7 +2,7 @@ import * as clack from "@clack/prompts";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import pc from "picocolors";
-import type { ProjectConfig, Template } from "./types.js";
+import type { ProjectConfig, Feature } from "./types.js";
 
 /**
  * Prompts the user for project name
@@ -68,27 +68,6 @@ export async function promptPort(): Promise<number> {
 }
 
 /**
- * Prompts the user to select a template
- */
-export async function promptTemplate(templates: Template[]): Promise<string> {
-	const template = await clack.select({
-		message: "Pick a template",
-		options: templates.map((t) => ({
-			value: t.name,
-			label: t.name,
-			hint: t.description,
-		})),
-	});
-
-	if (clack.isCancel(template)) {
-		clack.cancel("Operation cancelled");
-		process.exit(0);
-	}
-
-	return template as string;
-}
-
-/**
  * Prompts the user whether to initialize git
  */
 export async function promptInitGit(): Promise<boolean> {
@@ -106,23 +85,49 @@ export async function promptInitGit(): Promise<boolean> {
 }
 
 /**
+ * Prompts the user to select features
+ */
+export async function promptFeatures(availableFeatures: Feature[]): Promise<string[]> {
+	if (availableFeatures.length === 0) {
+		return [];
+	}
+
+	const features = await clack.multiselect({
+		message: "Select features to include (optional):",
+		options: availableFeatures.map((f) => ({
+			value: f.id,
+			label: f.name,
+			hint: f.description,
+		})),
+		required: false,
+	});
+
+	if (clack.isCancel(features)) {
+		clack.cancel("Operation cancelled");
+		process.exit(0);
+	}
+
+	return features as string[];
+}
+
+/**
  * Collects all project configuration from user prompts
  */
 export async function collectProjectConfig(
-	templates: Template[],
+	availableFeatures: Feature[],
 	version: string,
 ): Promise<{ config: ProjectConfig; projectPath: string }> {
 	const projectName = await promptProjectName();
 	const projectPath = validateProjectPath(projectName);
 	const port = await promptPort();
-	const template = await promptTemplate(templates);
+	const features = await promptFeatures(availableFeatures);
 	const initGit = await promptInitGit();
 
 	return {
 		config: {
 			projectName,
 			port,
-			template,
+			features,
 			version,
 			initGit,
 		},

@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dwex Feature Configuration",
+  "description": "Configuration schema for Dwex CLI features",
+  "type": "object",
+  "required": ["id", "name", "description"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the feature (kebab-case)",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "examples": ["auth-jwt", "openapi", "database-postgres"]
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable feature name",
+      "examples": ["JWT Authentication", "OpenAPI Documentation"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of what the feature provides",
+      "examples": [
+        "Add JWT-based authentication with login, guards, and protected routes",
+        "Add OpenAPI/Swagger documentation with interactive UI at /docs"
+      ]
+    },
+    "dependencies": {
+      "type": "object",
+      "description": "NPM dependencies to add to package.json",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [
+        {
+          "@dwex/jwt": "^1.0.0",
+          "@dwex/openapi": "^1.0.0"
+        }
+      ]
+    },
+    "conflicts": {
+      "type": "array",
+      "description": "Feature IDs that conflict with this feature",
+      "items": {
+        "type": "string"
+      },
+      "examples": [["auth-passport", "auth-clerk"]]
+    },
+    "imports": {
+      "type": "array",
+      "description": "Import statements to add to app.module.ts",
+      "items": {
+        "type": "string"
+      },
+      "examples": [
+        [
+          "import { JwtModule } from \"@dwex/jwt\";",
+          "import { AuthController } from \"./auth.controller\";"
+        ]
+      ]
+    },
+    "moduleConfig": {
+      "type": "object",
+      "description": "Configuration to add to the @Module decorator",
+      "properties": {
+        "imports": {
+          "type": "array",
+          "description": "Module imports to add to the imports array",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            [
+              "JwtModule.register({ global: true, secret: \"...\", signOptions: { expiresIn: \"1h\" } })"
+            ]
+          ]
+        },
+        "controllers": {
+          "type": "array",
+          "description": "Controllers to add to the controllers array",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["AuthController", "UsersController"]]
+        },
+        "providers": {
+          "type": "array",
+          "description": "Providers to add to the providers array",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["AuthService", "AuthGuard"]]
+        }
+      }
+    },
+    "mainAdditions": {
+      "type": "object",
+      "description": "Code to add to main.ts",
+      "properties": {
+        "imports": {
+          "type": "array",
+          "description": "Import statements to add to main.ts",
+          "items": {
+            "type": "string"
+          },
+          "examples": [["import { setupOpenApi } from \"./openapi.setup.js\";"]]
+        },
+        "beforeListen": {
+          "type": "array",
+          "description": "Code lines to execute before app.listen()",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            ["\t// Setup OpenAPI documentation", "\tsetupOpenApi(app);"]
+          ]
+        },
+        "afterListen": {
+          "type": "array",
+          "description": "Code lines to execute after app.listen()",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "appControllerAdditions": {
+      "type": "object",
+      "description": "Code to add to app.controller.ts",
+      "properties": {
+        "imports": {
+          "type": "array",
+          "description": "Import statements to add",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            [
+              "import { UseGuards, Req } from \"@dwex/core\";",
+              "import { AuthGuard } from \"./auth.guard\";"
+            ]
+          ]
+        },
+        "methods": {
+          "type": "array",
+          "description": "Method implementations to add to the controller class",
+          "items": {
+            "type": "object",
+            "required": ["code"],
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Complete method code including decorators and implementation"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+	"name": "<%= projectName %>",
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "bun run --watch src/main.ts",
+		"start": "bun run src/main.ts",
+		"format": "biome format --write .",
+		"format:check": "biome format .",
+		"lint": "biome lint .",
+		"lint:fix": "biome lint --write .",
+		"check": "biome check --write ."
+	},
+	"dependencies": {
+		"@dwex/common": "^<%= version %>",
+		"@dwex/core": "^<%= version %>",
+		"@dwex/logger": "^<%= version %>",
+		"reflect-metadata": "^0.2.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/bun": "^1.0.0"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
+}

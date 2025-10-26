@@ -1,0 +1,34 @@
+{
+	"$schema": "../feature.schema.json",
+	"id": "auth-jwt",
+	"name": "JWT Authentication",
+	"description": "Add JWT-based authentication with login, guards, and protected routes",
+	"dependencies": {
+		"@dwex/jwt": "^<%= version %>"
+	},
+	"imports": [
+		"import { JwtModule } from \"@dwex/jwt\";",
+		"import { AuthController } from \"./modules/auth/auth.controller\";",
+		"import { AuthService } from \"./modules/auth/auth.service\";",
+		"import { AuthGuard } from \"./modules/auth/auth.guard\";",
+		"import { UsersService } from \"./modules/users/users.service\";"
+	],
+	"moduleConfig": {
+		"imports": [
+			"JwtModule.register({\n\t\t\tglobal: true,\n\t\t\tsecret: \"super-secret-key-change-in-production\",\n\t\t\tsignOptions: { expiresIn: \"1h\" },\n\t\t\tissuer: \"<%= projectName %>\",\n\t\t})"
+		],
+		"controllers": ["AuthController"],
+		"providers": ["AuthService", "AuthGuard", "UsersService"]
+	},
+	"appControllerAdditions": {
+		"imports": [
+			"import { UseGuards, Req } from \"@dwex/core\";",
+			"import { AuthGuard } from \"./modules/auth/auth.guard\";"
+		],
+		"methods": [
+			{
+				"code": "\t/**\n\t * Protected endpoint - requires authentication\n\t * Access with: Authorization: Bearer <token>\n\t */\n\t@Get(\"profile\")\n\t@UseGuards(AuthGuard)\n\tgetProfile(@Req() req: any) {\n\t\tthis.logger.log(`Profile accessed by user: ${req.user.username}`);\n\t\treturn {\n\t\t\tmessage: \"This is a protected route\",\n\t\t\tuser: req.user,\n\t\t};\n\t}\n\n\t/**\n\t * Protected endpoint - requires authentication\n\t * Access with: Authorization: Bearer <token>\n\t */\n\t@Get(\"dashboard\")\n\t@UseGuards(AuthGuard)\n\tgetDashboard(@Req() req: any) {\n\t\treturn {\n\t\t\tmessage: \"Welcome to your dashboard\",\n\t\t\tusername: req.user.username,\n\t\t\trole: req.user.role,\n\t\t};\n\t}"
+			}
+		]
+	}
+}

@@ -1,0 +1,25 @@
+import type { DwexApplication } from "@dwex/core";
+import { DocumentBuilder, OpenApiModule } from "@dwex/openapi";
+
+/**
+ * Setup OpenAPI documentation
+ */
+export function setupOpenApi(app: DwexApplication): void {
+	// Create OpenAPI documentation config
+	const config = new DocumentBuilder()
+		.setTitle("<%= projectName %> API")
+		.setDescription("API documentation for <%= projectName %>")
+		.setVersion("1.0.0")
+		.addServer("http://localhost:<%= port %>", "Local development server")
+		.addTag("general", "General API endpoints")
+		.build();
+
+	// Generate the OpenAPI document
+	const document = OpenApiModule.createDocument(app, config);
+
+	// Setup Swagger UI at /docs
+	OpenApiModule.setup("/docs", app, document, {
+		customSiteTitle: "<%= projectName %> API Documentation",
+		darkMode: true,
+	});
+}
