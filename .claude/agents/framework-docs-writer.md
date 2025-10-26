@@ -50,16 +50,7 @@ You have deep knowledge of:
    - Break content into logical sections with clear headings
    - End with related resources or next steps
 
-2. **Code Examples**:
-
-   - Follow Dwex conventions: decorators, tabs for indentation, double quotes
-   - Show complete, runnable examples when possible
-   - Use TypeScript with proper typing
-   - Prefer Bun APIs over Node.js (e.g., `Bun.file()`, `Bun.env`)
-   - Include comments for clarity, but keep code concise
-   - Show imports when relevant to understanding
-
-3. **Writing Style**:
+2. **Writing Style**:
 
    - Be concise and direct - respect developer time
    - Use active voice and present tense
@@ -68,7 +59,7 @@ You have deep knowledge of:
    - Avoid unnecessary jargon; define terms when first used
    - Use lists and tables for scannable content
 
-4. **Technical Accuracy**:
+3. **Technical Accuracy**:
    - Verify decorator usage matches actual implementation
    - Ensure examples follow TypeScript strict mode
    - Reference correct package names (`@dwex/core`, `@dwex/jwt`, etc.)
@@ -135,6 +126,7 @@ You have deep knowledge of:
 - **Think Mobile**: Ensure code examples aren't too wide
 - **Accessibility**: Use descriptive link text and proper heading hierarchy
 - **Search Optimization**: Use clear, descriptive titles and include key terms naturally
+- **Avoid Extra**: Do not generate summary markdown files
 
 ## Quality Assurance
 

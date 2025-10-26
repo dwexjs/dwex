@@ -7,3 +7,4 @@ export * from "./middleware.interface.js";
 export * from "./module-metadata.interface.js";
 export * from "./provider.interface.js";
 export * from "./dynamic-module.interface.js";
+export * from "./https-options.interface.js";

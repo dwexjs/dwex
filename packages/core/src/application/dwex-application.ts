@@ -1,5 +1,6 @@
 import {
   HttpException,
+  type HttpsOptions,
   type MiddlewareFunction,
   MODULE_METADATA,
   type ModuleMetadata,
@@ -20,6 +21,7 @@ export class DwexApplication {
   private readonly requestHandler: RequestHandler;
   private readonly globalMiddleware: MiddlewareFunction[] = [];
   private server?: ReturnType<typeof Bun.serve>;
+  private tlsEnabled = false;
   private instanceLoaderLogger?: any;
   private routesResolverLogger?: any;
   private routerExplorerLogger?: any;
@@ -70,20 +72,39 @@ export class DwexApplication {
    *
    * @param port - Port to listen on
    * @param hostname - Hostname to bind to
+   * @param httpsOptions - Optional TLS/HTTPS configuration
    * @returns Promise that resolves when the server is listening
    *
    * @example
    * ```typescript
+   * // HTTP server
    * await app.listen(3000);
    * console.log('Server running on http://localhost:3000');
    * ```
+   *
+   * @example
+   * ```typescript
+   * // HTTPS server with TLS
+   * await app.listen(3000, '0.0.0.0', {
+   *   cert: Bun.file('./cert.pem'),
+   *   key: Bun.file('./key.pem'),
+   * });
+   * console.log('Server running on https://localhost:3000');
+   * ```
    */
-  async listen(port: number, hostname = "0.0.0.0"): Promise<void> {
+  async listen(
+    port: number,
+    hostname = "0.0.0.0",
+    httpsOptions?: HttpsOptions
+  ): Promise<void> {
+    this.tlsEnabled = !!httpsOptions;
+
     this.server = Bun.serve({
       port,
       hostname,
       fetch: this.handleRequest.bind(this),
       error: this.handleError.bind(this),
+      ...(httpsOptions && { tls: httpsOptions }),
     });
 
     // Print banner with all info at the very top
@@ -355,6 +376,7 @@ export class DwexApplication {
     const pid = process.pid;
     const port = this.server.port;
     const hostname = this.server.hostname;
+    const protocol = this.tlsEnabled ? "https" : "http";
 
     // Colors - Purple/Pink theme
     const pink = "\x1b[38;2;228;90;146m"; // #E45A92
@@ -364,7 +386,7 @@ export class DwexApplication {
     console.log("");
     console.log(`  ${pink}◆${reset} Dwex ${dim}v${version}${reset}`);
     console.log("");
-    console.log(`  ${dim}Local:${reset}   http://${hostname}:${port}`);
+    console.log(`  ${dim}Local:${reset}   ${protocol}://${hostname}:${port}`);
     console.log(`  ${dim}PID:${reset}     ${pid}`);
     console.log("");
   }

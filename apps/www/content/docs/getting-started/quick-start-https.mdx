@@ -1,0 +1,309 @@
+---
+title: Quick Start with HTTPS
+description: Get your Dwex application running with HTTPS in under 5 minutes.
+icon: Zap
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Steps } from "fumadocs-ui/components/steps";
+
+This guide will get you up and running with HTTPS in your Dwex application in just a few minutes.
+
+## Prerequisites
+
+- A working Dwex application (see [Quick Start](/docs/getting-started/quick-start) if you don't have one)
+- OpenSSL or mkcert installed
+
+## Quick Setup with mkcert (Recommended)
+
+For the best local development experience, use mkcert to generate trusted certificates:
+
+<Steps>
+
+### Install mkcert
+
+```bash
+# macOS
+brew install mkcert
+
+# Linux
+brew install mkcert
+# or: sudo apt install mkcert
+
+# Windows (Chocolatey)
+choco install mkcert
+```
+
+### Create Local CA
+
+```bash
+mkcert -install
+```
+
+This installs a local Certificate Authority on your system.
+
+### Generate Certificates
+
+```bash
+# In your project root
+mkcert -key-file key.pem -cert-file cert.pem localhost 127.0.0.1 ::1
+```
+
+This creates `cert.pem` and `key.pem` in your project directory.
+
+### Update Your Main File
+
+```typescript title="src/main.ts"
+import { DwexFactory } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+await app.listen(3443, "0.0.0.0", {
+	cert: Bun.file("./cert.pem"),
+	key: Bun.file("./key.pem"),
+});
+
+console.log("🔒 Server running at https://localhost:3443");
+```
+
+### Run Your Application
+
+```bash
+bun run src/main.ts
+```
+
+### Test It
+
+Visit `https://localhost:3443` in your browser - no certificate warnings!
+
+</Steps>
+
+<Callout type="info">
+mkcert certificates are automatically trusted by your browser, providing a seamless development experience.
+</Callout>
+
+## Quick Setup with OpenSSL
+
+If you prefer using OpenSSL or can't install mkcert:
+
+<Steps>
+
+### Generate Certificates
+
+```bash
+# Generate private key
+openssl genrsa -out key.pem 2048
+
+# Generate self-signed certificate
+openssl req -new -x509 -key key.pem -out cert.pem -days 365
+```
+
+When prompted, use `localhost` as the Common Name.
+
+### Update Your Main File
+
+```typescript title="src/main.ts"
+import { DwexFactory } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+await app.listen(3443, "0.0.0.0", {
+	cert: Bun.file("./cert.pem"),
+	key: Bun.file("./key.pem"),
+});
+
+console.log("🔒 Server running at https://localhost:3443");
+```
+
+### Run Your Application
+
+```bash
+bun run src/main.ts
+```
+
+### Test It
+
+Visit `https://localhost:3443` and accept the security warning (only needed once).
+
+</Steps>
+
+<Callout type="warn">
+Self-signed certificates from OpenSSL will show browser warnings. This is expected for development. For a better experience, use mkcert instead.
+</Callout>
+
+## Environment-Based Configuration
+
+For flexibility across environments:
+
+```typescript title="src/main.ts"
+import { DwexFactory } from "@dwex/core";
+import type { HttpsOptions } from "@dwex/common";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+const port = Number(Bun.env.PORT) || 3000;
+const isHttps = Bun.env.HTTPS === "true";
+
+let httpsOptions: HttpsOptions | undefined;
+
+if (isHttps) {
+	httpsOptions = {
+		cert: Bun.file("./cert.pem"),
+		key: Bun.file("./key.pem"),
+	};
+}
+
+await app.listen(port, "0.0.0.0", httpsOptions);
+
+const protocol = isHttps ? "https" : "http";
+console.log(`Server running at ${protocol}://localhost:${port}`);
+```
+
+Create a `.env` file:
+
+```bash title=".env"
+PORT=3443
+HTTPS=true
+```
+
+Now you can toggle HTTPS on/off with environment variables!
+
+## Testing Your HTTPS Server
+
+### Using curl
+
+```bash
+# With mkcert certificates
+curl https://localhost:3443
+
+# With self-signed certificates (use -k to accept)
+curl -k https://localhost:3443
+```
+
+### Using Browser
+
+Navigate to:
+- `https://localhost:3443` (main server)
+- `https://localhost:3443/health` (health check endpoint)
+
+### Using Postman or Insomnia
+
+1. Set URL to `https://localhost:3443`
+2. For self-signed certificates: Disable SSL verification in settings
+3. Send your request
+
+## Project Structure
+
+After setup, your project should look like:
+
+```
+my-dwex-app/
+├── src/
+│   ├── main.ts           # Your HTTPS-enabled main file
+│   ├── app.module.ts
+│   └── app.controller.ts
+├── cert.pem              # TLS certificate
+├── key.pem               # TLS private key
+├── .env                  # Environment variables (optional)
+├── .gitignore            # Don't commit keys!
+└── package.json
+```
+
+<Callout type="warn">
+Add certificate files to `.gitignore`:
+
+```gitignore title=".gitignore"
+*.pem
+.env
+```
+</Callout>
+
+## Complete Example
+
+Here's a complete, minimal HTTPS application:
+
+```typescript title="src/main.ts"
+import { DwexFactory } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+await app.listen(3443, "0.0.0.0", {
+	cert: Bun.file("./cert.pem"),
+	key: Bun.file("./key.pem"),
+});
+
+console.log("🔒 HTTPS server running at https://localhost:3443");
+```
+
+```typescript title="src/app.module.ts"
+import { Module } from "@dwex/common";
+import { AppController } from "./app.controller";
+
+@Module({
+	controllers: [AppController],
+})
+export class AppModule {}
+```
+
+```typescript title="src/app.controller.ts"
+import { Controller, Get } from "@dwex/common";
+
+@Controller()
+export class AppController {
+	@Get("/")
+	home() {
+		return {
+			message: "Welcome to Dwex HTTPS!",
+			secure: true,
+			timestamp: new Date().toISOString(),
+		};
+	}
+}
+```
+
+Run it:
+
+```bash
+# Generate certificates (one-time)
+mkcert -key-file key.pem -cert-file cert.pem localhost
+
+# Start server
+bun run src/main.ts
+```
+
+## Next Steps
+
+Now that you have HTTPS working, explore these topics:
+
+- [Complete HTTPS Guide](/docs/guides/https-tls) - Advanced HTTPS configuration
+- [Production Deployment](/docs/guides/deployment) - Deploy with real certificates
+- [Environment Configuration](/docs/guides/configuration) - Manage config across environments
+- [Security Best Practices](/docs/guides/security) - Secure your application
+
+## Troubleshooting
+
+### "Certificate not trusted" error
+
+**Solution**: If using mkcert, ensure you ran `mkcert -install` to install the local CA.
+
+### "Permission denied" on port 443
+
+**Solution**: Use port 3443 or higher for development. Ports below 1024 require elevated privileges.
+
+### "File not found" error
+
+**Solution**: Verify `cert.pem` and `key.pem` exist in your project root:
+
+```bash
+ls -la *.pem
+```
+
+## Learn More
+
+- [HttpsOptions API Reference](/docs/api-reference/interfaces/https-options) - All configuration options
+- [DwexApplication.listen()](/docs/api-reference/classes/dwex-application#listen) - Method documentation
+- [Bun TLS Documentation](https://bun.sh/docs/api/http#tls) - Underlying implementation
