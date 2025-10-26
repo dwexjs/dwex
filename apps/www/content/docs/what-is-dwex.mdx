@@ -1,0 +1,102 @@
+---
+title: What is Dwex
+description: A progressive TypeScript framework for building efficient server-side applications on Bun runtime
+icon: Info
+---
+
+## Welcome to Dwex
+
+Dwex is a lightweight, TypeScript-first web framework designed for the Bun runtime. Build fast, scalable server-side applications with decorator-based routing and powerful dependency injection.
+
+## Quick Start
+
+```bash
+bun create dwex my-app
+cd my-app
+bun install
+bun run src/main.ts
+```
+
+Your app is now running at `http://localhost:3000` 🚀
+
+## Key Features
+
+**Decorator-Based Routing** - Define routes using intuitive decorators like `@Get()`, `@Post()`, and `@Controller()`.
+
+**Dependency Injection** - Built-in DI container with support for singleton, request, and transient scopes.
+
+**Type-Safe** - Full TypeScript support with excellent type inference and IDE autocompletion.
+
+**Bun-Native** - Optimized for Bun's performance with native API usage throughout.
+
+**Modular Architecture** - Organize your app into reusable modules with clear boundaries.
+
+**Production Ready** - Includes JWT auth, logging, guards, interceptors, and exception handling.
+
+## Example
+
+```typescript
+import { Controller, Get, Post, Body } from "@dwex/core";
+import { Injectable } from "@dwex/core";
+
+@Injectable()
+class UserService {
+  private users = [{ id: 1, name: "Alice" }];
+
+  findAll() {
+    return this.users;
+  }
+
+  create(name: string) {
+    const user = { id: this.users.length + 1, name };
+    this.users.push(user);
+    return user;
+  }
+}
+
+@Controller("users")
+class UserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
+  @Post()
+  create(@Body("name") name: string) {
+    return this.userService.create(name);
+  }
+}
+```
+
+## Learn More
+
+<Cards>
+  <Card
+    title="Getting Started"
+    href="/docs/getting-started/introduction"
+    description="Install Dwex and create your first application"
+  />
+  <Card
+    title="Overview"
+    href="/docs/overview/modules"
+    description="Learn about modules, controllers, and providers"
+  />
+  <Card
+    title="Security"
+    href="/docs/security/guards"
+    description="Implement authentication and authorization"
+  />
+  <Card
+    title="API Reference"
+    href="/docs/api/decorators"
+    description="Complete API documentation"
+  />
+</Cards>
+
+## Community & Support
+
+- **[GitHub](https://github.com/dwexjs/dwex)** - Star the repo, report issues
+- **[Discord](https://discord.gg/3Jrma3xnTy)** - Join our community
+- **[Discussions](https://github.com/dwexjs/dwex/discussions)** - Ask questions, share ideas

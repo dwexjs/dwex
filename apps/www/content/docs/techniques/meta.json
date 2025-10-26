@@ -1,6 +1,5 @@
 {
 	"title": "Techniques",
-	"icon": "Wrench",
 	"pages": [
 		"configuration",
 		"validation",

@@ -1,7 +1,13 @@
 {
 	"title": "Documentation",
 	"pages": [
-		"getting-started",
+    "---Introduction---",
+    "index",
+		"what-is-dwex",
+    "comparisons",
+		"deploying",
+
+		"---Framework---",
 		"overview",
 		"fundamentals",
 		"techniques",

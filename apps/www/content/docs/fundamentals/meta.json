@@ -1,6 +1,5 @@
 {
 	"title": "Fundamentals",
-	"icon": "Layers",
 	"pages": [
 		"dependency-injection",
 		"custom-providers",

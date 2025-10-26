@@ -1,101 +1,184 @@
 ---
-title: Introduction
-description: A progressive TypeScript framework for building efficient server-side applications on Bun runtime
+title: Quick Start
+description: Get started with Dwex in minutes
+icon: Book
 ---
 
-## Welcome to Dwex
+## Prerequisites
 
-Dwex is a lightweight, TypeScript-first web framework designed for the Bun runtime. Build fast, scalable server-side applications with decorator-based routing and powerful dependency injection.
+Before you begin, ensure you have [Bun](https://bun.sh) installed on your system:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+
+Verify installation:
+
+```bash
+bun --version
+# Should output v1.0.0 or higher
+```
 
 ## Quick Start
+
+The fastest way to get started is using the `create-dwex` CLI:
 
 ```bash
 bun create dwex my-app
 cd my-app
 bun install
+```
+
+This creates a new Dwex project with a recommended structure and configuration.
+
+## Manual Installation
+
+If you prefer to set up your project manually:
+
+```bash
+# Create a new directory
+mkdir my-app
+cd my-app
+
+# Initialize package.json
+bun init -y
+
+# Install Dwex packages
+bun add @dwex/core @dwex/common reflect-metadata
+```
+
+### TypeScript Configuration
+
+Create a `tsconfig.json` file:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"]
+}
+```
+
+### Enable Decorators
+
+Dwex relies on decorators and metadata reflection. Ensure your `tsconfig.json` includes:
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
+
+## Optional Packages
+
+Enhance your application with additional modules:
+
+### JWT Authentication
+
+```bash
+bun add @dwex/jwt
+```
+
+### Logging
+
+```bash
+bun add @dwex/logger
+```
+
+## Project Structure
+
+After installation, your project should look like this:
+
+```
+my-app/
+├── src/
+│   ├── app.module.ts
+│   ├── app.controller.ts
+│   └── main.ts
+├── package.json
+├── tsconfig.json
+└── bun.lockb
+```
+
+## Verify Installation
+
+Create a simple `src/main.ts` to test your setup:
+
+```typescript
+import "reflect-metadata";
+import { DwexFactory, Module, Controller, Get } from "@dwex/core";
+
+@Controller()
+class AppController {
+  @Get()
+  hello() {
+    return "Hello, Dwex!";
+  }
+}
+
+@Module({
+  controllers: [AppController],
+})
+class AppModule {}
+
+async function bootstrap() {
+  const app = await DwexFactory.create(AppModule);
+  await app.listen(3000);
+}
+
+bootstrap();
+```
+
+Run your application:
+
+```bash
 bun run src/main.ts
 ```
 
-Your app is now running at `http://localhost:3000` 🚀
+Visit `http://localhost:3000` - you should see "Hello, Dwex!"
 
-## Key Features
+## Troubleshooting
 
-**Decorator-Based Routing** - Define routes using intuitive decorators like `@Get()`, `@Post()`, and `@Controller()`.
+### "Cannot find module 'reflect-metadata'"
 
-**Dependency Injection** - Built-in DI container with support for singleton, request, and transient scopes.
-
-**Type-Safe** - Full TypeScript support with excellent type inference and IDE autocompletion.
-
-**Bun-Native** - Optimized for Bun's performance with native API usage throughout.
-
-**Modular Architecture** - Organize your app into reusable modules with clear boundaries.
-
-**Production Ready** - Includes JWT auth, logging, guards, interceptors, and exception handling.
-
-## Example
+Make sure you import `reflect-metadata` at the top of your entry file:
 
 ```typescript
-import { Controller, Get, Post, Body } from "@dwex/core";
-import { Injectable } from "@dwex/core";
+import "reflect-metadata";
+```
 
-@Injectable()
-class UserService {
-  private users = [{ id: 1, name: "Alice" }];
+### Decorator errors
 
-  findAll() {
-    return this.users;
-  }
+Verify `experimentalDecorators` and `emitDecoratorMetadata` are enabled in your `tsconfig.json`.
 
-  create(name: string) {
-    const user = { id: this.users.length + 1, name };
-    this.users.push(user);
-    return user;
-  }
-}
+### Module resolution issues
 
-@Controller("users")
-class UserController {
-  constructor(private readonly userService: UserService) {}
+Ensure your `tsconfig.json` uses:
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Post()
-  create(@Body("name") name: string) {
-    return this.userService.create(name);
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler"
   }
 }
 ```
 
-## Learn More
+## Next Steps
 
 <Cards>
-  <Card
-    title="Getting Started"
-    href="/docs/getting-started/introduction"
-    description="Install Dwex and create your first application"
-  />
-  <Card
-    title="Overview"
-    href="/docs/overview/modules"
-    description="Learn about modules, controllers, and providers"
-  />
-  <Card
-    title="Security"
-    href="/docs/security/guards"
-    description="Implement authentication and authorization"
-  />
-  <Card
-    title="API Reference"
-    href="/docs/api/decorators"
-    description="Complete API documentation"
-  />
+  <Card title="First App Tutorial" href="/docs/getting-started/first-app" />
+  <Card title="Learn About Modules" href="/docs/overview/modules" />
 </Cards>
-
-## Community & Support
-
-- **[GitHub](https://github.com/dwexjs/dwex)** - Star the repo, report issues
-- **[Discord](https://discord.gg/3Jrma3xnTy)** - Join our community
-- **[Discussions](https://github.com/dwexjs/dwex/discussions)** - Ask questions, share ideas
