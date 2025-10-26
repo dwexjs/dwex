@@ -18,25 +18,6 @@
     "dist",
     "!**/*.tsbuildinfo"
   ],
-  "nx": {
-    "targets": {
-      "build": {
-        "executor": "@nx/esbuild:esbuild",
-        "outputs": [
-          "{options.outputPath}"
-        ],
-        "options": {
-          "outputPath": "packages/core/dist",
-          "main": "packages/core/src/index.ts",
-          "tsConfig": "packages/core/tsconfig.lib.json",
-          "format": [
-            "esm"
-          ],
-          "declarationRootDir": "packages/core/src"
-        }
-      }
-    }
-  },
   "dependencies": {
     "tslib": "^2.3.0",
     "@dwex/common": "1.0.0-beta.1",
