@@ -83,14 +83,14 @@
     },
     "packages/common": {
       "name": "@dwexjs/common",
-      "version": "0.0.1",
+      "version": "1.0.0-beta.1",
       "dependencies": {
         "tslib": "^2.3.0",
       },
     },
     "packages/core": {
       "name": "@dwexjs/core",
-      "version": "0.0.1",
+      "version": "1.0.0-beta.1",
       "dependencies": {
         "@dwexjs/common": "*",
         "@dwexjs/logger": "*",
@@ -104,7 +104,7 @@
     },
     "packages/create-dwex": {
       "name": "create-dwex",
-      "version": "0.0.1",
+      "version": "1.0.0-beta.1",
       "bin": {
         "create-dwex": "./dist/index.js",
       },
@@ -121,7 +121,7 @@
     },
     "packages/jwt": {
       "name": "@dwexjs/jwt",
-      "version": "0.0.1",
+      "version": "1.0.0-beta.1",
       "dependencies": {
         "@dwexjs/common": "*",
         "jose": "^5.9.6",
@@ -131,7 +131,7 @@
     },
     "packages/logger": {
       "name": "@dwexjs/logger",
-      "version": "0.0.1",
+      "version": "1.0.0-beta.1",
       "dependencies": {
         "@dwexjs/common": "*",
         "pino": "^10.1.0",
