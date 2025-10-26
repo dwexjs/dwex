@@ -11,10 +11,10 @@
 	},
 	"include": ["src/**/*.ts"],
 	"references": [
-    {
-      "path": "../common/tsconfig.lib.json"
-    }
-  ],
+		{
+			"path": "../common/tsconfig.lib.json"
+		}
+	],
 	"exclude": [
 		"vite.config.ts",
 		"vite.config.mts",

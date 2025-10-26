@@ -72,10 +72,7 @@ export class Logger {
 						const { time, msg, context, level } = log;
 
 						// Map pino level numbers to level names and colors
-						const levelMap: Record<
-							number,
-							{ name: string; color: string }
-						> = {
+						const levelMap: Record<number, { name: string; color: string }> = {
 							10: { name: "TRACE", color: "\x1b[38;2;186;223;219m" }, // #BADFDB
 							20: { name: "DEBUG", color: "\x1b[38;2;186;223;219m" }, // #BADFDB
 							30: { name: "LOG", color: "\x1b[38;2;252;249;234m" }, // #FCF9EA

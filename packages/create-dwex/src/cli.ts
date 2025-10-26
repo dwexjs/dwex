@@ -1,7 +1,11 @@
 import * as clack from "@clack/prompts";
 import { mkdir } from "node:fs/promises";
 import pc from "picocolors";
-import { discoverTemplates, processTemplateFiles, getTemplatePath } from "./template.js";
+import {
+	discoverTemplates,
+	processTemplateFiles,
+	getTemplatePath,
+} from "./template.js";
 import { collectProjectConfig } from "./prompts.js";
 import { getCreateDwexVersion } from "./package.js";
 import { initializeGit } from "./git.js";
@@ -26,7 +30,10 @@ export async function run(): Promise<void> {
 	const version = await getCreateDwexVersion();
 
 	// Collect project configuration from user
-	const { config, projectPath } = await collectProjectConfig(templates, version);
+	const { config, projectPath } = await collectProjectConfig(
+		templates,
+		version,
+	);
 
 	// Create project
 	const spinner = clack.spinner();
