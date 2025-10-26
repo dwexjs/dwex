@@ -54,6 +54,11 @@
     "version": {
       "preVersionCommand": "bunx nx run-many -t build",
       "preserveMatchingDependencyRanges": false
+    },
+    "changelog": {
+      "workspaceChangelog": {
+        "createRelease": "github"
+      }
     }
   }
 }
