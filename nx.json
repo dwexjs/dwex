@@ -56,9 +56,6 @@
       "preserveMatchingDependencyRanges": false
     },
     "changelog": {
-      "git": {
-        "commitMessage": "chore: release {{version}}"
-      },
       "workspaceChangelog": {
         "file": "CHANGELOG.md",
         "createRelease": "github"
