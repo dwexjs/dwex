@@ -43,3 +43,27 @@ export const SCOPE = "dwex:scope";
 
 /** Key for custom param decorators */
 export const CUSTOM_ROUTE_PARAM = "dwex:custom:route:param";
+
+/** Key for API tags metadata (Swagger) */
+export const API_TAGS = "dwex:api:tags";
+
+/** Key for API operation metadata (Swagger) */
+export const API_OPERATION = "dwex:api:operation";
+
+/** Key for API response metadata (Swagger) */
+export const API_RESPONSE = "dwex:api:response";
+
+/** Key for API parameter metadata (Swagger) */
+export const API_PARAM = "dwex:api:param";
+
+/** Key for API query metadata (Swagger) */
+export const API_QUERY = "dwex:api:query";
+
+/** Key for API body metadata (Swagger) */
+export const API_BODY = "dwex:api:body";
+
+/** Key for API property metadata (Swagger) */
+export const API_PROPERTY = "dwex:api:property";
+
+/** Key for API security metadata (Swagger) */
+export const API_SECURITY = "dwex:api:security";

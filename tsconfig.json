@@ -1,8 +1,8 @@
 {
-	"extends": "./tsconfig.base.json",
-	"compileOnSave": false,
-	"files": [],
-	"references": [
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
     {
       "path": "./packages/core"
     },
@@ -17,6 +17,12 @@
     },
     {
       "path": "./packages/logger"
+    },
+    {
+      "path": "./examples/openapi"
+    },
+    {
+      "path": "./packages/openapi"
     }
   ]
 }
