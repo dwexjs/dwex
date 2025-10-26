@@ -10,11 +10,8 @@ import { findUserByUsername, type User } from "./users.db";
 @Injectable()
 export class AuthService {
 	private readonly logger = new Logger(AuthService.name);
-	private readonly jwtService = new JwtService({
-		secret: "super-secret-key-change-in-production",
-		expiresIn: "1h",
-		issuer: "<%= projectName %>",
-	});
+
+	constructor(private jwtService: JwtService) {}
 
 	/**
 	 * Validates user credentials and returns a JWT token

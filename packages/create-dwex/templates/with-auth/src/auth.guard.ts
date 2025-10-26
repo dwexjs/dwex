@@ -1,8 +1,4 @@
-import {
-	Injectable,
-	CanActivate,
-	type ExecutionContext,
-} from "@dwexjs/core";
+import { Injectable, CanActivate, type ExecutionContext } from "@dwexjs/core";
 import { Logger } from "@dwexjs/logger";
 import { AuthService } from "./auth.service";
 
@@ -13,7 +9,8 @@ import { AuthService } from "./auth.service";
 @Injectable()
 export class AuthGuard implements CanActivate {
 	private readonly logger = new Logger(AuthGuard.name);
-	private readonly authService = new AuthService();
+
+	constructor(private readonly authService: AuthService) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.getRequest();
