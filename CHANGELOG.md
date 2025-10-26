@@ -1,3 +1,13 @@
+## 1.0.0-beta.5 (2025-10-26)
+
+### 🚀 Features
+
+- **create-dwex:** add composable feature system with auth-jwt and openapi features ([c535cc0](https://github.com/dwexjs/dwex/commit/c535cc0))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.4 (2025-10-26)
 
 ### 🚀 Features
