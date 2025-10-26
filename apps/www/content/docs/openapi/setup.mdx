@@ -1,0 +1,172 @@
+---
+title: Setup
+description: Setting up OpenAPI documentation in your Dwex application
+---
+
+# OpenAPI Setup
+
+This guide will walk you through setting up OpenAPI documentation in your Dwex application.
+
+## Installation
+
+First, install the OpenAPI package:
+
+```bash
+bun add @dwex/openapi
+```
+
+## Basic Configuration
+
+Create your OpenAPI configuration using the `DocumentBuilder`:
+
+```typescript
+import { DocumentBuilder, OpenApiModule } from '@dwex/openapi';
+
+const config = new DocumentBuilder()
+  .setTitle('My API')
+  .setDescription('API documentation')
+  .setVersion('1.0')
+  .build();
+```
+
+## Creating the Document
+
+Generate the OpenAPI document from your application:
+
+```typescript
+const document = OpenApiModule.createDocument(app, config);
+```
+
+This will automatically scan all your controllers and routes to generate the OpenAPI specification.
+
+## Setting Up the UI
+
+Serve the API documentation at a specific path (default: `/docs`):
+
+```typescript
+OpenApiModule.setup('/docs', app, document);
+```
+
+This creates two endpoints:
+- `GET /docs` - Scalar UI interface
+- `GET /docs/json` - OpenAPI JSON specification
+
+## Full Example
+
+Here's a complete bootstrap function with OpenAPI:
+
+```typescript
+import { DwexFactory } from '@dwex/core';
+import { DocumentBuilder, OpenApiModule } from '@dwex/openapi';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  // Create the application
+  const app = await DwexFactory.create(AppModule);
+
+  // Configure OpenAPI
+  const config = new DocumentBuilder()
+    .setTitle('My API')
+    .setDescription('The My API description')
+    .setVersion('1.0')
+    .setTermsOfService('https://example.com/terms')
+    .setContact('API Support', 'https://example.com', 'support@example.com')
+    .setLicense('MIT', 'https://opensource.org/licenses/MIT')
+    .addServer('http://localhost:3000', 'Local server')
+    .addServer('https://api.example.com', 'Production server')
+    .addTag('users', 'User management endpoints')
+    .addTag('auth', 'Authentication endpoints')
+    .addBearerAuth()
+    .build();
+
+  // Create and setup documentation
+  const document = OpenApiModule.createDocument(app, config);
+  OpenApiModule.setup('/docs', app, document, {
+    customSiteTitle: 'My API Documentation',
+    darkMode: true,
+  });
+
+  // Start the server
+  await app.listen(3000);
+  console.log('API Documentation: http://localhost:3000/docs');
+}
+
+bootstrap();
+```
+
+## Configuration Options
+
+### DocumentBuilder Methods
+
+| Method | Description |
+|--------|-------------|
+| `setTitle(title)` | Set the API title |
+| `setDescription(description)` | Set the API description |
+| `setVersion(version)` | Set the API version |
+| `setTermsOfService(url)` | Set terms of service URL |
+| `setContact(name, url, email)` | Set contact information |
+| `setLicense(name, url)` | Set license information |
+| `addServer(url, description)` | Add a server |
+| `addTag(name, description)` | Add a tag for grouping |
+| `addBearerAuth(options)` | Add Bearer authentication |
+| `addBasicAuth(options)` | Add Basic authentication |
+| `addApiKey(options)` | Add API Key authentication |
+| `addSecurity(name, scopes)` | Add global security requirement |
+
+### Setup Options
+
+```typescript
+OpenApiModule.setup('/docs', app, document, {
+  customSiteTitle: 'My API Docs',  // Page title
+  darkMode: true,                   // Enable dark mode
+  customCss: 'body { ... }',       // Custom CSS
+  customfavIcon: 'https://...',    // Custom favicon URL
+});
+```
+
+## Security Schemes
+
+### Bearer Authentication
+
+```typescript
+const config = new DocumentBuilder()
+  .addBearerAuth({
+    name: 'JWT',
+    description: 'JWT Authorization',
+    bearerFormat: 'JWT'
+  })
+  .build();
+```
+
+### Basic Authentication
+
+```typescript
+const config = new DocumentBuilder()
+  .addBasicAuth({
+    name: 'basic',
+    description: 'Basic HTTP Authentication'
+  })
+  .build();
+```
+
+### API Key
+
+```typescript
+const config = new DocumentBuilder()
+  .addApiKey({
+    name: 'api-key',
+    in: 'header',
+    paramName: 'X-API-KEY',
+    description: 'API Key Authentication'
+  })
+  .build();
+```
+
+## Next Steps
+
+Now that you've set up OpenAPI, learn how to document your endpoints:
+
+<Cards>
+  <Card title="Decorators" href="/docs/openapi/decorators" />
+  <Card title="DTOs" href="/docs/openapi/dtos" />
+</Cards>

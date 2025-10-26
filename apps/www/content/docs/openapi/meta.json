@@ -1,0 +1,5 @@
+{
+	"title": "OpenAPI",
+	"icon": "FileText",
+	"pages": ["index", "setup", "decorators", "dtos", "security"]
+}

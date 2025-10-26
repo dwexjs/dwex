@@ -1,0 +1,66 @@
+---
+title: Introduction
+description: API documentation with OpenAPI and Scalar UI
+---
+
+# OpenAPI Documentation
+
+Dwex provides first-class support for OpenAPI (formerly Swagger) specification through the `@dwex/openapi` package. Generate beautiful, interactive API documentation with Scalar UI automatically from your code.
+
+## Features
+
+- **Auto-generation**: Automatically generates OpenAPI specs from your decorators
+- **Scalar UI**: Beautiful, modern API documentation interface
+- **Type-Safe**: Full TypeScript support with decorators
+- **Customizable**: Optional decorators for detailed control
+- **NestJS-like**: Familiar API for developers coming from NestJS
+
+## Installation
+
+```bash
+bun add @dwex/openapi
+```
+
+## Quick Start
+
+Setup OpenAPI documentation in your application:
+
+```typescript
+import { DwexFactory } from "@dwex/core";
+import { DocumentBuilder, OpenApiModule } from "@dwex/openapi";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+  const app = await DwexFactory.create(AppModule);
+
+  // Create OpenAPI configuration
+  const config = new DocumentBuilder()
+    .setTitle("My API")
+    .setDescription("API documentation")
+    .setVersion("1.0")
+    .addServer("http://localhost:3000")
+    .addBearerAuth()
+    .build();
+
+  // Generate OpenAPI document
+  const document = OpenApiModule.createDocument(app, config);
+
+  // Setup API documentation at /docs
+  OpenApiModule.setup("/docs", app, document);
+
+  await app.listen(3000);
+}
+
+bootstrap();
+```
+
+Visit `http://localhost:3000/docs` to see your API documentation!
+
+## Next Steps
+
+<Cards>
+  <Card title="Setup" href="/docs/openapi/setup" />
+  <Card title="Decorators" href="/docs/openapi/decorators" />
+  <Card title="DTOs" href="/docs/openapi/dtos" />
+  <Card title="Security" href="/docs/openapi/security" />
+</Cards>

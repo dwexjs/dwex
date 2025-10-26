@@ -1,0 +1,298 @@
+---
+title: Decorators
+description: Document your API endpoints with decorators
+---
+
+# API Decorators
+
+Use decorators to add detailed documentation to your API endpoints.
+
+## Class-Level Decorators
+
+### @ApiTags
+
+Group endpoints by tags:
+
+```typescript
+import { Controller, Get } from '@dwex/core';
+import { ApiTags } from '@dwex/openapi';
+
+@Controller('users')
+@ApiTags('users', 'management')
+export class UsersController {
+  @Get()
+  findAll() {
+    return [];
+  }
+}
+```
+
+### @ApiBearerAuth
+
+Require Bearer authentication:
+
+```typescript
+@Controller('users')
+@ApiBearerAuth()
+export class UsersController {
+  // All routes require authentication
+}
+```
+
+### @ApiSecurity
+
+Custom security requirements:
+
+```typescript
+@Controller('admin')
+@ApiSecurity('api-key', ['admin'])
+export class AdminController {}
+```
+
+## Method-Level Decorators
+
+### @ApiOperation
+
+Document endpoint purpose:
+
+```typescript
+import { Get } from '@dwex/core';
+import { ApiOperation } from '@dwex/openapi';
+
+@Get(':id')
+@ApiOperation({
+  summary: 'Get user by ID',
+  description: 'Returns a single user by their unique identifier',
+  operationId: 'getUserById',
+  deprecated: false
+})
+findOne(@Param('id') id: string) {
+  return { id };
+}
+```
+
+### @ApiResponse
+
+Document responses:
+
+```typescript
+import { ApiResponse } from '@dwex/openapi';
+
+@Get(':id')
+@ApiResponse({
+  status: 200,
+  description: 'User found',
+  type: UserDto
+})
+@ApiResponse({
+  status: 404,
+  description: 'User not found'
+})
+findOne(@Param('id') id: string) {
+  return { id };
+}
+```
+
+## Response Shortcuts
+
+Convenience decorators for common responses:
+
+```typescript
+import {
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+} from '@dwex/openapi';
+
+@Get()
+@ApiOkResponse({ description: 'List of users', type: [UserDto] })
+findAll() {}
+
+@Post()
+@ApiCreatedResponse({ description: 'User created', type: UserDto })
+@ApiBadRequestResponse({ description: 'Invalid input' })
+create(@Body() dto: CreateUserDto) {}
+
+@Delete(':id')
+@ApiNoContentResponse({ description: 'User deleted' })
+@ApiNotFoundResponse({ description: 'User not found' })
+remove(@Param('id') id: string) {}
+```
+
+## Parameter Decorators
+
+### @ApiParam
+
+Document path parameters:
+
+```typescript
+import { ApiParam } from '@dwex/openapi';
+
+@Get(':id')
+@ApiParam({
+  name: 'id',
+  description: 'User ID',
+  type: String,
+  example: '123'
+})
+findOne(@Param('id') id: string) {
+  return { id };
+}
+```
+
+### @ApiQuery
+
+Document query parameters:
+
+```typescript
+import { ApiQuery } from '@dwex/openapi';
+
+@Get()
+@ApiQuery({
+  name: 'page',
+  description: 'Page number',
+  required: false,
+  type: Number,
+  example: 1
+})
+@ApiQuery({
+  name: 'limit',
+  description: 'Items per page',
+  required: false,
+  type: Number,
+  example: 10
+})
+findAll(@Query('page') page?: string) {
+  return [];
+}
+```
+
+### @ApiBody
+
+Document request body:
+
+```typescript
+import { ApiBody } from '@dwex/openapi';
+
+@Post()
+@ApiBody({
+  description: 'User creation data',
+  type: CreateUserDto,
+  required: true
+})
+create(@Body() dto: CreateUserDto) {
+  return dto;
+}
+```
+
+## Complete Example
+
+```typescript
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@dwex/core';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBody,
+} from '@dwex/openapi';
+
+@Controller('users')
+@ApiTags('users')
+@ApiBearerAuth()
+export class UsersController {
+  @Get()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiOkResponse({ description: 'List of users', type: [UserDto] })
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ) {
+    return [];
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiParam({ name: 'id', description: 'User ID', type: String })
+  @ApiOkResponse({ description: 'User found', type: UserDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  findOne(@Param('id') id: string) {
+    return { id };
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiBody({ description: 'User data', type: CreateUserDto })
+  @ApiCreatedResponse({ description: 'User created', type: UserDto })
+  create(@Body() dto: CreateUserDto) {
+    return dto;
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update user' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiOkResponse({ description: 'User updated', type: UserDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return { id, ...dto };
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete user' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiNoContentResponse({ description: 'User deleted' })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  remove(@Param('id') id: string) {
+    return null;
+  }
+}
+```
+
+## Auto-Generation
+
+Even without decorators, `@dwex/openapi` automatically generates basic documentation from your existing Dwex decorators:
+
+```typescript
+// This is automatically documented!
+@Controller('users')
+export class UsersController {
+  @Get()
+  findAll(@Query('page') page?: string) {
+    return [];
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return { id };
+  }
+
+  @Post()
+  create(@Body() dto: CreateUserDto) {
+    return dto;
+  }
+}
+```
+
+The auto-generated documentation includes:
+- Route paths from `@Get()`, `@Post()`, etc.
+- Parameters from `@Param()`, `@Query()`, `@Body()`
+- Controller paths from `@Controller()`
+- Authentication requirements from guards
+
+## Next Steps
+
+<Cards>
+  <Card title="DTOs" href="/docs/openapi/dtos" />
+  <Card title="Security" href="/docs/openapi/security" />
+</Cards>

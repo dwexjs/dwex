@@ -1,0 +1,420 @@
+---
+title: DTOs
+description: Document your Data Transfer Objects with property decorators
+---
+
+# DTO Documentation
+
+Document your DTOs (Data Transfer Objects) using property decorators to generate detailed schema information.
+
+## @ApiProperty
+
+Define required properties with detailed information:
+
+```typescript
+import { ApiProperty } from '@dwex/openapi';
+
+export class CreateUserDto {
+  @ApiProperty({
+    description: 'Username',
+    example: 'john_doe',
+    minLength: 3,
+    maxLength: 20,
+  })
+  username: string;
+
+  @ApiProperty({
+    description: 'Email address',
+    example: 'john@example.com',
+    format: 'email',
+  })
+  email: string;
+
+  @ApiProperty({
+    description: 'User age',
+    example: 25,
+    minimum: 18,
+    maximum: 100,
+  })
+  age: number;
+}
+```
+
+## @ApiPropertyOptional
+
+Define optional properties:
+
+```typescript
+import { ApiPropertyOptional } from '@dwex/openapi';
+
+export class UpdateUserDto {
+  @ApiPropertyOptional({
+    description: 'Username',
+    example: 'john_doe_updated',
+  })
+  username?: string;
+
+  @ApiPropertyOptional({
+    description: 'Email address',
+    example: 'john.updated@example.com',
+  })
+  email?: string;
+
+  @ApiPropertyOptional({
+    description: 'User age',
+    example: 26,
+  })
+  age?: number;
+}
+```
+
+## Property Options
+
+All available options for `@ApiProperty`:
+
+```typescript
+@ApiProperty({
+  // Basic information
+  description: 'Property description',
+  example: 'example value',
+  default: 'default value',
+
+  // Type information
+  type: String,  // or Number, Boolean, Date, etc.
+  format: 'email',  // 'email', 'date-time', 'uri', etc.
+
+  // Validation
+  required: true,
+  minimum: 0,
+  maximum: 100,
+  minLength: 3,
+  maxLength: 20,
+  pattern: '^[a-z]+$',
+
+  // Enums
+  enum: ['option1', 'option2', 'option3'],
+
+  // Arrays
+  isArray: true,
+})
+propertyName: string;
+```
+
+## Enums
+
+Document enum properties:
+
+```typescript
+export class CreateUserDto {
+  @ApiProperty({
+    description: 'User role',
+    enum: ['admin', 'user', 'guest'],
+    default: 'user',
+    example: 'user',
+  })
+  role: string;
+}
+```
+
+Or with TypeScript enums:
+
+```typescript
+enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+  GUEST = 'guest',
+}
+
+export class CreateUserDto {
+  @ApiProperty({
+    description: 'User role',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
+}
+```
+
+## Arrays
+
+Document array properties:
+
+```typescript
+export class CreateUserDto {
+  @ApiProperty({
+    description: 'User tags',
+    type: [String],
+    example: ['tag1', 'tag2'],
+  })
+  tags: string[];
+
+  // Or use isArray
+  @ApiProperty({
+    description: 'User interests',
+    type: String,
+    isArray: true,
+    example: ['coding', 'music'],
+  })
+  interests: string[];
+}
+```
+
+## Nested Objects
+
+Document nested DTO properties:
+
+```typescript
+export class AddressDto {
+  @ApiProperty({ description: 'Street address' })
+  street: string;
+
+  @ApiProperty({ description: 'City' })
+  city: string;
+
+  @ApiProperty({ description: 'Postal code' })
+  postalCode: string;
+}
+
+export class CreateUserDto {
+  @ApiProperty({ description: 'Username' })
+  username: string;
+
+  @ApiProperty({
+    description: 'User address',
+    type: AddressDto,
+  })
+  address: AddressDto;
+}
+```
+
+## Array of Objects
+
+Document arrays of nested objects:
+
+```typescript
+export class PhoneDto {
+  @ApiProperty({ description: 'Phone type', enum: ['mobile', 'home', 'work'] })
+  type: string;
+
+  @ApiProperty({ description: 'Phone number' })
+  number: string;
+}
+
+export class CreateUserDto {
+  @ApiProperty({ description: 'Username' })
+  username: string;
+
+  @ApiProperty({
+    description: 'Phone numbers',
+    type: [PhoneDto],
+    isArray: true,
+  })
+  phones: PhoneDto[];
+}
+```
+
+## Validation Examples
+
+### String Validation
+
+```typescript
+@ApiProperty({
+  description: 'Username',
+  minLength: 3,
+  maxLength: 20,
+  pattern: '^[a-zA-Z0-9_]+$',
+  example: 'john_doe',
+})
+username: string;
+```
+
+### Number Validation
+
+```typescript
+@ApiProperty({
+  description: 'User age',
+  type: Number,
+  minimum: 18,
+  maximum: 100,
+  example: 25,
+})
+age: number;
+```
+
+### Date Properties
+
+```typescript
+@ApiProperty({
+  description: 'Birth date',
+  type: Date,
+  format: 'date-time',
+  example: '1990-01-01T00:00:00Z',
+})
+birthDate: Date;
+```
+
+## Complete DTO Example
+
+```typescript
+import { ApiProperty, ApiPropertyOptional } from '@dwex/openapi';
+
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+  GUEST = 'guest',
+}
+
+export class CreateUserDto {
+  @ApiProperty({
+    description: 'Username (alphanumeric and underscores only)',
+    example: 'john_doe',
+    minLength: 3,
+    maxLength: 20,
+    pattern: '^[a-zA-Z0-9_]+$',
+  })
+  username: string;
+
+  @ApiProperty({
+    description: 'Email address',
+    example: 'john@example.com',
+    format: 'email',
+  })
+  email: string;
+
+  @ApiProperty({
+    description: 'User password (min 8 characters)',
+    example: 'SecurePass123',
+    minLength: 8,
+    format: 'password',
+  })
+  password: string;
+
+  @ApiProperty({
+    description: 'User age (must be 18 or older)',
+    example: 25,
+    minimum: 18,
+    maximum: 100,
+  })
+  age: number;
+
+  @ApiPropertyOptional({
+    description: 'User role',
+    enum: UserRole,
+    default: UserRole.USER,
+    example: UserRole.USER,
+  })
+  role?: UserRole;
+
+  @ApiPropertyOptional({
+    description: 'User interests',
+    type: [String],
+    example: ['coding', 'music', 'sports'],
+  })
+  interests?: string[];
+
+  @ApiPropertyOptional({
+    description: 'User bio',
+    example: 'Software developer from NYC',
+    maxLength: 500,
+  })
+  bio?: string;
+}
+
+export class UpdateUserDto {
+  @ApiPropertyOptional({
+    description: 'Updated username',
+    minLength: 3,
+    maxLength: 20,
+  })
+  username?: string;
+
+  @ApiPropertyOptional({
+    description: 'Updated email',
+    format: 'email',
+  })
+  email?: string;
+
+  @ApiPropertyOptional({
+    description: 'Updated bio',
+    maxLength: 500,
+  })
+  bio?: string;
+}
+
+export class UserDto {
+  @ApiProperty({
+    description: 'User ID',
+    example: '123',
+  })
+  id: string;
+
+  @ApiProperty({
+    description: 'Username',
+    example: 'john_doe',
+  })
+  username: string;
+
+  @ApiProperty({
+    description: 'Email address',
+    example: 'john@example.com',
+  })
+  email: string;
+
+  @ApiProperty({
+    description: 'User age',
+    example: 25,
+  })
+  age: number;
+
+  @ApiProperty({
+    description: 'User role',
+    enum: UserRole,
+    example: UserRole.USER,
+  })
+  role: UserRole;
+
+  @ApiProperty({
+    description: 'Account creation timestamp',
+    format: 'date-time',
+    example: '2024-01-01T00:00:00Z',
+  })
+  createdAt: Date;
+}
+```
+
+## Using DTOs in Controllers
+
+Reference your DTOs in controller decorators:
+
+```typescript
+import { Controller, Post, Body } from '@dwex/core';
+import { ApiBody, ApiCreatedResponse, ApiBadRequestResponse } from '@dwex/openapi';
+import { CreateUserDto, UserDto } from './user.dto';
+
+@Controller('users')
+export class UsersController {
+  @Post()
+  @ApiBody({
+    description: 'User creation data',
+    type: CreateUserDto,
+  })
+  @ApiCreatedResponse({
+    description: 'User created successfully',
+    type: UserDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid user data',
+  })
+  create(@Body() createUserDto: CreateUserDto): UserDto {
+    // Implementation
+    return {} as UserDto;
+  }
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Security" href="/docs/openapi/security" />
+  <Card title="Decorators" href="/docs/openapi/decorators" />
+</Cards>

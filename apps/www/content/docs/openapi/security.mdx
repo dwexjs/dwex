@@ -1,0 +1,381 @@
+---
+title: Security
+description: Document authentication and authorization in your API
+---
+
+# API Security
+
+Document authentication and authorization requirements in your OpenAPI specification.
+
+## Security Schemes
+
+Define security schemes in your OpenAPI configuration:
+
+### Bearer Authentication (JWT)
+
+```typescript
+const config = new DocumentBuilder()
+  .setTitle('My API')
+  .setVersion('1.0')
+  .addBearerAuth({
+    name: 'JWT',
+    description: 'JWT Authorization header using Bearer scheme',
+    bearerFormat: 'JWT'
+  })
+  .build();
+```
+
+### Basic Authentication
+
+```typescript
+const config = new DocumentBuilder()
+  .addBasicAuth({
+    name: 'basic',
+    description: 'Basic HTTP Authentication'
+  })
+  .build();
+```
+
+### API Key
+
+```typescript
+const config = new DocumentBuilder()
+  .addApiKey({
+    name: 'api-key',
+    in: 'header',  // or 'query' or 'cookie'
+    paramName: 'X-API-KEY',
+    description: 'API Key Authentication'
+  })
+  .build();
+```
+
+### OAuth2
+
+```typescript
+const config = new DocumentBuilder()
+  .addOAuth2({
+    name: 'oauth2',
+    description: 'OAuth2 Authentication',
+    flows: {
+      authorizationCode: {
+        authorizationUrl: 'https://example.com/oauth/authorize',
+        tokenUrl: 'https://example.com/oauth/token',
+        scopes: {
+          'read:users': 'Read user information',
+          'write:users': 'Modify user information',
+        }
+      }
+    }
+  })
+  .build();
+```
+
+## Applying Security
+
+### Global Security
+
+Apply security to all endpoints:
+
+```typescript
+const config = new DocumentBuilder()
+  .addBearerAuth()
+  .addSecurity('bearer', [])  // Apply globally
+  .build();
+```
+
+### Controller-Level Security
+
+Apply security to all routes in a controller:
+
+```typescript
+import { Controller } from '@dwex/core';
+import { ApiBearerAuth } from '@dwex/openapi';
+
+@Controller('users')
+@ApiBearerAuth()
+export class UsersController {
+  // All routes require Bearer authentication
+}
+```
+
+### Route-Level Security
+
+Apply security to specific routes:
+
+```typescript
+import { Get } from '@dwex/core';
+import { ApiBearerAuth } from '@dwex/openapi';
+
+@Controller('users')
+export class UsersController {
+  @Get()
+  findAll() {
+    // Public route
+    return [];
+  }
+
+  @Get('profile')
+  @ApiBearerAuth()
+  getProfile() {
+    // Protected route
+    return {};
+  }
+}
+```
+
+## Security Decorators
+
+### @ApiBearerAuth
+
+Require Bearer token authentication:
+
+```typescript
+@Controller('users')
+@ApiBearerAuth()
+export class UsersController {}
+```
+
+With scopes:
+
+```typescript
+@Get('admin')
+@ApiBearerAuth(['admin', 'write'])
+adminOnly() {
+  return { message: 'Admin area' };
+}
+```
+
+### @ApiBasicAuth
+
+Require Basic authentication:
+
+```typescript
+@Controller('legacy')
+@ApiBasicAuth()
+export class LegacyController {}
+```
+
+### @ApiApiKeyAuth
+
+Require API Key authentication:
+
+```typescript
+@Controller('api')
+@ApiApiKeyAuth('api-key')
+export class ApiController {}
+```
+
+### @ApiSecurity
+
+Custom security requirements:
+
+```typescript
+import { ApiSecurity } from '@dwex/openapi';
+
+@Controller('admin')
+@ApiSecurity('oauth2', ['admin', 'write:users'])
+export class AdminController {}
+```
+
+## Multiple Security Schemes
+
+Apply multiple security schemes:
+
+```typescript
+const config = new DocumentBuilder()
+  .addBearerAuth({ name: 'jwt' })
+  .addApiKey({
+    name: 'api-key',
+    in: 'header',
+    paramName: 'X-API-KEY'
+  })
+  .build();
+```
+
+Use them in controllers:
+
+```typescript
+import { ApiSecurity } from '@dwex/openapi';
+
+@Controller('users')
+@ApiSecurity('jwt', [])
+@ApiSecurity('api-key', [])
+export class UsersController {
+  // Accepts either JWT or API Key
+}
+```
+
+## Complete Example
+
+```typescript
+// main.ts
+import { DwexFactory } from '@dwex/core';
+import { DocumentBuilder, OpenApiModule } from '@dwex/openapi';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await DwexFactory.create(AppModule);
+
+  const config = new DocumentBuilder()
+    .setTitle('My API')
+    .setVersion('1.0')
+    // Add Bearer auth for JWT tokens
+    .addBearerAuth({
+      name: 'JWT',
+      description: 'JWT Authorization header',
+      bearerFormat: 'JWT'
+    })
+    // Add API Key for service-to-service
+    .addApiKey({
+      name: 'api-key',
+      in: 'header',
+      paramName: 'X-API-KEY',
+      description: 'API Key for service authentication'
+    })
+    .build();
+
+  const document = OpenApiModule.createDocument(app, config);
+  OpenApiModule.setup('/docs', app, document);
+
+  await app.listen(3000);
+}
+
+bootstrap();
+```
+
+```typescript
+// users.controller.ts
+import { Controller, Get, Post, Body, UseGuards } from '@dwex/core';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiApiKeyAuth,
+  ApiOperation,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
+} from '@dwex/openapi';
+import { AuthGuard } from './auth.guard';
+import { RolesGuard } from './roles.guard';
+
+@Controller('users')
+@ApiTags('users')
+export class UsersController {
+  // Public route - no auth required
+  @Get('public')
+  @ApiOperation({ summary: 'Get public user list' })
+  @ApiOkResponse({ description: 'Public user data' })
+  getPublicUsers() {
+    return [];
+  }
+
+  // JWT protected route
+  @Get('profile')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiOkResponse({ description: 'User profile' })
+  @ApiUnauthorizedResponse({ description: 'Not authenticated' })
+  getProfile() {
+    return {};
+  }
+
+  // Admin only route
+  @Get('admin')
+  @UseGuards(AuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Admin only endpoint' })
+  @ApiOkResponse({ description: 'Admin data' })
+  @ApiUnauthorizedResponse({ description: 'Not authenticated' })
+  @ApiForbiddenResponse({ description: 'Insufficient permissions' })
+  adminOnly() {
+    return { message: 'Admin area' };
+  }
+
+  // Service-to-service with API Key
+  @Post('sync')
+  @ApiApiKeyAuth('api-key')
+  @ApiOperation({ summary: 'Sync user data (service-to-service)' })
+  @ApiOkResponse({ description: 'Sync completed' })
+  @ApiUnauthorizedResponse({ description: 'Invalid API key' })
+  syncUsers(@Body() data: any) {
+    return { status: 'synced' };
+  }
+}
+```
+
+## Security Responses
+
+Document common security responses:
+
+```typescript
+import {
+  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
+} from '@dwex/openapi';
+
+@Get('protected')
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({
+  description: 'Missing or invalid authentication token'
+})
+@ApiForbiddenResponse({
+  description: 'Insufficient permissions to access this resource'
+})
+getProtected() {
+  return {};
+}
+```
+
+## OAuth2 Scopes
+
+Document required OAuth2 scopes:
+
+```typescript
+const config = new DocumentBuilder()
+  .addOAuth2({
+    name: 'oauth2',
+    flows: {
+      authorizationCode: {
+        authorizationUrl: 'https://example.com/oauth/authorize',
+        tokenUrl: 'https://example.com/oauth/token',
+        scopes: {
+          'read:users': 'Read user information',
+          'write:users': 'Modify user information',
+          'delete:users': 'Delete users',
+          'admin': 'Admin access',
+        }
+      }
+    }
+  })
+  .build();
+```
+
+Use in controllers:
+
+```typescript
+import { ApiSecurity } from '@dwex/openapi';
+
+@Controller('users')
+export class UsersController {
+  @Get()
+  @ApiSecurity('oauth2', ['read:users'])
+  findAll() {}
+
+  @Post()
+  @ApiSecurity('oauth2', ['write:users'])
+  create() {}
+
+  @Delete(':id')
+  @ApiSecurity('oauth2', ['delete:users', 'admin'])
+  remove() {}
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Guards" href="/docs/security/guards" />
+  <Card title="Authentication" href="/docs/security/authentication" />
+  <Card title="JWT Module" href="/docs/modules/jwt" />
+</Cards>

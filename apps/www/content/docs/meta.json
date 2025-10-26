@@ -6,6 +6,7 @@
 		"fundamentals",
 		"routing",
 		"security",
+		"openapi",
 		"modules",
 		"api"
 	]
