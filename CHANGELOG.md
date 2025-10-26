@@ -1,3 +1,17 @@
+## 1.0.0-beta.4 (2025-10-26)
+
+### 🚀 Features
+
+- add support for openapi docs ([04fa211](https://github.com/dwexjs/dwex/commit/04fa211))
+
+### 🩹 Fixes
+
+- correct package.json path in DwexApplication ([866d3f1](https://github.com/dwexjs/dwex/commit/866d3f1))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.3 (2025-10-26)
 
 This was a version bump only, there were no code changes.
