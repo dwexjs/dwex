@@ -76,7 +76,7 @@ Create a `dwex.config.ts` file in your project root:
 ```typescript
 export default {
   // Entry point file for the application
-  entry: "src/main.ts",
+  entry: "index.ts",
 
   // Output directory for built files
   outdir: "dist",
@@ -113,9 +113,9 @@ my-dwex-app/
 │       ├── auth.module.ts
 │       ├── auth.controller.ts
 │       └── auth.service.ts
-├── src/
-│   └── main.ts          # Entry point
-├── dwex.config.ts       # Optional config
+├── root.module.ts        # Root application module
+├── index.ts              # Entry point
+├── dwex.config.ts        # Optional config
 └── package.json
 ```
 
