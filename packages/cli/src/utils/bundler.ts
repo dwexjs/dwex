@@ -29,7 +29,13 @@ export async function bundle(options: BundleOptions): Promise<void> {
 		const buildConfig: BuildConfig = {
 			entrypoints: [entry],
 			outdir,
-			minify,
+			minify: minify
+				? {
+						syntax: true,
+						whitespace: true,
+						identifiers: false, // Keep class names for better logging
+				  }
+				: false,
 			sourcemap,
 			target,
 			external,
