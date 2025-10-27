@@ -369,8 +369,8 @@ export class DwexApplication {
     if (!this.server) return;
 
     // Read version from package.json
-    const packageJsonPath = new URL("../../package.json", import.meta.url);
-    const packageJson = await Bun.file(packageJsonPath).json();
+    const corePackagePath = new URL(import.meta.resolve("@dwex/core/package.json"));
+    const packageJson = await Bun.file(corePackagePath).json();
     const version = packageJson.version;
 
     const pid = process.pid;
