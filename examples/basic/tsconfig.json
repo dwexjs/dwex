@@ -30,17 +30,20 @@
 		"types": ["bun"]
 	},
 	"references": [
-		{
-			"path": "../../packages/common"
-		},
-		{
-			"path": "../../packages/jwt"
-		},
-		{
-			"path": "../../packages/logger"
-		},
-		{
-			"path": "../../packages/core"
-		}
-	]
+    {
+      "path": "../../packages/cli"
+    },
+    {
+      "path": "../../packages/common"
+    },
+    {
+      "path": "../../packages/jwt"
+    },
+    {
+      "path": "../../packages/logger"
+    },
+    {
+      "path": "../../packages/core"
+    }
+  ]
 }

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@dwex/common": "*",
+    "@dwex/cli": "*",
     "@dwex/core": "*",
     "@dwex/jwt": "*",
     "@dwex/logger": "*",

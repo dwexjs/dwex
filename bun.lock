@@ -68,6 +68,7 @@
     "examples/basic": {
       "name": "basic",
       "dependencies": {
+        "@dwex/cli": "*",
         "@dwex/common": "*",
         "@dwex/core": "*",
         "@dwex/jwt": "*",
