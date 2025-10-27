@@ -6,7 +6,7 @@ import { AppController } from "./app.controller";
  * Root application module
  */
 @Module({
-  imports: [LoggerModule],
-  controllers: [AppController],
+	imports: [LoggerModule],
+	controllers: [AppController],
 })
 export class AppModule {}

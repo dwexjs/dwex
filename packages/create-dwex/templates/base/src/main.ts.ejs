@@ -8,7 +8,7 @@ import { AppModule } from "./app.module";
 async function bootstrap() {
 	const app = await DwexFactory.create(AppModule);
 
-	const port = parseInt(process.env.PORT) || <%= port %>;
+	const port = parseInt(process.env.PORT ?? "") || <%= port %>;
 	await app.listen(port);
 }
 

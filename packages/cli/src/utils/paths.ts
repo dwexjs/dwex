@@ -36,7 +36,7 @@ export function resolvePath(...paths: string[]): string {
  * Get the modules directory path
  */
 export function getModulesDir(): string {
-	return resolveProjectPath("modules");
+	return resolveProjectPath("src", "modules");
 }
 
 /**

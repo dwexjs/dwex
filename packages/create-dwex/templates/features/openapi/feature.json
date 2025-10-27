@@ -8,7 +8,7 @@
 	},
 	"mainAdditions": {
 		"imports": [
-			"import { setupOpenApi } from \"./openapi.setup.js\";"
+			"import { setupOpenApi } from \"./openapi.setup\";"
 		],
 		"beforeListen": [
 			"\t// Setup OpenAPI documentation",

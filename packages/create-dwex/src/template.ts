@@ -1,7 +1,7 @@
 import { mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import ejs from "ejs";
-import type { ProjectConfig, Feature } from "./types.js";
+import type { Feature, ProjectConfig } from "./types.js";
 
 /**
  * Discovers available features by reading the features directory
@@ -82,7 +82,10 @@ export function getFeaturePath(featureId: string): string {
 /**
  * Loads a feature configuration
  */
-export async function loadFeature(featureId: string, config: ProjectConfig): Promise<Feature> {
+export async function loadFeature(
+	featureId: string,
+	config: ProjectConfig,
+): Promise<Feature> {
 	const featurePath = join(getFeaturePath(featureId), "feature.json");
 	const content = await Bun.file(featurePath).text();
 	const rendered = ejs.render(content, config);
@@ -172,7 +175,8 @@ async function applyFeaturesToAppModule(
 	}
 
 	// Build the new imports section
-	const baseImports = 'import { Module } from "@dwex/core";\nimport { LoggerModule } from "@dwex/logger";\nimport { AppController } from "./app.controller";';
+	const baseImports =
+		'import { Module } from "@dwex/core";\nimport { LoggerModule } from "@dwex/logger";\nimport { AppController } from "./app.controller";';
 	const newImports = [baseImports, ...allImports].join("\n");
 
 	// Build the module decorator
@@ -219,7 +223,11 @@ async function applyFeaturesToMain(
 	}
 
 	// If there are additions, rebuild the main.ts file
-	if (allImports.length > 0 || beforeListen.length > 0 || afterListen.length > 0) {
+	if (
+		allImports.length > 0 ||
+		beforeListen.length > 0 ||
+		afterListen.length > 0
+	) {
 		// Add imports at the top
 		if (allImports.length > 0) {
 			const importSection = allImports.join("\n");
