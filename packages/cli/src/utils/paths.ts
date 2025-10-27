@@ -40,13 +40,6 @@ export function getModulesDir(): string {
 }
 
 /**
- * Get the source directory path
- */
-export function getSourceDir(): string {
-	return resolveProjectPath("src");
-}
-
-/**
  * Check if modules directory exists
  */
 export function hasModulesDir(): boolean {

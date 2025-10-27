@@ -4,7 +4,7 @@
 export interface DwexConfig {
 	/**
 	 * Entry point file for the application
-	 * @default "src/main.ts"
+	 * @default "index.ts"
 	 */
 	entry?: string;
 
@@ -49,7 +49,7 @@ export interface DwexConfig {
  * Default configuration values
  */
 export const defaultConfig: Required<DwexConfig> = {
-	entry: "src/main.ts",
+	entry: "index.ts",
 	outdir: "dist",
 	minify: true,
 	sourcemap: "external",
