@@ -1,3 +1,23 @@
+## 1.0.0-beta.7 (2025-10-27)
+
+### 🚀 Features
+
+- **basic-example:** add @dwex/cli dependency and update project structure by removing unused application files ([19c7db2](https://github.com/dwexjs/dwex/commit/19c7db2))
+- **cli:** implement build, dev, and generate commands with interactive ([#3](https://github.com/dwexjs/dwex/pull/3))
+
+### 🩹 Fixes
+
+- **cli:** update default entry point in configuration to "index.ts" and remove unused getSourceDir function ([dada214](https://github.com/dwexjs/dwex/commit/dada214))
+- **cli:** enhance minification options in bundler to improve logging and control ([64aea4a](https://github.com/dwexjs/dwex/commit/64aea4a))
+- **cli:** update README to reflect new entry point and project structure ([3a598d7](https://github.com/dwexjs/dwex/commit/3a598d7))
+- **cli:** update default entry point and module path resolution in configuration ([8bf01b4](https://github.com/dwexjs/dwex/commit/8bf01b4))
+- **dwex-application:** update package.json path resolution to use core package ([6176067](https://github.com/dwexjs/dwex/commit/6176067))
+
+### ❤️ Thank You
+
+- Monawwar Abdullah
+- mxvsh
+
 ## 1.0.0-beta.6 (2025-10-27)
 
 ### 🚀 Features
