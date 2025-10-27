@@ -49,16 +49,6 @@ Dwex leverages the Bun runtime to deliver exceptional performance. Here's how it
 | **Cold Start** | 15ms | 95ms | 220ms |
 | **Memory Usage** | 32MB | 48MB | 105MB |
 
-### Feature Comparison
-
-| Feature | Dwex | Express | NestJS |
-|---------|------|---------|--------|
-| **Runtime** | Bun | Node.js | Node.js |
-| **TypeScript** | ✅ | ❌ | ✅ |
-| **Decorators** | ✅ | ❌ | ✅ |
-| **Dependency Injection** | ✅ | ❌ | ✅ |
-| **Module System** | ✅ | ❌ | ✅ |
-
 Dwex combines the developer experience of NestJS with the blazing-fast performance of Bun, making it an ideal choice for building modern, high-performance server applications.
 
 ## Installation
