@@ -82,9 +82,11 @@ export function getFeaturePath(featureId: string): string {
 /**
  * Loads a feature configuration
  */
-export async function loadFeature(featureId: string): Promise<Feature> {
+export async function loadFeature(featureId: string, config: ProjectConfig): Promise<Feature> {
 	const featurePath = join(getFeaturePath(featureId), "feature.json");
-	return await Bun.file(featurePath).json();
+	const content = await Bun.file(featurePath).text();
+	const rendered = ejs.render(content, config);
+	return JSON.parse(rendered);
 }
 
 /**
@@ -309,7 +311,7 @@ export async function composeProject(
 	// 2. Load all selected features
 	const features: Feature[] = [];
 	for (const featureId of config.features) {
-		const feature = await loadFeature(featureId);
+		const feature = await loadFeature(featureId, config);
 		features.push(feature);
 	}
 
