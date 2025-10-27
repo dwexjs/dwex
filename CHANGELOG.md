@@ -1,3 +1,20 @@
+## 1.0.0-beta.6 (2025-10-27)
+
+### 🚀 Features
+
+- add HTTPS configuration support ([7127055](https://github.com/dwexjs/dwex/commit/7127055))
+- add analytics script to layout for enhanced tracking ([4bc3583](https://github.com/dwexjs/dwex/commit/4bc3583))
+
+### 🩹 Fixes
+
+- correct code block syntax for .gitignore in quick-start-https documentation ([d603ead](https://github.com/dwexjs/dwex/commit/d603ead))
+- update biome version to latest ([cff3191](https://github.com/dwexjs/dwex/commit/cff3191))
+- **create-dwex:** process feature.json files through EJS to render version placeholders ([556ff07](https://github.com/dwexjs/dwex/commit/556ff07))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.5 (2025-10-26)
 
 ### 🚀 Features
