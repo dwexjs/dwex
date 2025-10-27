@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -33,7 +33,7 @@ export function Header() {
 				animate={{ y: 0 }}
 				transition={{ duration: 0.6, ease }}
 			>
-				<div className="container flex h-16 items-center justify-between px-4 md:px-8 lg:px-12">
+				<div className="container flex h-16 items-center px-4 md:px-8 lg:px-12">
 					{/* Logo */}
 					<Link href="/" className="flex items-center gap-3 group">
 						<div className="relative h-8 w-8 overflow-hidden rounded-lg ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
@@ -47,17 +47,9 @@ export function Header() {
 						</div>
 					</Link>
 
-					{/* Desktop Navigation */}
-					<nav className="hidden md:flex items-center gap-6">
-						{navItems.map((item) => (
-							<Link
-								key={item.href}
-								href={item.href}
-								className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-							>
-								{item.label}
-							</Link>
-						))}
+					{/* Desktop Navigation - Centered */}
+					<nav className="hidden md:flex items-center gap-6 mx-auto">
+						 
 					</nav>
 
 					{/* Desktop Actions */}
@@ -87,7 +79,7 @@ export function Header() {
 					{/* Mobile Menu Button */}
 					<button
 						type="button"
-						className="md:hidden p-2 hover:bg-muted rounded-md transition-colors"
+						className="md:hidden p-2 hover:bg-muted rounded-md transition-colors ml-auto"
 						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
 						aria-label="Toggle menu"
 					>

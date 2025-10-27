@@ -11,17 +11,17 @@ export default function Page() {
 		<div>
 			<Hero
 				pill={{
-					text: "Powered by Bun",
+					text: "Powered by Bun Runtime",
 					href: "/docs",
 					icon: <Icons.zap className="h-4 w-4" />,
 					variant: "default",
 					size: "md",
 				}}
 				content={{
-					title: "Build APIs",
+					title: "Build Modern APIs",
 					titleHighlight: "blazingly fast",
 					description:
-						"A modern TypeScript framework for building server-side applications with Bun. Leverage decorators, dependency injection, and modular architecture for a superior developer experience.",
+						"The TypeScript framework for building high-performance server applications with Bun. Experience the power of decorators, dependency injection, and enterprise-grade architecture with unmatched developer experience.",
 					primaryAction: {
 						href: "/docs/getting-started",
 						text: "Get Started",
@@ -29,7 +29,7 @@ export default function Page() {
 					},
 					secondaryAction: {
 						href: "/docs",
-						text: "View Documentation",
+						text: "Documentation",
 						icon: <Icons.book className="h-4 w-4" />,
 					},
 				}}
