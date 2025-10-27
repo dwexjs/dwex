@@ -18,7 +18,7 @@
 		"reflect-metadata": "^0.2.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
+		"@biomejs/biome": "^2.3.1",
 		"@types/bun": "^1.0.0"
 	},
 	"peerDependencies": {
