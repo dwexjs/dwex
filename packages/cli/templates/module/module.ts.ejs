@@ -1,0 +1,9 @@
+import { Module } from "@dwex/core";
+import { <%= className %>Controller } from "./<%= fileName %>.controller.js";
+import { <%= className %>Service } from "./<%= fileName %>.service.js";
+
+@Module({
+	controllers: [<%= className %>Controller],
+	providers: [<%= className %>Service],
+})
+export class <%= className %>Module {}

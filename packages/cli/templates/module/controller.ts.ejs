@@ -1,0 +1,12 @@
+import { Controller, Get } from "@dwex/core";
+import { <%= className %>Service } from "./<%= fileName %>.service.js";
+
+@Controller("/<%= routePath %>")
+export class <%= className %>Controller {
+	constructor(private readonly <%= serviceName %>: <%= className %>Service) {}
+
+	@Get()
+	findAll() {
+		return this.<%= serviceName %>.findAll();
+	}
+}
