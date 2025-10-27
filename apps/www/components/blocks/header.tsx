@@ -1,13 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Mail, Menu, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -75,11 +75,12 @@ export function Header() {
 							<Icons.github className="h-5 w-5" />
 						</Link>
 						<Link
-							href="/docs/getting-started"
-							className={cn(buttonVariants({ size: "sm" }), "gap-2")}
+							href="https://discord.gg/3Jrma3xnTy"
+							target="_blank"
+							rel="noopener noreferrer"
+							className={cn(buttonVariants({ size: "icon", variant: "ghost" }), "gap-2")}
 						>
-							<Icons.zap className="h-4 w-4" />
-							Get Started
+							<Icons.discord className="h-4 w-4" />
 						</Link>
 					</div>
 
