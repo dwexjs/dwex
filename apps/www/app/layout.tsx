@@ -9,8 +9,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-	title: "Dwex - Lightweight. Typed. Lightning-fast Web Framework.",
 	metadataBase: new URL("https://dwex.dev"),
+	title: "Dwex - A Web Framework on Bun runtime",
+	description:
+		"Build scalable server-side apps with dependency injection and decorators on Bun runtime.",
 };
 
 export default function Layout({ children }: LayoutProps<"/">) {

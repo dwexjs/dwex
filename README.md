@@ -8,7 +8,7 @@
   Lightweight. Typed. Lightning-fast Web Framework.
 </h3>
 <p align="center">
-  A progressive TypeScript framework for building efficient and scalable server-side applications on Bun runtime.
+  A modern, type-safe framework for building APIs and services on Bun runtime.
 </p>
 
 <p align="center"><a href="https://github.com/dwexjs/dwex/discussions">Discussions</a> · <a href="https://dwex.dev/docs">Documentation</a> · <a href="https://discord.gg/3Jrma3xnTy">Discord</a></p>
