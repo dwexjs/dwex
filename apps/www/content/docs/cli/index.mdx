@@ -1,0 +1,96 @@
+---
+title: CLI
+description: Official command-line interface for building and developing Dwex applications
+---
+
+## Overview
+
+The Dwex CLI (`@dwex/cli`) is a powerful command-line tool that streamlines your development workflow. It provides commands for running a development server, building for production, and scaffolding code with interactive prompts.
+
+## Features
+
+- **Development Server** - Hot reload with automatic restart on file changes
+- **Production Build** - Optimized bundling with Bun.build()
+- **Code Generation** - Interactive scaffolding for modules, controllers, services, and more
+- **Configuration** - Flexible configuration via `dwex.config.ts`
+
+## Installation
+
+The CLI is included automatically when you create a new Dwex project:
+
+```bash
+bun create dwex my-app
+```
+
+Or add it to an existing project:
+
+```bash
+bun add -D @dwex/cli
+```
+
+## Quick Start
+
+Run the development server:
+
+```bash
+bunx dwex dev
+```
+
+Build for production:
+
+```bash
+bunx dwex build
+```
+
+Generate a new module:
+
+```bash
+bunx dwex g module users
+```
+
+## Available Commands
+
+The CLI provides three main commands:
+
+<Cards>
+	<Card
+		title="dev"
+		href="/docs/cli/dev"
+		description="Start development server with hot reload"
+	/>
+	<Card
+		title="build"
+		href="/docs/cli/build"
+		description="Bundle application for production"
+	/>
+	<Card
+		title="generate"
+		href="/docs/cli/generate"
+		description="Scaffold modules, controllers, services, and more"
+	/>
+	<Card
+		title="Configuration"
+		href="/docs/cli/configuration"
+		description="Configure CLI behavior with dwex.config.ts"
+	/>
+</Cards>
+
+## Help
+
+Get help for any command:
+
+```bash
+bunx dwex --help
+bunx dwex dev --help
+bunx dwex build --help
+bunx dwex generate --help
+```
+
+## Next Steps
+
+Learn more about each command:
+
+- [Development Server](/docs/cli/dev) - Run your app with hot reload
+- [Build](/docs/cli/build) - Create optimized production bundles
+- [Generate](/docs/cli/generate) - Scaffold code interactively
+- [Configuration](/docs/cli/configuration) - Customize CLI behavior

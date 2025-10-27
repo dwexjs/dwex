@@ -1,0 +1,171 @@
+---
+title: Build Command
+description: Bundle your Dwex application for production deployment
+---
+
+## Overview
+
+The `build` command bundles your Dwex application into an optimized production build using Bun's native bundler. It creates a single executable file with minification, tree-shaking, and optional sourcemaps.
+
+## Usage
+
+```bash
+bunx dwex build
+```
+
+## Features
+
+- **Single File Output** - Bundles entire application into one file
+- **Smart Minification** - Minifies code while preserving class names for logging
+- **Tree Shaking** - Removes unused code automatically
+- **Sourcemaps** - Optional sourcemap generation for debugging
+- **Fast Builds** - Powered by Bun.build() for maximum speed
+
+## Options
+
+### `--no-minify`
+
+Disable minification (useful for debugging production builds):
+
+```bash
+bunx dwex build --no-minify
+```
+
+### `--sourcemap <type>`
+
+Generate sourcemaps. Options: `none`, `inline`, `external`
+
+```bash
+bunx dwex build --sourcemap inline
+bunx dwex build --sourcemap external
+bunx dwex build --sourcemap none
+```
+
+### `-o, --outdir <dir>`
+
+Specify custom output directory:
+
+```bash
+bunx dwex build --outdir build
+bunx dwex build -o production
+```
+
+## Default Behavior
+
+By default, the build command:
+
+1. Reads entry point from `index.ts` (or `dwex.config.ts` if configured)
+2. Bundles to `dist/` directory
+3. Minifies syntax and whitespace (keeps class names)
+4. Generates external sourcemaps
+5. Targets Bun runtime
+
+## Output
+
+After building, you'll see:
+
+```bash
+✔ Built in 0.45s → 234.56 KB
+
+  ➜  Output: dist
+```
+
+## Running Production Build
+
+Run your bundled application:
+
+```bash
+bun dist/index.js
+```
+
+Or with environment variables:
+
+```bash
+PORT=8080 bun dist/index.js
+```
+
+## Example with All Options
+
+```bash
+bunx dwex build \
+  --sourcemap external \
+  --outdir production \
+  --no-minify
+```
+
+## Configuration
+
+Customize build behavior in `dwex.config.ts`:
+
+```typescript
+export default {
+  entry: "index.ts",
+  outdir: "dist",
+  minify: true,
+  sourcemap: "external",
+  external: ["some-native-module"],
+  target: "bun",
+};
+```
+
+See [Configuration](/docs/cli/configuration) for all options.
+
+## External Dependencies
+
+Some packages should remain external (not bundled). Specify them in config:
+
+```typescript
+export default {
+  external: [
+    "sharp",           // Native modules
+    "sqlite3",
+    "@prisma/client",  // Database clients
+  ],
+};
+```
+
+## Build Performance
+
+The Dwex CLI uses Bun.build() which is extremely fast:
+
+- **Small apps** (< 100 files): ~100-300ms
+- **Medium apps** (< 500 files): ~300-800ms
+- **Large apps** (> 1000 files): ~1-2s
+
+## Troubleshooting
+
+### Build Fails
+
+If build fails, check:
+
+1. Entry file exists (`index.ts`)
+2. All imports are valid
+3. TypeScript has no errors
+
+Run TypeScript check first:
+
+```bash
+bun tsc --noEmit
+```
+
+### Large Bundle Size
+
+If bundle is too large:
+
+1. Mark dependencies as external
+2. Use dynamic imports for large modules
+3. Check for duplicate dependencies
+
+### Class Names Minified
+
+The CLI preserves class names by default for better logging. If you still see minified names, ensure you're using the latest version:
+
+```bash
+bun update @dwex/cli
+```
+
+## Next Steps
+
+- [Development Server](/docs/cli/dev) - Run with hot reload
+- [Configuration](/docs/cli/configuration) - Customize build options
+- [Deploying](/docs/deploying) - Deploy your production build

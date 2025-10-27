@@ -1,0 +1,230 @@
+---
+title: Dev Command
+description: Start development server with hot reload and automatic restarts
+---
+
+## Overview
+
+The `dev` command starts your Dwex application in development mode with hot reload. It automatically restarts your server when files change, clearing the console and showing restart timing for a smooth development experience.
+
+## Usage
+
+```bash
+bunx dwex dev
+```
+
+## Features
+
+- **Hot Reload** - Automatically restarts on file changes
+- **Clear Console** - Clean output on each restart
+- **Timing Info** - Shows startup and restart duration
+- **Port Configuration** - Customize server port
+- **Colorful Output** - Clear status messages with colors
+
+## Options
+
+### `-p, --port <port>`
+
+Specify a custom port:
+
+```bash
+bunx dwex dev --port 8080
+bunx dwex dev -p 4000
+```
+
+## How It Works
+
+The dev command:
+
+1. Reads entry point from `index.ts` (or config)
+2. Starts your app with Bun's `--watch` flag
+3. Monitors file changes in your project
+4. Clears console and restarts on changes
+5. Shows timing information for each restart
+
+## Output
+
+On first start:
+
+```bash
+ℹ Starting Dwex development server...
+
+✔ Server ready in 245ms
+
+  ➜  Local:   http://localhost:3000
+  ➜  Watching for changes...
+```
+
+On file change:
+
+```bash
+ℹ File change detected, restarting...
+
+✔ Server restarted in 123ms
+  ➜  Local:   http://localhost:3000
+```
+
+## Environment Variables
+
+Set environment variables for development:
+
+```bash
+PORT=8080 bunx dwex dev
+```
+
+Or create a `.env` file:
+
+```bash title=".env"
+PORT=3000
+NODE_ENV=development
+DATABASE_URL=postgresql://localhost/mydb
+```
+
+## Configuration
+
+Customize dev server in `dwex.config.ts`:
+
+```typescript
+export default {
+  entry: "index.ts",
+  port: 3000,
+};
+```
+
+See [Configuration](/docs/cli/configuration) for all options.
+
+## Watching Files
+
+The dev server uses Bun's native `--watch` flag, which watches:
+
+- All TypeScript/JavaScript files
+- JSON configuration files
+- Files imported by your application
+
+Files **not** watched:
+- `node_modules/`
+- `dist/` or build output
+- `.git/`
+- Files in `.gitignore`
+
+## Performance
+
+Development mode is optimized for fast restarts:
+
+- **Initial start**: ~200-500ms
+- **Hot restarts**: ~100-300ms
+- No build step required (uses Bun's JIT)
+
+## Tips for Development
+
+### Fast Restarts
+
+Keep restart times fast by:
+
+1. Using lazy imports for heavy modules
+2. Avoiding expensive initialization logic
+3. Using environment-based conditional imports
+
+```typescript
+// Lazy load heavy modules
+if (process.env.NODE_ENV === "development") {
+  const { devTool } = await import("./dev-tools");
+}
+```
+
+### Multiple Instances
+
+Run multiple apps on different ports:
+
+```bash
+# Terminal 1
+bunx dwex dev --port 3000
+
+# Terminal 2
+bunx dwex dev --port 4000
+```
+
+### Debug Mode
+
+Enable verbose logging:
+
+```typescript title="index.ts"
+import "reflect-metadata";
+import { DwexFactory } from "@dwex/core";
+import { RootModule } from "./root.module";
+
+async function bootstrap() {
+  const app = await DwexFactory.create(RootModule, {
+    logger: ["log", "error", "warn", "debug", "verbose"],
+  });
+
+  await app.listen(3000);
+}
+
+bootstrap();
+```
+
+## Graceful Shutdown
+
+The dev server handles shutdown gracefully:
+
+- Press `Ctrl+C` to stop
+- Server closes active connections
+- Process exits cleanly
+
+## Troubleshooting
+
+### Port Already in Use
+
+If port is already taken:
+
+```bash
+bunx dwex dev --port 3001
+```
+
+Or find and kill the process:
+
+```bash
+# macOS/Linux
+lsof -ti:3000 | xargs kill -9
+
+# Or use a different port in config
+```
+
+### Changes Not Detected
+
+If hot reload isn't working:
+
+1. Ensure files are in the project directory
+2. Check file isn't in `.gitignore`
+3. Restart the dev server manually
+
+### Slow Restarts
+
+If restarts are slow:
+
+1. Check for heavy synchronous operations in bootstrap
+2. Use lazy imports for large dependencies
+3. Profile startup with `console.time()`
+
+```typescript
+console.time("bootstrap");
+const app = await DwexFactory.create(RootModule);
+console.timeEnd("bootstrap");
+```
+
+## Comparison with Production
+
+| Feature | Dev Mode | Production Build |
+|---------|----------|------------------|
+| Startup | ~200-500ms | ~50-100ms |
+| Hot Reload | ✅ Yes | ❌ No |
+| Minified | ❌ No | ✅ Yes |
+| Sourcemaps | ✅ Inline | ⚙️ Configurable |
+| Bundle Size | N/A | Optimized |
+
+## Next Steps
+
+- [Build Command](/docs/cli/build) - Create production builds
+- [Generate Command](/docs/cli/generate) - Scaffold code quickly
+- [Configuration](/docs/cli/configuration) - Customize dev server

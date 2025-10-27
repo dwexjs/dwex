@@ -1,0 +1,411 @@
+---
+title: Generate Command
+description: Scaffold modules, controllers, services, and more with interactive prompts
+---
+
+## Overview
+
+The `generate` command (alias `g`) helps you quickly scaffold code with interactive prompts. It generates modules, controllers, services, guards, and middleware following Dwex best practices and conventions.
+
+## Usage
+
+Interactive mode (prompts for all options):
+
+```bash
+bunx dwex generate
+# or shorthand
+bunx dwex g
+```
+
+With arguments:
+
+```bash
+bunx dwex g <schematic> <name>
+```
+
+## Schematics
+
+### Module
+
+Generate a complete module with controller and service:
+
+```bash
+bunx dwex g module users
+```
+
+Creates:
+```
+modules/users/
+├── users.module.ts
+├── users.controller.ts
+└── users.service.ts
+```
+
+Generated files:
+
+```typescript title="modules/users/users.module.ts"
+import { Module } from "@dwex/core";
+import { UsersController } from "./users.controller.js";
+import { UsersService } from "./users.service.js";
+
+@Module({
+  controllers: [UsersController],
+  providers: [UsersService],
+})
+export class UsersModule {}
+```
+
+```typescript title="modules/users/users.controller.ts"
+import { Controller, Get } from "@dwex/core";
+import { UsersService } from "./users.service.js";
+
+@Controller("/users")
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+}
+```
+
+### Controller
+
+Generate a REST API controller:
+
+```bash
+bunx dwex g controller products
+```
+
+If modules exist, you'll be prompted to select one:
+
+```bash
+? Which module should contain this controller?
+  ❯ users
+    auth
+    products
+```
+
+Creates:
+```typescript title="modules/products/products.controller.ts"
+import { Controller, Get } from "@dwex/core";
+
+@Controller("/products")
+export class ProductsController {
+  @Get()
+  findAll() {
+    return {
+      message: "This action returns all products",
+    };
+  }
+}
+```
+
+### Service
+
+Generate a business logic service:
+
+```bash
+bunx dwex g service email
+```
+
+Select target module:
+
+```bash
+? Which module should contain this service?
+  ❯ users
+    auth
+```
+
+Creates:
+```typescript title="modules/users/email.service.ts"
+import { Injectable } from "@dwex/core";
+
+@Injectable()
+export class EmailService {
+  // Add your service methods here
+}
+```
+
+### Guard
+
+Generate a route guard for authorization:
+
+```bash
+bunx dwex g guard admin
+```
+
+Creates:
+```typescript title="modules/auth/admin.guard.ts"
+import { Injectable, type CanActivate, type ExecutionContext } from "@dwex/core";
+
+@Injectable()
+export class AdminGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    // Add your guard logic here
+    return true;
+  }
+}
+```
+
+### Middleware
+
+Generate HTTP middleware:
+
+```bash
+bunx dwex g middleware logging
+```
+
+Creates:
+```typescript title="modules/app/logging.middleware.ts"
+import { Injectable, type DwexMiddleware, type Request, type Response, type NextFunction } from "@dwex/core";
+
+@Injectable()
+export class LoggingMiddleware implements DwexMiddleware {
+  use(req: Request, res: Response, next: NextFunction): void {
+    // Add your middleware logic here
+    next();
+  }
+}
+```
+
+## Interactive Mode
+
+When you run `bunx dwex g` without arguments:
+
+```bash
+bunx dwex g
+```
+
+You'll see an interactive prompt:
+
+```bash
+┌  Dwex Generator
+│
+◆  What would you like to generate?
+│  ○ Module - Complete module with controller and service
+│  ○ Controller - REST API controller
+│  ○ Service - Business logic service
+│  ○ Guard - Route guard for authorization
+│  ○ Middleware - HTTP middleware
+└
+```
+
+After selecting, you'll be prompted for the name:
+
+```bash
+◆  What is the name of the module?
+│  my-module
+└
+```
+
+## Naming Conventions
+
+The generator automatically handles naming:
+
+| Input | Class Name | File Name | Route Path |
+|-------|------------|-----------|------------|
+| `users` | `UsersController` | `users.controller.ts` | `/users` |
+| `user-profile` | `UserProfileController` | `user-profile.controller.ts` | `/user-profile` |
+| `auth_service` | `AuthServiceService` | `auth-service.service.ts` | `/auth-service` |
+
+Supports:
+- **kebab-case**: `user-profile`
+- **snake_case**: `user_profile`
+- **PascalCase**: `UserProfile`
+- **camelCase**: `userProfile`
+
+## Project Structure
+
+The generator expects this structure:
+
+```
+my-app/
+├── modules/              # All modules go here
+│   ├── users/
+│   │   ├── users.module.ts
+│   │   ├── users.controller.ts
+│   │   └── users.service.ts
+│   └── auth/
+│       ├── auth.module.ts
+│       ├── auth.controller.ts
+│       └── auth.service.ts
+├── root.module.ts
+├── index.ts
+└── package.json
+```
+
+## Post-Generation Steps
+
+After generating code:
+
+### 1. Register in Module
+
+If you generated a controller or service separately, register it:
+
+```typescript title="modules/users/users.module.ts"
+import { Module } from "@dwex/core";
+import { UsersController } from "./users.controller.js";
+import { UsersService } from "./users.service.js";
+// highlight-next-line
+import { EmailService } from "./email.service.js";
+
+@Module({
+  controllers: [UsersController],
+  // highlight-next-line
+  providers: [UsersService, EmailService],
+})
+export class UsersModule {}
+```
+
+### 2. Import in Root Module
+
+If you generated a new module, import it in `root.module.ts`:
+
+```typescript title="root.module.ts"
+import { Module } from "@dwex/core";
+// highlight-next-line
+import { UsersModule } from "./modules/users/users.module.js";
+
+@Module({
+  // highlight-next-line
+  imports: [UsersModule],
+})
+export class RootModule {}
+```
+
+### 3. Implement Logic
+
+Add your business logic to generated files:
+
+```typescript title="modules/users/users.service.ts"
+import { Injectable } from "@dwex/core";
+
+@Injectable()
+export class UsersService {
+  // highlight-start
+  private users = [
+    { id: 1, name: "Alice" },
+    { id: 2, name: "Bob" },
+  ];
+  // highlight-end
+
+  findAll() {
+    // highlight-next-line
+    return this.users;
+  }
+}
+```
+
+## Tips
+
+### Generate Multiple Files
+
+Generate related code together:
+
+```bash
+bunx dwex g module products
+bunx dwex g service inventory  # Select products module
+bunx dwex g guard owner        # Select products module
+```
+
+### Organize by Feature
+
+Keep related code in one module:
+
+```
+modules/products/
+├── products.module.ts
+├── products.controller.ts
+├── products.service.ts
+├── inventory.service.ts
+├── owner.guard.ts
+└── dto/
+    ├── create-product.dto.ts
+    └── update-product.dto.ts
+```
+
+### Follow Naming Patterns
+
+Use descriptive, consistent names:
+
+```bash
+# Good
+bunx dwex g module user-management
+bunx dwex g service email-sender
+bunx dwex g guard is-authenticated
+
+# Less clear
+bunx dwex g module um
+bunx dwex g service email
+bunx dwex g guard auth
+```
+
+## Examples
+
+### Complete Feature Module
+
+```bash
+# 1. Create base module
+bunx dwex g module blog
+
+# 2. Add services
+bunx dwex g service post       # Select blog module
+bunx dwex g service comment    # Select blog module
+
+# 3. Add guards
+bunx dwex g guard author       # Select blog module
+```
+
+Result:
+```
+modules/blog/
+├── blog.module.ts
+├── blog.controller.ts
+├── blog.service.ts
+├── post.service.ts
+├── comment.service.ts
+└── author.guard.ts
+```
+
+### Authentication System
+
+```bash
+bunx dwex g module auth
+bunx dwex g service jwt           # Select auth
+bunx dwex g guard authenticated   # Select auth
+bunx dwex g middleware session    # Select auth
+```
+
+## Troubleshooting
+
+### No Modules Found
+
+If you see "No modules found":
+
+1. Create a module first: `bunx dwex g module app`
+2. Or ensure `modules/` directory exists
+
+### Invalid Characters
+
+Names can only contain:
+- Letters (a-z, A-Z)
+- Numbers (0-9)
+- Hyphens (-)
+- Underscores (_)
+
+### Import Errors
+
+If generated files have import errors:
+
+1. Ensure you're using `.js` extensions in imports
+2. Check `tsconfig.json` has `"moduleResolution": "nodenext"`
+3. Verify `"type": "module"` in `package.json`
+
+## Next Steps
+
+- [Modules](/docs/overview/modules) - Learn about module architecture
+- [Controllers](/docs/overview/controllers) - Build REST APIs
+- [Providers](/docs/overview/providers) - Implement business logic
+- [Guards](/docs/security/guards) - Protect routes

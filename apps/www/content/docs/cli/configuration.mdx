@@ -1,0 +1,430 @@
+---
+title: Configuration
+description: Customize CLI behavior with dwex.config.ts
+---
+
+## Overview
+
+Customize the Dwex CLI behavior by creating a `dwex.config.ts` (or `dwex.config.js`) file in your project root. This allows you to configure build options, development server settings, and more.
+
+## Configuration File
+
+Create `dwex.config.ts` in your project root:
+
+```typescript title="dwex.config.ts"
+export default {
+  entry: "index.ts",
+  outdir: "dist",
+  minify: true,
+  sourcemap: "external",
+  external: [],
+  target: "bun",
+  port: 3000,
+};
+```
+
+## Options
+
+### `entry`
+
+**Type:** `string`
+**Default:** `"index.ts"`
+
+Entry point file for your application:
+
+```typescript
+export default {
+  entry: "index.ts",
+};
+```
+
+Alternative entry points:
+
+```typescript
+export default {
+  entry: "src/main.ts",    // Legacy structure
+  entry: "app/server.ts",  // Custom structure
+};
+```
+
+### `outdir`
+
+**Type:** `string`
+**Default:** `"dist"`
+
+Output directory for production builds:
+
+```typescript
+export default {
+  outdir: "dist",
+};
+```
+
+Examples:
+
+```typescript
+export default {
+  outdir: "build",
+  outdir: "production",
+  outdir: ".output",
+};
+```
+
+### `minify`
+
+**Type:** `boolean`
+**Default:** `true`
+
+Enable minification for production builds:
+
+```typescript
+export default {
+  minify: true,  // Recommended for production
+};
+```
+
+When enabled:
+- Minifies syntax (removes unnecessary code)
+- Minifies whitespace (compresses spacing)
+- **Preserves** class names (for better logging)
+
+Disable for debugging:
+
+```typescript
+export default {
+  minify: false,  // Easier to debug production builds
+};
+```
+
+### `sourcemap`
+
+**Type:** `"none" | "inline" | "external"`
+**Default:** `"external"`
+
+Configure sourcemap generation:
+
+```typescript
+export default {
+  sourcemap: "external",  // Separate .map files
+};
+```
+
+Options:
+
+| Value | Description | Use Case |
+|-------|-------------|----------|
+| `"external"` | Separate `.js.map` files | Production (recommended) |
+| `"inline"` | Embedded in output | Development/debugging |
+| `"none"` | No sourcemaps | Smallest bundle size |
+
+Examples:
+
+```typescript
+// Production with sourcemaps
+export default {
+  sourcemap: "external",
+};
+
+// Development with inline maps
+export default {
+  sourcemap: "inline",
+};
+
+// Disable for smallest size
+export default {
+  sourcemap: "none",
+};
+```
+
+### `external`
+
+**Type:** `string[]`
+**Default:** `[]`
+
+Packages to exclude from the bundle:
+
+```typescript
+export default {
+  external: [
+    "sharp",           // Native modules
+    "sqlite3",
+    "@prisma/client",  // Database clients
+    "canvas",
+  ],
+};
+```
+
+Use for:
+- Native Node.js modules
+- Large dependencies you want to keep separate
+- Packages with dynamic imports
+- Platform-specific modules
+
+### `target`
+
+**Type:** `"bun" | "node"`
+**Default:** `"bun"`
+
+Target runtime environment:
+
+```typescript
+export default {
+  target: "bun",  // Optimized for Bun
+};
+```
+
+Options:
+
+```typescript
+// For Bun runtime (recommended)
+export default {
+  target: "bun",
+};
+
+// For Node.js compatibility
+export default {
+  target: "node",
+};
+```
+
+### `port`
+
+**Type:** `number`
+**Default:** `3000`
+
+Default port for development server:
+
+```typescript
+export default {
+  port: 3000,
+};
+```
+
+Can be overridden with CLI flag:
+
+```bash
+bunx dwex dev --port 8080
+```
+
+Or environment variable:
+
+```bash
+PORT=8080 bunx dwex dev
+```
+
+## Complete Example
+
+```typescript title="dwex.config.ts"
+export default {
+  // Application entry point
+  entry: "index.ts",
+
+  // Build output directory
+  outdir: "dist",
+
+  // Enable minification (preserves class names)
+  minify: true,
+
+  // Generate external sourcemaps
+  sourcemap: "external",
+
+  // External dependencies (not bundled)
+  external: [
+    "sharp",
+    "@prisma/client",
+  ],
+
+  // Target Bun runtime
+  target: "bun",
+
+  // Development server port
+  port: 3000,
+};
+```
+
+## Environment-Specific Config
+
+Use environment variables for different configs:
+
+```typescript title="dwex.config.ts"
+const isDev = process.env.NODE_ENV === "development";
+
+export default {
+  entry: "index.ts",
+  outdir: "dist",
+  minify: !isDev,
+  sourcemap: isDev ? "inline" : "external",
+  port: isDev ? 3000 : 8080,
+};
+```
+
+## TypeScript Support
+
+For full TypeScript support:
+
+```typescript title="dwex.config.ts"
+import type { DwexConfig } from "@dwex/cli";
+
+const config: DwexConfig = {
+  entry: "index.ts",
+  outdir: "dist",
+  minify: true,
+  sourcemap: "external",
+  external: [],
+  target: "bun",
+  port: 3000,
+};
+
+export default config;
+```
+
+## Common Configurations
+
+### Minimal Production Build
+
+Smallest possible bundle:
+
+```typescript title="dwex.config.ts"
+export default {
+  minify: true,
+  sourcemap: "none",
+  external: [],
+};
+```
+
+### Development Optimized
+
+Fast builds with good debugging:
+
+```typescript title="dwex.config.ts"
+export default {
+  minify: false,
+  sourcemap: "inline",
+  port: 3000,
+};
+```
+
+### Large Application
+
+With external dependencies:
+
+```typescript title="dwex.config.ts"
+export default {
+  entry: "index.ts",
+  outdir: "dist",
+  minify: true,
+  sourcemap: "external",
+  external: [
+    "sharp",
+    "canvas",
+    "@prisma/client",
+    "sqlite3",
+  ],
+  target: "bun",
+};
+```
+
+### Multi-Environment
+
+Different settings per environment:
+
+```typescript title="dwex.config.ts"
+const env = process.env.NODE_ENV || "development";
+
+const configs = {
+  development: {
+    minify: false,
+    sourcemap: "inline" as const,
+    port: 3000,
+  },
+  staging: {
+    minify: true,
+    sourcemap: "external" as const,
+    port: 8080,
+  },
+  production: {
+    minify: true,
+    sourcemap: "none" as const,
+    port: 8080,
+  },
+};
+
+export default {
+  entry: "index.ts",
+  outdir: "dist",
+  target: "bun" as const,
+  ...configs[env as keyof typeof configs],
+};
+```
+
+## Loading Order
+
+The CLI searches for config files in this order:
+
+1. `dwex.config.ts` (preferred)
+2. `dwex.config.js`
+3. Falls back to defaults if not found
+
+## Config Schema
+
+```typescript
+interface DwexConfig {
+  entry?: string;              // Default: "index.ts"
+  outdir?: string;             // Default: "dist"
+  minify?: boolean;            // Default: true
+  sourcemap?: "none" | "inline" | "external";  // Default: "external"
+  external?: string[];         // Default: []
+  target?: "bun" | "node";     // Default: "bun"
+  port?: number;               // Default: 3000
+}
+```
+
+## Validation
+
+The CLI validates your config automatically:
+
+```typescript
+export default {
+  port: "3000",  // ❌ Error: port must be a number
+  minify: "yes", // ❌ Error: minify must be a boolean
+  target: "deno", // ❌ Error: target must be "bun" or "node"
+};
+```
+
+## Troubleshooting
+
+### Config Not Loaded
+
+If config isn't loading:
+
+1. Ensure file is in project root (same level as `package.json`)
+2. Check filename: `dwex.config.ts` or `dwex.config.js`
+3. Verify file exports default object
+
+### TypeScript Errors
+
+If TypeScript shows errors:
+
+```bash
+bun add -D @dwex/cli  # Ensure CLI is installed
+```
+
+Then import types:
+
+```typescript
+import type { DwexConfig } from "@dwex/cli";
+```
+
+### External Packages Not Working
+
+If external packages aren't excluded:
+
+1. Check package name matches exactly
+2. Ensure package is installed
+3. Try rebuilding: `bunx dwex build`
+
+## Next Steps
+
+- [Build Command](/docs/cli/build) - Use config in builds
+- [Dev Command](/docs/cli/dev) - Use config in development
+- [Generate Command](/docs/cli/generate) - Scaffold code quickly
