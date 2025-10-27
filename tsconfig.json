@@ -23,6 +23,9 @@
     },
     {
       "path": "./packages/openapi"
+    },
+    {
+      "path": "./packages/cli"
     }
   ]
 }

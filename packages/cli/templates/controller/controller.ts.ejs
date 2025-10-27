@@ -1,0 +1,11 @@
+import { Controller, Get } from "@dwex/core";
+
+@Controller("/<%= routePath %>")
+export class <%= className %>Controller {
+	@Get()
+	findAll() {
+		return {
+			message: "This action returns all <%= routePath %>",
+		};
+	}
+}
