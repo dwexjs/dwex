@@ -11,6 +11,10 @@
   A modern, type-safe framework for building APIs and services on Bun runtime.
 </p>
 
+<p align="center">
+<a href="https://deepwiki.com/dwexjs/dwex"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+</p>
+
 <p align="center"><a href="https://github.com/dwexjs/dwex/discussions">Discussions</a> · <a href="https://dwex.dev/docs">Documentation</a> · <a href="https://discord.gg/3Jrma3xnTy">Discord</a></p>
 
 ## Philosophy
