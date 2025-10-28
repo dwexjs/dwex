@@ -18,11 +18,11 @@ export const metadata: Metadata = {
 export default function Layout({ children }: LayoutProps<"/">) {
 	return (
 		<html lang="en" className={inter.className} suppressHydrationWarning>
-			<Script
+			{process.env.NODE_ENV === "production" && <Script
 				defer
 				src="https://analytics.monawwar.io/script.js"
 				data-website-id="5599c2d7-3249-40a2-accd-65ba865f986d"
-			/>
+			/>}
 			<body className="flex flex-col min-h-screen">
 				<RootProvider>{children}</RootProvider>
 			</body>
