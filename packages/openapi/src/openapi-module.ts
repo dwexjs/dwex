@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import type { DwexApplication } from "@dwex/core";
 import { RequestMethod, ROUTE_PARAMS } from "@dwex/common";
+import type { DwexApplication } from "@dwex/core";
 import { ParamType } from "@dwex/core";
 import type { OpenAPIObject } from "openapi3-ts/oas31";
 import type { OpenApiOptions } from "./interfaces/index.js";
@@ -21,7 +21,7 @@ import { generateScalarHTML } from "./templates/scalar.template.js";
  * const document = OpenApiModule.createDocument(app, config);
  * OpenApiModule.setup('/docs', app, document);
  *
- * await app.listen(3000);
+ * await app.listen(9929);
  * // Docs available at: http://localhost:3000/docs
  * ```
  */

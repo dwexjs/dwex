@@ -78,7 +78,7 @@ export class DwexApplication {
    * @example
    * ```typescript
    * // HTTP server
-   * await app.listen(3000);
+   * await app.listen(9929);
    * console.log('Server running on http://localhost:3000');
    * ```
    *

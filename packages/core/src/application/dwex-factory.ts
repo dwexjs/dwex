@@ -17,7 +17,7 @@ export class DwexFactory {
    * import { AppModule } from './app.module';
    *
    * const app = await DwexFactory.create(AppModule);
-   * await app.listen(3000);
+   * await app.listen(9929);
    * ```
    */
   static async create(module: Type<any>): Promise<DwexApplication> {

@@ -41,7 +41,7 @@ async function bootstrap() {
   // Setup OpenAPI UI at /docs
   OpenApiModule.setup('/docs', app, document);
 
-  await app.listen(3000);
+  await app.listen(9929);
 }
 
 bootstrap();
