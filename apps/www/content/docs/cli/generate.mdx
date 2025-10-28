@@ -45,8 +45,8 @@ Generated files:
 
 ```typescript title="modules/users/users.module.ts"
 import { Module } from "@dwex/core";
-import { UsersController } from "./users.controller.js";
-import { UsersService } from "./users.service.js";
+import { UsersController } from "./users.controller";
+import { UsersService } from "./users.service";
 
 @Module({
   controllers: [UsersController],
@@ -57,7 +57,7 @@ export class UsersModule {}
 
 ```typescript title="modules/users/users.controller.ts"
 import { Controller, Get } from "@dwex/core";
-import { UsersService } from "./users.service.js";
+import { UsersService } from "./users.service";
 
 @Controller("/users")
 export class UsersController {
@@ -233,7 +233,7 @@ my-app/
 │       └── auth.service.ts
 ├── root.module.ts
 ├── index.ts
-└── package.json
+└── packageon
 ```
 
 ## Post-Generation Steps
@@ -246,10 +246,10 @@ If you generated a controller or service separately, register it:
 
 ```typescript title="modules/users/users.module.ts"
 import { Module } from "@dwex/core";
-import { UsersController } from "./users.controller.js";
-import { UsersService } from "./users.service.js";
+import { UsersController } from "./users.controller";
+import { UsersService } from "./users.service";
 // highlight-next-line
-import { EmailService } from "./email.service.js";
+import { EmailService } from "./email.service";
 
 @Module({
   controllers: [UsersController],
@@ -266,7 +266,7 @@ If you generated a new module, import it in `root.module.ts`:
 ```typescript title="root.module.ts"
 import { Module } from "@dwex/core";
 // highlight-next-line
-import { UsersModule } from "./modules/users/users.module.js";
+import { UsersModule } from "./modules/users/users.module";
 
 @Module({
   // highlight-next-line
@@ -399,9 +399,9 @@ Names can only contain:
 
 If generated files have import errors:
 
-1. Ensure you're using `.js` extensions in imports
-2. Check `tsconfig.json` has `"moduleResolution": "nodenext"`
-3. Verify `"type": "module"` in `package.json`
+1. Ensure you're using `` extensions in imports
+2. Check `tsconfigon` has `"moduleResolution": "nodenext"`
+3. Verify `"type": "module"` in `packageon`
 
 ## Next Steps
 
