@@ -20,21 +20,17 @@ import { DwexFactory } from "@dwex/core";
 import { corsMiddleware } from "@dwex/core";
 import { AppModule } from "./app.module";
 
-async function bootstrap() {
-  const app = await DwexFactory.create(AppModule);
+const app = await DwexFactory.create(AppModule);
 
-  // Enable CORS
-  app.use(
-    corsMiddleware({
-      origin: "https://example.com",
-      credentials: true,
-    })
-  );
+// Enable CORS
+app.use(
+  corsMiddleware({
+    origin: "https://example.com",
+    credentials: true,
+  })
+);
 
-  await app.listen(9929);
-}
-
-bootstrap();
+await app.listen(3000);
 ```
 
 CORS Options:
@@ -177,20 +173,18 @@ export class UserController {
 Apply middleware to all routes:
 
 ```typescript title="main.ts"
-async function bootstrap() {
-  const app = await DwexFactory.create(AppModule);
+const app = await DwexFactory.create(AppModule);
 
-  // CORS
-  app.use(corsMiddleware({ origin: "*" }));
+// CORS
+app.use(corsMiddleware({ origin: "*" }));
 
-  // Custom logging
-  app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
-    next();
-  });
+// Custom logging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
-  await app.listen(9929);
-}
+await app.listen(3000);
 ```
 
 ## Controller-Specific Middleware

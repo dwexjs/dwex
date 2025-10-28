@@ -130,7 +130,7 @@ import { TaskService } from "./task.service";
 export class AppModule {}
 ```
 
-## Step 6: Bootstrap the Application
+## Step 6: Start the Application
 
 Create `src/main.ts`:
 
@@ -139,14 +139,8 @@ import "reflect-metadata";
 import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
 
-async function bootstrap() {
-  const app = await DwexFactory.create(AppModule);
-
-  const port = 3000;
-  await app.listen(port);
-}
-
-bootstrap();
+const app = await DwexFactory.create(AppModule);
+await app.listen(3000);
 ```
 
 ## Step 7: Run Your Application
@@ -208,7 +202,7 @@ The `TaskController` handles HTTP requests. Decorators like `@Get()` and `@Post(
 
 The `AppModule` ties everything together, registering controllers and providers.
 
-### Bootstrap
+### Application Initialization
 
 `DwexFactory.create()` initializes the application and dependency injection container. `app.listen()` starts the HTTP server.
 

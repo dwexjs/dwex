@@ -52,12 +52,8 @@ import "reflect-metadata";
 import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
 
-async function bootstrap() {
-  const app = await DwexFactory.create(AppModule);
-  await app.listen(9929);
-}
-
-bootstrap();
+const app = await DwexFactory.create(AppModule);
+await app.listen(9929);
 ```
 
 ### `src/app.module.ts`

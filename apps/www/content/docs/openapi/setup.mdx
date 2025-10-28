@@ -53,45 +53,41 @@ This creates two endpoints:
 
 ## Full Example
 
-Here's a complete bootstrap function with OpenAPI:
+Here's a complete example with OpenAPI:
 
-```typescript
+```typescript title="main.ts"
 import { DwexFactory } from '@dwex/core';
 import { DocumentBuilder, OpenApiModule } from '@dwex/openapi';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
-  // Create the application
-  const app = await DwexFactory.create(AppModule);
+// Create the application
+const app = await DwexFactory.create(AppModule);
 
-  // Configure OpenAPI
-  const config = new DocumentBuilder()
-    .setTitle('My API')
-    .setDescription('The My API description')
-    .setVersion('1.0')
-    .setTermsOfService('https://example.com/terms')
-    .setContact('API Support', 'https://example.com', 'support@example.com')
-    .setLicense('MIT', 'https://opensource.org/licenses/MIT')
-    .addServer('http://localhost:3000', 'Local server')
-    .addServer('https://api.example.com', 'Production server')
-    .addTag('users', 'User management endpoints')
-    .addTag('auth', 'Authentication endpoints')
-    .addBearerAuth()
-    .build();
+// Configure OpenAPI
+const config = new DocumentBuilder()
+  .setTitle('My API')
+  .setDescription('The My API description')
+  .setVersion('1.0')
+  .setTermsOfService('https://example.com/terms')
+  .setContact('API Support', 'https://example.com', 'support@example.com')
+  .setLicense('MIT', 'https://opensource.org/licenses/MIT')
+  .addServer('http://localhost:3000', 'Local server')
+  .addServer('https://api.example.com', 'Production server')
+  .addTag('users', 'User management endpoints')
+  .addTag('auth', 'Authentication endpoints')
+  .addBearerAuth()
+  .build();
 
-  // Create and setup documentation
-  const document = OpenApiModule.createDocument(app, config);
-  OpenApiModule.setup('/docs', app, document, {
-    customSiteTitle: 'My API Documentation',
-    darkMode: true,
-  });
+// Create and setup documentation
+const document = OpenApiModule.createDocument(app, config);
+OpenApiModule.setup('/docs', app, document, {
+  customSiteTitle: 'My API Documentation',
+  darkMode: true,
+});
 
-  // Start the server
-  await app.listen(9929);
-  console.log('API Documentation: http://localhost:3000/docs');
-}
-
-bootstrap();
+// Start the server
+await app.listen(3000);
+console.log('API Documentation: http://localhost:3000/docs');
 ```
 
 ## Configuration Options

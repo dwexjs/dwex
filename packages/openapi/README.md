@@ -23,28 +23,24 @@ import { DwexFactory } from '@dwex/core';
 import { DocumentBuilder, OpenApiModule } from '@dwex/openapi';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
-  const app = await DwexFactory.create(AppModule);
+const app = await DwexFactory.create(AppModule);
 
-  // Create OpenAPI configuration
-  const config = new DocumentBuilder()
-    .setTitle('My API')
-    .setDescription('API documentation')
-    .setVersion('1.0')
-    .addServer('http://localhost:3000')
-    .addBearerAuth()
-    .build();
+// Create OpenAPI configuration
+const config = new DocumentBuilder()
+  .setTitle('My API')
+  .setDescription('API documentation')
+  .setVersion('1.0')
+  .addServer('http://localhost:3000')
+  .addBearerAuth()
+  .build();
 
-  // Generate OpenAPI document
-  const document = OpenApiModule.createDocument(app, config);
+// Generate OpenAPI document
+const document = OpenApiModule.createDocument(app, config);
 
-  // Setup OpenAPI UI at /docs
-  OpenApiModule.setup('/docs', app, document);
+// Setup OpenAPI UI at /docs
+OpenApiModule.setup('/docs', app, document);
 
-  await app.listen(9929);
-}
-
-bootstrap();
+await app.listen(9929);
 ```
 
 Visit `http://localhost:3000/docs` to see your API documentation!

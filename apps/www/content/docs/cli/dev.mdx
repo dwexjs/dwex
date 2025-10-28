@@ -153,15 +153,11 @@ import "reflect-metadata";
 import { DwexFactory } from "@dwex/core";
 import { RootModule } from "./root.module";
 
-async function bootstrap() {
-  const app = await DwexFactory.create(RootModule, {
-    logger: ["log", "error", "warn", "debug", "verbose"],
-  });
+const app = await DwexFactory.create(RootModule, {
+  logger: ["log", "error", "warn", "debug", "verbose"],
+});
 
-  await app.listen(9929);
-}
-
-bootstrap();
+await app.listen(3000);
 ```
 
 ## Graceful Shutdown
@@ -203,14 +199,14 @@ If hot reload isn't working:
 
 If restarts are slow:
 
-1. Check for heavy synchronous operations in bootstrap
+1. Check for heavy synchronous operations during app initialization
 2. Use lazy imports for large dependencies
 3. Profile startup with `console.time()`
 
 ```typescript
-console.time("bootstrap");
+console.time("startup");
 const app = await DwexFactory.create(RootModule);
-console.timeEnd("bootstrap");
+console.timeEnd("startup");
 ```
 
 ## Comparison with Production

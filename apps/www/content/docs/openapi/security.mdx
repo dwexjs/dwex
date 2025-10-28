@@ -207,44 +207,38 @@ export class UsersController {
 
 ## Complete Example
 
-```typescript
-// main.ts
+```typescript title="main.ts"
 import { DwexFactory } from '@dwex/core';
 import { DocumentBuilder, OpenApiModule } from '@dwex/openapi';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
-  const app = await DwexFactory.create(AppModule);
+const app = await DwexFactory.create(AppModule);
 
-  const config = new DocumentBuilder()
-    .setTitle('My API')
-    .setVersion('1.0')
-    // Add Bearer auth for JWT tokens
-    .addBearerAuth({
-      name: 'JWT',
-      description: 'JWT Authorization header',
-      bearerFormat: 'JWT'
-    })
-    // Add API Key for service-to-service
-    .addApiKey({
-      name: 'api-key',
-      in: 'header',
-      paramName: 'X-API-KEY',
-      description: 'API Key for service authentication'
-    })
-    .build();
+const config = new DocumentBuilder()
+  .setTitle('My API')
+  .setVersion('1.0')
+  // Add Bearer auth for JWT tokens
+  .addBearerAuth({
+    name: 'JWT',
+    description: 'JWT Authorization header',
+    bearerFormat: 'JWT'
+  })
+  // Add API Key for service-to-service
+  .addApiKey({
+    name: 'api-key',
+    in: 'header',
+    paramName: 'X-API-KEY',
+    description: 'API Key for service authentication'
+  })
+  .build();
 
-  const document = OpenApiModule.createDocument(app, config);
-  OpenApiModule.setup('/docs', app, document);
+const document = OpenApiModule.createDocument(app, config);
+OpenApiModule.setup('/docs', app, document);
 
-  await app.listen(9929);
-}
-
-bootstrap();
+await app.listen(3000);
 ```
 
-```typescript
-// users.controller.ts
+```typescript title="users.controller.ts"
 import { Controller, Get, Post, Body, UseGuards } from '@dwex/core';
 import {
   ApiTags,
