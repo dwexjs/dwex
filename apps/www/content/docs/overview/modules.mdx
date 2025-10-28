@@ -11,7 +11,7 @@ Modules are the fundamental building blocks of a Dwex application. A module is a
 
 Here's a simple module:
 
-```typescript
+```typescript title="user.module.ts"
 import { Module } from "@dwex/core";
 import { UserController } from "./user.controller";
 import { UserService } from "./user.service";
@@ -126,7 +126,7 @@ Dynamic modules allow configuration at runtime. This is useful for modules that 
 
 ### Creating a Dynamic Module
 
-```typescript
+```typescript title="database.module.ts"
 import { Module, type DynamicModule } from "@dwex/core";
 
 @Module({})
@@ -149,7 +149,7 @@ export class DatabaseModule {
 
 ### Using a Dynamic Module
 
-```typescript
+```typescript title="app.module.ts"
 @Module({
   imports: [
     DatabaseModule.forRoot({
@@ -166,7 +166,7 @@ export class AppModule {}
 
 For configuration that requires async initialization:
 
-```typescript
+```typescript title="database.module.ts"
 @Module({})
 export class DatabaseModule {
   static async forRootAsync(
@@ -191,7 +191,7 @@ export class DatabaseModule {
 
 Usage:
 
-```typescript
+```typescript title="app.module.ts"
 @Module({
   imports: [
     await DatabaseModule.forRootAsync({
@@ -230,8 +230,7 @@ export class AppModule {}
 
 Organize your app by features:
 
-```typescript
-// user.module.ts
+```typescript title="user.module.ts"
 @Module({
   imports: [DatabaseModule],
   controllers: [UserController],
@@ -241,8 +240,7 @@ Organize your app by features:
 export class UserModule {}
 ```
 
-```typescript
-// auth.module.ts
+```typescript title="auth.module.ts"
 @Module({
   imports: [UserModule, JwtModule],
   controllers: [AuthController],
@@ -252,8 +250,7 @@ export class UserModule {}
 export class AuthModule {}
 ```
 
-```typescript
-// app.module.ts
+```typescript title="app.module.ts"
 @Module({
   imports: [UserModule, AuthModule],
 })
@@ -264,7 +261,7 @@ export class AppModule {}
 
 Every application has exactly one root module passed to `DwexFactory.create()`:
 
-```typescript
+```typescript title="main.ts"
 import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
 
@@ -273,7 +270,7 @@ const app = await DwexFactory.create(AppModule);
 
 The root module typically imports all feature modules:
 
-```typescript
+```typescript title="app.module.ts"
 @Module({
   imports: [
     LoggerModule,

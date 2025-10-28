@@ -51,7 +51,7 @@ bun add @dwex/core @dwex/common reflect-metadata
 
 Create a `tsconfig.json` file:
 
-```json
+```json title="tsconfig.json"
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -73,7 +73,7 @@ Create a `tsconfig.json` file:
 
 Dwex relies on decorators and metadata reflection. Ensure your `tsconfig.json` includes:
 
-```json
+```json title="tsconfig.json"
 {
   "compilerOptions": {
     "experimentalDecorators": true,
@@ -117,7 +117,7 @@ my-app/
 
 Create a simple `src/main.ts` to test your setup:
 
-```typescript
+```typescript title="src/main.ts"
 import "reflect-metadata";
 import { DwexFactory, Module, Controller, Get } from "@dwex/core";
 
@@ -134,12 +134,8 @@ class AppController {
 })
 class AppModule {}
 
-async function bootstrap() {
-  const app = await DwexFactory.create(AppModule);
-  await app.listen(3000);
-}
-
-bootstrap();
+const app = await DwexFactory.create(AppModule);
+await app.listen(3000);
 ```
 
 Run your application:
@@ -168,7 +164,7 @@ Verify `experimentalDecorators` and `emitDecoratorMetadata` are enabled in your 
 
 Ensure your `tsconfig.json` uses:
 
-```json
+```json title="tsconfig.json"
 {
   "compilerOptions": {
     "moduleResolution": "bundler"

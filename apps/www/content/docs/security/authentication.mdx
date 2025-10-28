@@ -19,7 +19,7 @@ bun add @dwex/jwt
 
 Register the JWT module in your app:
 
-```typescript
+```typescript title="app.module.ts"
 import { Module } from "@dwex/core";
 import { JwtModule } from "@dwex/jwt";
 
@@ -40,7 +40,7 @@ export class AppModule {}
 
 ### 2. Create Auth Service
 
-```typescript
+```typescript title="auth.service.ts"
 import { Injectable, UnauthorizedException } from "@dwex/core";
 import { JwtService } from "@dwex/jwt";
 
@@ -100,7 +100,7 @@ export class AuthService {
 
 ### 3. Create Auth Controller
 
-```typescript
+```typescript title="auth.controller.ts"
 import { Controller, Post, Body } from "@dwex/core";
 import { AuthService } from "./auth.service";
 
@@ -117,7 +117,7 @@ export class AuthController {
 
 ### 4. Create Auth Guard
 
-```typescript
+```typescript title="auth.guard.ts"
 import {
   Injectable,
   CanActivate,
@@ -155,7 +155,7 @@ export class AuthGuard implements CanActivate {
 
 ### 5. Create Auth Module
 
-```typescript
+```typescript title="auth.module.ts"
 import { Module } from "@dwex/core";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
@@ -171,7 +171,7 @@ export class AuthModule {}
 
 ### 6. Protect Routes
 
-```typescript
+```typescript title="user.controller.ts"
 import { Controller, Get, UseGuards, Req } from "@dwex/core";
 import { AuthGuard } from "./auth/auth.guard";
 
@@ -243,7 +243,7 @@ bun add -d @types/bcrypt
 
 Updated Auth Service:
 
-```typescript
+```typescript title="auth.service.ts"
 import { Injectable, UnauthorizedException } from "@dwex/core";
 import { JwtService } from "@dwex/jwt";
 import * as bcrypt from "bcrypt";
@@ -293,7 +293,7 @@ export class AuthService {
 
 Implement refresh token flow:
 
-```typescript
+```typescript title="auth.service.ts"
 @Injectable()
 export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
@@ -353,7 +353,7 @@ export class AuthService {
 
 Add refresh endpoint:
 
-```typescript
+```typescript title="auth.controller.ts"
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -378,7 +378,7 @@ export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 Update AuthGuard:
 
-```typescript
+```typescript title="auth.guard.ts"
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(

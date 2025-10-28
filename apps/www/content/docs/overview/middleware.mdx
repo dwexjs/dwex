@@ -15,7 +15,7 @@ Dwex provides several built-in middleware functions:
 
 Enable Cross-Origin Resource Sharing:
 
-```typescript
+```typescript title="main.ts"
 import { DwexFactory } from "@dwex/core";
 import { corsMiddleware } from "@dwex/core";
 import { AppModule } from "./app.module";
@@ -132,7 +132,7 @@ app.use(loggingMiddleware);
 
 ### Class-Based Middleware
 
-```typescript
+```typescript title="logger.middleware.ts"
 import { Injectable, type DwexMiddleware } from "@dwex/core";
 
 @Injectable()
@@ -146,7 +146,7 @@ export class LoggerMiddleware implements DwexMiddleware {
 
 Register in module:
 
-```typescript
+```typescript title="app.module.ts"
 import { Module } from "@dwex/core";
 import { LoggerMiddleware } from "./logger.middleware";
 
@@ -158,7 +158,7 @@ export class AppModule {}
 
 Apply to controllers:
 
-```typescript
+```typescript title="user.controller.ts"
 import { Controller, Get, UseMiddleware } from "@dwex/core";
 import { LoggerMiddleware } from "./logger.middleware";
 
@@ -176,7 +176,7 @@ export class UserController {
 
 Apply middleware to all routes:
 
-```typescript
+```typescript title="main.ts"
 async function bootstrap() {
   const app = await DwexFactory.create(AppModule);
 
@@ -197,7 +197,7 @@ async function bootstrap() {
 
 Apply middleware to specific controllers:
 
-```typescript
+```typescript title="admin.controller.ts"
 import { Controller, Get, UseMiddleware } from "@dwex/core";
 import { AuthMiddleware } from "./auth.middleware";
 import { LoggerMiddleware } from "./logger.middleware";
@@ -216,7 +216,7 @@ export class AdminController {
 
 ### Authentication Middleware
 
-```typescript
+```typescript title="auth.middleware.ts"
 import { Injectable, UnauthorizedException } from "@dwex/core";
 import type { DwexMiddleware } from "@dwex/core";
 
@@ -380,7 +380,7 @@ const middleware = (req, res, next) => {
 
 When you need dependencies, use class-based middleware:
 
-```typescript
+```typescript title="auth.middleware.ts"
 @Injectable()
 export class AuthMiddleware implements DwexMiddleware {
   constructor(
@@ -414,7 +414,7 @@ app.use(corsAndLoggingAndAuthMiddleware);
 
 Clearly document what middleware modifies:
 
-```typescript
+```typescript title="auth.middleware.ts"
 /**
  * Attaches user object to request after validating JWT token.
  * Adds `req.user` property.

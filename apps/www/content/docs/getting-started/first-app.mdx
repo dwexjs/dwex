@@ -24,7 +24,7 @@ bun install
 
 Create `src/task.interface.ts`:
 
-```typescript
+```typescript title="src/task.interface.ts"
 export interface Task {
   id: string;
   title: string;
@@ -36,7 +36,7 @@ export interface Task {
 
 Create `src/task.service.ts`:
 
-```typescript
+```typescript title="src/task.service.ts"
 import { Injectable } from "@dwex/core";
 import type { Task } from "./task.interface";
 
@@ -78,7 +78,7 @@ export class TaskService {
 
 Create `src/task.controller.ts`:
 
-```typescript
+```typescript title="src/task.controller.ts"
 import { Controller, Get, Post, Delete, Param, Body } from "@dwex/core";
 import { TaskService } from "./task.service";
 import type { Task } from "./task.interface";
@@ -118,7 +118,7 @@ export class TaskController {
 
 Create `src/app.module.ts`:
 
-```typescript
+```typescript title="src/app.module.ts"
 import { Module } from "@dwex/core";
 import { TaskController } from "./task.controller";
 import { TaskService } from "./task.service";
@@ -134,7 +134,7 @@ export class AppModule {}
 
 Create `src/main.ts`:
 
-```typescript
+```typescript title="src/main.ts"
 import "reflect-metadata";
 import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
@@ -222,7 +222,7 @@ bun add @dwex/logger
 
 Update `src/app.module.ts`:
 
-```typescript
+```typescript title="src/app.module.ts"
 import { Module } from "@dwex/core";
 import { LoggerModule } from "@dwex/logger";
 import { TaskController } from "./task.controller";
@@ -238,7 +238,7 @@ export class AppModule {}
 
 Update `src/task.controller.ts`:
 
-```typescript
+```typescript title="src/task.controller.ts"
 import { Controller, Get, Post, Delete, Param, Body } from "@dwex/core";
 import { Logger } from "@dwex/logger";
 import { TaskService } from "./task.service";

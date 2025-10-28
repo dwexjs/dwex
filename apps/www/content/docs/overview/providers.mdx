@@ -9,7 +9,7 @@ Providers are classes that can be injected as dependencies. They encapsulate bus
 
 ## Basic Provider
 
-```typescript
+```typescript title="user.service.ts"
 import { Injectable } from "@dwex/core";
 
 @Injectable()
@@ -33,7 +33,7 @@ export class UserService {
 
 Register providers in a module's `providers` array:
 
-```typescript
+```typescript title="user.module.ts"
 import { Module } from "@dwex/core";
 import { UserController } from "./user.controller";
 import { UserService } from "./user.service";

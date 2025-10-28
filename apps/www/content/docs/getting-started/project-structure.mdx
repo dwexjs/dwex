@@ -47,7 +47,7 @@ my-app/
 
 The entry point of your application. Bootstraps the app and starts the server.
 
-```typescript
+```typescript title="src/main.ts"
 import "reflect-metadata";
 import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
@@ -64,7 +64,7 @@ bootstrap();
 
 The root module that imports all feature modules.
 
-```typescript
+```typescript title="src/app.module.ts"
 import { Module } from "@dwex/core";
 import { LoggerModule } from "@dwex/logger";
 import { UserModule } from "./modules/users/users.module";
@@ -89,8 +89,7 @@ Feature modules organized by domain. Each module contains:
 
 **Example: Users Module**
 
-```typescript
-// users.module.ts
+```typescript title="users.module.ts"
 @Module({
   imports: [DatabaseModule],
   controllers: [UserController],
@@ -100,8 +99,7 @@ Feature modules organized by domain. Each module contains:
 export class UserModule {}
 ```
 
-```typescript
-// users.controller.ts
+```typescript title="users.controller.ts"
 @Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -113,8 +111,7 @@ export class UserController {
 }
 ```
 
-```typescript
-// users.service.ts
+```typescript title="users.service.ts"
 @Injectable()
 export class UserService {
   constructor(private readonly db: DatabaseService) {}
@@ -136,8 +133,7 @@ Shared utilities used across modules:
 
 **Example: Logging Interceptor**
 
-```typescript
-// common/interceptors/logging.interceptor.ts
+```typescript title="common/interceptors/logging.interceptor.ts"
 @Injectable()
 export class LoggingInterceptor implements DwexInterceptor {
   async intercept(context: ExecutionContext, next: () => Promise<any>) {
@@ -154,8 +150,7 @@ export class LoggingInterceptor implements DwexInterceptor {
 
 Configuration files for environment variables, database connections, etc.
 
-```typescript
-// config/app.config.ts
+```typescript title="config/app.config.ts"
 export const appConfig = {
   port: process.env.PORT || 3000,
   database: {
@@ -225,8 +220,7 @@ export class SharedModule {}
 
 Use Data Transfer Objects to define expected request shapes:
 
-```typescript
-// dto/create-user.dto.ts
+```typescript title="dto/create-user.dto.ts"
 export interface CreateUserDto {
   email: string;
   password: string;
@@ -238,8 +232,7 @@ export interface CreateUserDto {
 
 Use `index.ts` files to simplify imports:
 
-```typescript
-// modules/users/index.ts
+```typescript title="modules/users/index.ts"
 export * from "./users.controller";
 export * from "./users.service";
 export * from "./users.module";
