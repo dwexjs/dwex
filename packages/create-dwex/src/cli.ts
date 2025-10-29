@@ -66,68 +66,22 @@ export async function run(): Promise<void> {
 			console.error(error);
 		}
 
-		// Format code with Biome
-		const formatSpinner = clack.spinner();
-		formatSpinner.start("Formatting code with Biome...");
-
 		try {
 			const formatProc = Bun.spawn(
 				["bunx", "biome", "format", "--write", "."],
 				{
 					cwd: projectPath,
-					stdout: "inherit",
-					stderr: "inherit",
 				},
 			);
 			await formatProc.exited;
-			if (formatProc.exitCode === 0) {
-				formatSpinner.stop(pc.green("Code formatted"));
-			} else {
-				formatSpinner.stop(pc.yellow("Failed to format code"));
-			}
 		} catch (error) {
-			formatSpinner.stop(pc.yellow("Failed to format code"));
 			console.error(error);
 		}
 
 		// Initialize git if requested
 		if (config.initGit) {
-			const gitSpinner = clack.spinner();
-			gitSpinner.start("Initializing git repository...");
-
-			try {
-				await initializeGit(projectPath);
-				gitSpinner.stop(pc.green("Git repository initialized"));
-			} catch (error) {
-				gitSpinner.stop(pc.yellow("Failed to initialize git repository"));
-				console.error(error);
-			}
+			await initializeGit(projectPath);
 		}
-
-		// Show next steps
-		const nextSteps = [
-			`${pc.cyan("cd")} ${config.projectName}`,
-			`${pc.cyan("bun run dev")}`,
-		];
-
-		// Add feature-specific notes
-		if (config.features.includes("openapi")) {
-			nextSteps.push(
-				"",
-				`📚 API docs available at: ${pc.cyan(`http://localhost:${config.port}/docs`)}`,
-			);
-		}
-
-		if (config.features.includes("auth-jwt")) {
-			nextSteps.push(
-				"",
-				`🔐 Auth endpoints: ${pc.cyan(`http://localhost:${config.port}/auth/login`)}`,
-			);
-		}
-
-		clack.note(nextSteps.join("\n"), "Next steps");
-
-		clack.outro(pc.green("Happy coding! 🚀"));
 	} catch (error) {
 		spinner.stop(pc.red("Failed to create project"));
 		console.error(error);
