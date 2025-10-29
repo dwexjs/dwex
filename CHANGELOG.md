@@ -1,3 +1,17 @@
+## 1.0.0-beta.8 (2025-10-29)
+
+### 🚀 Features
+
+- **create-dwex:** show version during project creation ([dc01546](https://github.com/dwexjs/dwex/commit/dc01546))
+
+### 🩹 Fixes
+
+- **layout:** conditionally load analytics script in production environment to optimize performance ([b1b8c88](https://github.com/dwexjs/dwex/commit/b1b8c88))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.7 (2025-10-27)
 
 ### 🚀 Features
