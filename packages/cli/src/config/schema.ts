@@ -33,10 +33,15 @@ export interface DwexConfig {
 	external?: string[];
 
 	/**
-	 * Target runtime
+	 * Target platform for deployment
 	 * @default "bun"
+	 *
+	 * - "bun": Local development and production using Bun runtime (default)
+	 * - "vercel-edge": Deploy to Vercel Edge Functions
+	 * - "cloudflare-workers": Deploy to Cloudflare Workers
+	 * - "netlify-edge": Deploy to Netlify Edge Functions
 	 */
-	target?: "bun" | "node";
+	target?: "bun" | "vercel-edge" | "cloudflare-workers" | "netlify-edge";
 
 	/**
 	 * Port for development server

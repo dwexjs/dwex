@@ -14,11 +14,16 @@ export async function buildCommand(program: Command): Promise<void> {
 		.option("--no-minify", "Disable minification")
 		.option("--sourcemap <type>", "Sourcemap type (none, inline, external)")
 		.option("-o, --outdir <dir>", "Output directory")
+		.option(
+			"-t, --target <platform>",
+			"Target platform (bun, vercel-edge, cloudflare-workers, netlify-edge)",
+		)
 		.action(async (options) => {
 			const config = await loadConfig();
 
 			const entryPath = resolveProjectPath(config.entry);
 			const outdir = options.outdir || config.outdir;
+			const target = options.target || config.target;
 
 			// Validate entry file exists
 			if (!existsSync(entryPath)) {
@@ -45,11 +50,14 @@ export async function buildCommand(program: Command): Promise<void> {
 					minify: options.minify !== false,
 					sourcemap: options.sourcemap || config.sourcemap,
 					external: config.external,
-					target: config.target,
+					target,
 				});
 
 				spinner.succeed(logger.green("Build completed successfully!"));
-				logger.log(`\n  ${logger.dim("➜")}  Output: ${logger.cyan(outdir)}\n`);
+				logger.log(
+					`\n  ${logger.dim("➜")}  Target: ${logger.cyan(target)}`,
+				);
+				logger.log(`  ${logger.dim("➜")}  Output: ${logger.cyan(outdir)}\n`);
 			} catch (error) {
 				spinner.fail(logger.red("Build failed"));
 				logger.error(

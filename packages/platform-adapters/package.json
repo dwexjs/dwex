@@ -1,0 +1,29 @@
+{
+	"name": "@dwex/platform-adapters",
+	"version": "1.0.0-beta.9",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"@dwex/source": "./src/index.ts",
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"!**/*.tsbuildinfo"
+	],
+	"dependencies": {
+		"tslib": "^2.3.0",
+		"@dwex/common": "*",
+		"@dwex/core": "*"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.3.1"
+	}
+}

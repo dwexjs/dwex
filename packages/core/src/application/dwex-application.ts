@@ -1,10 +1,12 @@
 import {
+	BunAdapter,
 	HttpException,
 	type HttpsOptions,
 	type MiddlewareFunction,
 	MODULE_METADATA,
 	type ModuleMetadata,
 	NotFoundException,
+	type PlatformAdapter,
 	type Type,
 } from "@dwex/common";
 import "reflect-metadata";
@@ -20,19 +22,24 @@ export class DwexApplication {
 	private readonly router: Router;
 	private readonly requestHandler: RequestHandler;
 	private readonly globalMiddleware: MiddlewareFunction[] = [];
-	private server?: ReturnType<typeof Bun.serve>;
+	private readonly adapter: PlatformAdapter;
 	private tlsEnabled = false;
 	private instanceLoaderLogger?: any;
 	private routesResolverLogger?: any;
 	private routerExplorerLogger?: any;
 	private dwexAppLogger?: any;
 	private startTime: bigint;
+	private serverPort?: number;
 
-	constructor(private readonly rootModule: Type<any>) {
+	constructor(
+		private readonly rootModule: Type<any>,
+		adapter?: PlatformAdapter,
+	) {
 		this.startTime = process.hrtime.bigint();
 		this.container = new Container();
 		this.router = new Router();
 		this.requestHandler = new RequestHandler(this.container);
+		this.adapter = adapter || new BunAdapter();
 	}
 
 	/**
@@ -99,14 +106,20 @@ export class DwexApplication {
 		hostname = "0.0.0.0",
 		httpsOptions?: HttpsOptions,
 	): Promise<void> {
-		this.tlsEnabled = !!httpsOptions;
+		if (!this.adapter.supportsListen) {
+			throw new Error(
+				`The ${this.adapter.name} adapter does not support listen(). Use getHandler() instead.`,
+			);
+		}
 
-		this.server = Bun.serve({
+		this.tlsEnabled = !!httpsOptions;
+		this.serverPort = port;
+
+		// Use the adapter to start the server
+		await this.adapter.listen?.(this.handleWebRequest.bind(this), {
 			port,
 			hostname,
-			fetch: this.handleRequest.bind(this),
-			error: this.handleError.bind(this),
-			...(httpsOptions && { tls: httpsOptions }),
+			httpsOptions,
 		});
 
 		// Print banner with all info at the very top
@@ -142,9 +155,39 @@ export class DwexApplication {
 	 * Stops the HTTP server.
 	 */
 	async close(): Promise<void> {
-		if (this.server) {
-			this.server.stop();
+		await this.adapter.destroy?.();
+	}
+
+	/**
+	 * Gets a handler function for edge/serverless platforms.
+	 *
+	 * Use this method when deploying to platforms like Vercel Edge Functions,
+	 * Cloudflare Workers, or Netlify Edge Functions that require a handler export.
+	 *
+	 * @returns Handler function compatible with the platform adapter
+	 *
+	 * @example
+	 * ```typescript
+	 * // Vercel Edge Functions
+	 * import { DwexFactory } from '@dwex/core';
+	 * import { VercelEdgeAdapter } from '@dwex/platform-adapters';
+	 * import { AppModule } from './app.module';
+	 *
+	 * const app = await DwexFactory.create(AppModule, new VercelEdgeAdapter());
+	 * export default app.getHandler();
+	 * ```
+	 */
+	getHandler(): (...args: any[]) => Promise<Response> {
+		if (!this.adapter.requiresHandler && !this.adapter.createHandler) {
+			throw new Error(
+				`The ${this.adapter.name} adapter does not support getHandler(). Use listen() instead.`,
+			);
 		}
+
+		return (
+			this.adapter.createHandler?.(this.handleWebRequest.bind(this)) ??
+			this.handleWebRequest.bind(this)
+		);
 	}
 
 	/**
@@ -162,9 +205,10 @@ export class DwexApplication {
 	}
 
 	/**
-	 * Handles incoming HTTP requests.
+	 * Handles incoming HTTP requests using Web API standard.
+	 * This is the core platform-agnostic request handler.
 	 */
-	private async handleRequest(req: Request): Promise<Response> {
+	private async handleWebRequest(req: Request): Promise<Response> {
 		try {
 			// Create a mutable request object
 			const request: any = {
@@ -382,17 +426,20 @@ export class DwexApplication {
 	 * Prints startup banner with all server information
 	 */
 	private async printStartupBanner(): Promise<void> {
-		if (!this.server) return;
+		if (!this.serverPort) return;
 
 		// Read version from package.json
 		const corePackagePath = new URL(
 			import.meta.resolve("@dwex/core/package.json"),
 		);
-		const packageJson = await Bun.file(corePackagePath).json();
+
+		// Use fetch to read the file (works in all environments)
+		const response = await fetch(corePackagePath);
+		const packageJson = (await response.json()) as { version: string };
 		const version = packageJson.version;
 
 		const pid = process.pid;
-		const port = this.server.port;
+		const port = this.serverPort;
 		const protocol = this.tlsEnabled ? "https" : "http";
 
 		// Colors - Purple/Pink theme
