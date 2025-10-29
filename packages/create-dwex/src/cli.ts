@@ -52,6 +52,8 @@ export async function run(): Promise<void> {
 		try {
 			const installProc = Bun.spawn(["bun", "install"], {
 				cwd: projectPath,
+				stdout: 'ignore',
+				stderr: 'ignore',
 			});
 			await installProc.exited;
 			if (installProc.exitCode === 0) {
@@ -69,6 +71,8 @@ export async function run(): Promise<void> {
 				["bunx", "biome", "format", "--write", "."],
 				{
 					cwd: projectPath,
+					stdout: 'ignore',
+					stderr: 'ignore',
 				},
 			);
 			await formatProc.exited;
