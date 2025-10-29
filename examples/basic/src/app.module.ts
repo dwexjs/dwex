@@ -1,7 +1,7 @@
 import { Module } from "@dwex/core";
 import { JwtModule } from "@dwex/jwt";
 import { LoggerModule } from "@dwex/logger";
-import { AppController } from "./root.controller";
+import { AppController } from "./app.controller";
 
 /**
  * Root application module
@@ -19,4 +19,4 @@ import { AppController } from "./root.controller";
 	controllers: [AppController],
 	providers: [],
 })
-export class RootModule {}
+export class AppModule {}
