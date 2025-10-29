@@ -1,27 +1,24 @@
-import * as clack from "@clack/prompts";
 import { mkdir } from "node:fs/promises";
+import * as clack from "@clack/prompts";
 import pc from "picocolors";
-import {
-	discoverFeatures,
-	composeProject,
-} from "./template.js";
-import { collectProjectConfig } from "./prompts.js";
-import { getCreateDwexVersion } from "./package.js";
 import { initializeGit } from "./git.js";
+import { getCreateDwexVersion } from "./package.js";
+import { collectProjectConfig } from "./prompts.js";
+import { composeProject, discoverFeatures } from "./template.js";
 
 /**
  * Main CLI function
  */
 export async function run(): Promise<void> {
-	console.clear();
+	console.log();
+	
+	// Get create-dwex version
+	const version = await getCreateDwexVersion();
 
-	clack.intro(pc.bgCyan(pc.black(" create-dwex ")));
+	clack.intro(pc.bgCyan(pc.black(` Dwex v${version} `)));
 
 	// Discover available features
 	const features = await discoverFeatures();
-
-	// Get create-dwex version
-	const version = await getCreateDwexVersion();
 
 	// Collect project configuration from user
 	const { config, projectPath } = await collectProjectConfig(features, version);
@@ -74,11 +71,14 @@ export async function run(): Promise<void> {
 		formatSpinner.start("Formatting code with Biome...");
 
 		try {
-			const formatProc = Bun.spawn(["bunx", "biome", "format", "--write", "."], {
-				cwd: projectPath,
-				stdout: "inherit",
-				stderr: "inherit",
-			});
+			const formatProc = Bun.spawn(
+				["bunx", "biome", "format", "--write", "."],
+				{
+					cwd: projectPath,
+					stdout: "inherit",
+					stderr: "inherit",
+				},
+			);
 			await formatProc.exited;
 			if (formatProc.exitCode === 0) {
 				formatSpinner.stop(pc.green("Code formatted"));
