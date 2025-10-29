@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run --watch src/main.ts",
-    "start": "bun run src/main.ts"
+    "dev": "dwex dev",
+    "start": "dwex build"
   },
   "dependencies": {
     "@dwex/common": "*",
