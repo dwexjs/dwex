@@ -94,7 +94,7 @@ export default {
   target: "bun",
 
   // Port for development server
-  port: 3000,
+  port: 9929,
 };
 ```
 

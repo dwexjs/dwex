@@ -14,7 +14,7 @@ const config = new DocumentBuilder()
 	.setVersion("1.0.0")
 	.setContact("Dwex Team", "https://github.com/dwexjs/dwex", "")
 	.setLicense("MIT", "https://opensource.org/licenses/MIT")
-	.addServer("http://localhost:3000", "Local development server")
+	.addServer("http://localhost:9929", "Local development server")
 	.addTag("general", "General API endpoints")
 	.addTag("users", "User management endpoints")
 	.addBearerAuth({
@@ -34,5 +34,5 @@ OpenApiModule.setup("/docs", app, document, {
 });
 
 // Start the server
-const port = 3001;
+const port = 9929;
 await app.listen(port);

@@ -19,7 +19,7 @@ export default {
   sourcemap: "external",
   external: [],
   target: "bun",
-  port: 3000,
+  port: 9929,
 };
 ```
 
@@ -190,20 +190,20 @@ export default {
 ### `port`
 
 **Type:** `number`
-**Default:** `3000`
+**Default:** `9929`
 
 Default port for development server:
 
 ```typescript
 export default {
-  port: 3000,
+  port: 9929,
 };
 ```
 
 Can be overridden with CLI flag:
 
 ```bash
-bunx dwex dev --port 8080
+bunx dwex dev --port 9929
 ```
 
 Or environment variable:
@@ -238,7 +238,7 @@ export default {
   target: "bun",
 
   // Development server port
-  port: 3000,
+  port: 9929,
 };
 ```
 
@@ -254,7 +254,7 @@ export default {
   outdir: "dist",
   minify: !isDev,
   sourcemap: isDev ? "inline" : "external",
-  port: isDev ? 3000 : 8080,
+  port: isDev ? 9929 : 8080,
 };
 ```
 
@@ -272,7 +272,7 @@ const config: DwexConfig = {
   sourcemap: "external",
   external: [],
   target: "bun",
-  port: 3000,
+  port: 9929,
 };
 
 export default config;
@@ -300,7 +300,7 @@ Fast builds with good debugging:
 export default {
   minify: false,
   sourcemap: "inline",
-  port: 3000,
+  port: 9929,
 };
 ```
 
@@ -335,7 +335,7 @@ const configs = {
   development: {
     minify: false,
     sourcemap: "inline" as const,
-    port: 3000,
+    port: 9929,
   },
   staging: {
     minify: true,
@@ -375,7 +375,7 @@ interface DwexConfig {
   sourcemap?: "none" | "inline" | "external";  // Default: "external"
   external?: string[];         // Default: []
   target?: "bun" | "node";     // Default: "bun"
-  port?: number;               // Default: 3000
+  port?: number;               // Default: 9929
 }
 ```
 
@@ -385,7 +385,7 @@ The CLI validates your config automatically:
 
 ```typescript
 export default {
-  port: "3000",  // ❌ Error: port must be a number
+  port: "9929",  // ❌ Error: port must be a number
   minify: "yes", // ❌ Error: minify must be a boolean
   target: "deno", // ❌ Error: target must be "bun" or "node"
 };

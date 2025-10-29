@@ -28,16 +28,16 @@ bun install
 bun run dev
 ```
 
-The server will start on `http://localhost:3000`
+The server will start on `http://localhost:9929`
 
 ### Try it out
 
 ```bash
 # Root endpoint
-curl http://localhost:3000
+curl http://localhost:9929
 
 # Ping endpoint
-curl http://localhost:3000/ping
+curl http://localhost:9929/ping
 ```
 
 ## Project Structure

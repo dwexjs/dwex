@@ -15,7 +15,7 @@ import type {
  *   .setTitle('My API')
  *   .setDescription('API documentation')
  *   .setVersion('1.0')
- *   .addServer('http://localhost:3000', 'Local server')
+ *   .addServer('http://localhost:9929', 'Local server')
  *   .addTag('users', 'User management endpoints')
  *   .addBearerAuth()
  *   .build();

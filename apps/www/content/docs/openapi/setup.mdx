@@ -71,7 +71,7 @@ const config = new DocumentBuilder()
   .setTermsOfService('https://example.com/terms')
   .setContact('API Support', 'https://example.com', 'support@example.com')
   .setLicense('MIT', 'https://opensource.org/licenses/MIT')
-  .addServer('http://localhost:3000', 'Local server')
+  .addServer('http://localhost:9929', 'Local server')
   .addServer('https://api.example.com', 'Production server')
   .addTag('users', 'User management endpoints')
   .addTag('auth', 'Authentication endpoints')
@@ -86,8 +86,8 @@ OpenApiModule.setup('/docs', app, document, {
 });
 
 // Start the server
-await app.listen(3000);
-console.log('API Documentation: http://localhost:3000/docs');
+await app.listen(9929);
+console.log('API Documentation: http://localhost:9929/docs');
 ```
 
 ## Configuration Options

@@ -21,11 +21,11 @@ Dwex makes it easy to work with environment variables and configuration using Bu
 @Injectable()
 export class ConfigService {
 	get apiUrl() {
-		return Bun.env.API_URL || "http://localhost:3000";
+		return Bun.env.API_URL || "http://localhost:9929";
 	}
 
 	get port() {
-		return Number(Bun.env.PORT) || 3000;
+		return Number(Bun.env.PORT) || 9929;
 	}
 }
 ```

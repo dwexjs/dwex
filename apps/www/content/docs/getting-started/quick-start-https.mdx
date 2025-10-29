@@ -144,7 +144,7 @@ import { AppModule } from "./app.module";
 
 const app = await DwexFactory.create(AppModule);
 
-const port = Number(Bun.env.PORT) || 3000;
+const port = Number(Bun.env.PORT) || 9929;
 const isHttps = Bun.env.HTTPS === "true";
 
 let httpsOptions: HttpsOptions | undefined;

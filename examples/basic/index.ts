@@ -4,5 +4,5 @@ import { RootModule } from "./root.module";
 
 const app = await DwexFactory.create(RootModule);
 
-const port = 3001;
+const port = 9929;
 await app.listen(port);

@@ -40,7 +40,7 @@ export interface DwexConfig {
 
 	/**
 	 * Port for development server
-	 * @default 3000
+	 * @default 9929
 	 */
 	port?: number;
 }
@@ -55,7 +55,7 @@ export const defaultConfig: Required<DwexConfig> = {
 	sourcemap: "external",
 	external: [],
 	target: "bun",
-	port: 3000,
+	port: 9929,
 };
 
 /**

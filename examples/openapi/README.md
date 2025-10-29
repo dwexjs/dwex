@@ -20,12 +20,12 @@ cd examples/openapi
 bun dev
 ```
 
-The application will start on http://localhost:3000
+The application will start on http://localhost:9929
 
 ## Accessing Documentation
 
-- **OpenAPI UI**: http://localhost:3000/docs
-- **OpenAPI JSON**: http://localhost:3000/docs/json
+- **OpenAPI UI**: http://localhost:9929/docs
+- **OpenAPI JSON**: http://localhost:9929/docs/json
 
 ## API Endpoints
 
@@ -45,7 +45,7 @@ The application will start on http://localhost:3000
 ### Creating a User
 
 ```bash
-curl -X POST http://localhost:3000/users \
+curl -X POST http://localhost:9929/users \
   -H "Content-Type: application/json" \
   -d '{
     "username": "johndoe",
@@ -58,7 +58,7 @@ curl -X POST http://localhost:3000/users \
 ### Getting All Users
 
 ```bash
-curl http://localhost:3000/users?page=1&limit=10
+curl http://localhost:9929/users?page=1&limit=10
 ```
 
 ## Code Highlights
@@ -108,7 +108,7 @@ const config = new DocumentBuilder()
   .setTitle('My API')
   .setDescription('API documentation')
   .setVersion('1.0')
-  .addServer('http://localhost:3000')
+  .addServer('http://localhost:9929')
   .addBearerAuth()
   .build();
 

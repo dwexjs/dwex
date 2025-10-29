@@ -28,7 +28,7 @@ bunx dwex dev
 Specify a custom port:
 
 ```bash
-bunx dwex dev --port 8080
+bunx dwex dev --port 9929
 bunx dwex dev -p 4000
 ```
 
@@ -51,7 +51,7 @@ On first start:
 
 ✔ Server ready in 245ms
 
-  ➜  Local:   http://localhost:3000
+  ➜  Local:   http://localhost:9929
   ➜  Watching for changes...
 ```
 
@@ -61,7 +61,7 @@ On file change:
 ℹ File change detected, restarting...
 
 ✔ Server restarted in 123ms
-  ➜  Local:   http://localhost:3000
+  ➜  Local:   http://localhost:9929
 ```
 
 ## Environment Variables
@@ -75,7 +75,7 @@ PORT=8080 bunx dwex dev
 Or create a `.env` file:
 
 ```bash title=".env"
-PORT=3000
+PORT=9929
 NODE_ENV=development
 DATABASE_URL=postgresql://localhost/mydb
 ```
@@ -87,7 +87,7 @@ Customize dev server in `dwex.config.ts`:
 ```typescript
 export default {
   entry: "index.ts",
-  port: 3000,
+  port: 9929,
 };
 ```
 
@@ -138,7 +138,7 @@ Run multiple apps on different ports:
 
 ```bash
 # Terminal 1
-bunx dwex dev --port 3000
+bunx dwex dev --port 9929
 
 # Terminal 2
 bunx dwex dev --port 4000
@@ -157,7 +157,7 @@ const app = await DwexFactory.create(RootModule, {
   logger: ["log", "error", "warn", "debug", "verbose"],
 });
 
-await app.listen(3000);
+await app.listen(9929);
 ```
 
 ## Graceful Shutdown
@@ -175,14 +175,14 @@ The dev server handles shutdown gracefully:
 If port is already taken:
 
 ```bash
-bunx dwex dev --port 3001
+bunx dwex dev --port 9929
 ```
 
 Or find and kill the process:
 
 ```bash
 # macOS/Linux
-lsof -ti:3000 | xargs kill -9
+lsof -ti:9929 | xargs kill -9
 
 # Or use a different port in config
 ```

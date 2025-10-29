@@ -22,7 +22,7 @@ import { generateScalarHTML } from "./templates/scalar.template.js";
  * OpenApiModule.setup('/docs', app, document);
  *
  * await app.listen(9929);
- * // Docs available at: http://localhost:3000/docs
+ * // Docs available at: http://localhost:9929/docs
  * ```
  */
 export class OpenApiModule {

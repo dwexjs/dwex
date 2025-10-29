@@ -37,7 +37,7 @@ const config = new DocumentBuilder()
   .setTitle("My API")
   .setDescription("API documentation")
   .setVersion("1.0")
-  .addServer("http://localhost:3000")
+  .addServer("http://localhost:9929")
   .addBearerAuth()
   .build();
 
@@ -47,10 +47,10 @@ const document = OpenApiModule.createDocument(app, config);
 // Setup API documentation at /docs
 OpenApiModule.setup("/docs", app, document);
 
-await app.listen(3000);
+await app.listen(9929);
 ```
 
-Visit `http://localhost:3000/docs` to see your API documentation!
+Visit `http://localhost:9929/docs` to see your API documentation!
 
 ## Next Steps
 

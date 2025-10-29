@@ -197,7 +197,7 @@ export class UserController {
 ### 1. Login
 
 ```bash
-curl -X POST http://localhost:3000/auth/login \
+curl -X POST http://localhost:9929/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "password123"}'
 ```
@@ -217,7 +217,7 @@ Response:
 ### 2. Access Protected Route
 
 ```bash
-curl http://localhost:3000/users/me \
+curl http://localhost:9929/users/me \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
 ```
 

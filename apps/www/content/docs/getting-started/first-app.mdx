@@ -140,7 +140,7 @@ import { DwexFactory } from "@dwex/core";
 import { AppModule } from "./app.module";
 
 const app = await DwexFactory.create(AppModule);
-await app.listen(3000);
+await app.listen(9929);
 ```
 
 ## Step 7: Run Your Application
@@ -154,7 +154,7 @@ bun run src/main.ts
 ### Get all tasks
 
 ```bash
-curl http://localhost:3000/tasks
+curl http://localhost:9929/tasks
 ```
 
 Response:
@@ -169,13 +169,13 @@ Response:
 ### Get a specific task
 
 ```bash
-curl http://localhost:3000/tasks/1
+curl http://localhost:9929/tasks/1
 ```
 
 ### Create a new task
 
 ```bash
-curl -X POST http://localhost:3000/tasks \
+curl -X POST http://localhost:9929/tasks \
   -H "Content-Type: application/json" \
   -d '{"title": "Deploy to production"}'
 ```
@@ -183,7 +183,7 @@ curl -X POST http://localhost:3000/tasks \
 ### Delete a task
 
 ```bash
-curl -X DELETE http://localhost:3000/tasks/1
+curl -X DELETE http://localhost:9929/tasks/1
 ```
 
 ## What We Built

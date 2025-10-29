@@ -30,7 +30,7 @@ const config = new DocumentBuilder()
   .setTitle('My API')
   .setDescription('API documentation')
   .setVersion('1.0')
-  .addServer('http://localhost:3000')
+  .addServer('http://localhost:9929')
   .addBearerAuth()
   .build();
 
@@ -43,7 +43,7 @@ OpenApiModule.setup('/docs', app, document);
 await app.listen(9929);
 ```
 
-Visit `http://localhost:3000/docs` to see your API documentation!
+Visit `http://localhost:9929/docs` to see your API documentation!
 
 ## Usage
 
@@ -202,7 +202,7 @@ const config = new DocumentBuilder()
   .setTermsOfService('https://example.com/terms')
   .setContact('Support', 'https://example.com', 'support@example.com')
   .setLicense('MIT', 'https://opensource.org/licenses/MIT')
-  .addServer('http://localhost:3000', 'Local server')
+  .addServer('http://localhost:9929', 'Local server')
   .addTag('users', 'User management')
   .addBearerAuth()
   .addBasicAuth()
@@ -236,7 +236,7 @@ Even without explicit decorators, @dwex/openapi will automatically generate basi
 The OpenAPI JSON specification is automatically available at `/docs/json` (or `{your-path}/json`).
 
 ```bash
-curl http://localhost:3000/docs/json
+curl http://localhost:9929/docs/json
 ```
 
 ## Example
