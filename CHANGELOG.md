@@ -1,3 +1,13 @@
+## 1.0.0-beta.13 (2025-10-29)
+
+### 🚀 Features
+
+- **cli:** enhance CLI with interactive and non-interactive modes, add validation for project name and features ([bc7e4ac](https://github.com/dwexjs/dwex/commit/bc7e4ac))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.12 (2025-10-29)
 
 ### 🩹 Fixes

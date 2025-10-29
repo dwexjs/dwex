@@ -1,6 +1,6 @@
 {
   "name": "@dwex/core",
-  "version": "1.0.0-beta.12",
+  "version": "1.0.0-beta.13",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -20,8 +20,8 @@
   ],
   "dependencies": {
     "tslib": "^2.3.0",
-    "@dwex/common": "1.0.0-beta.12",
-    "@dwex/logger": "1.0.0-beta.12",
+    "@dwex/common": "1.0.0-beta.13",
+    "@dwex/logger": "1.0.0-beta.13",
     "reflect-metadata": "^0.2.2",
     "cookie": "^1.0.2"
   },
