@@ -6,7 +6,8 @@ export const revalidate = false;
 
 export async function GET(
 	_req: Request,
-	{ params }: { params: Promise<{ slug: string[] }> }
+	// biome-ignore lint/suspicious/noExplicitAny: wip
+	{ params }: any
 ) {
 	const { slug } = await params;	
 	const page = source.getPage(slug);
