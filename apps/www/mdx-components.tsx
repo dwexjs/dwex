@@ -1,9 +1,11 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
+import { AIQuickStart } from "@/components/ai-quick-start";
 
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
-  return {
-    ...defaultMdxComponents,
-    ...components,
-  };
+	return {
+		...defaultMdxComponents,
+		AIQuickStart,
+		...components,
+	};
 }
