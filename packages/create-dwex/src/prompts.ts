@@ -2,12 +2,30 @@ import * as clack from "@clack/prompts";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import pc from "picocolors";
-import type { ProjectConfig, Feature } from "./types.js";
+import type { ProjectConfig, Feature, CliOptions } from "./types.js";
 
 /**
  * Prompts the user for project name
  */
-export async function promptProjectName(): Promise<string> {
+export async function promptProjectName(cliValue?: string): Promise<string> {
+	// If CLI value provided, validate and use it
+	if (cliValue !== undefined) {
+		if (!cliValue) {
+			clack.outro(pc.red("Project name cannot be empty"));
+			process.exit(1);
+		}
+		if (!/^[a-z0-9-]+$/.test(cliValue)) {
+			clack.outro(
+				pc.red(
+					"Project name must contain only lowercase letters, numbers, and hyphens",
+				),
+			);
+			process.exit(1);
+		}
+		return cliValue;
+	}
+
+	// Interactive prompt
 	const projectName = await clack.text({
 		message: "What is your project name?",
 		placeholder: "my-dwex-app",
@@ -45,7 +63,13 @@ export function validateProjectPath(projectName: string): string {
 /**
  * Prompts the user for server port
  */
-export async function promptPort(): Promise<number> {
+export async function promptPort(cliValue?: number): Promise<number> {
+	// If CLI value provided, use it
+	if (cliValue !== undefined) {
+		return cliValue;
+	}
+
+	// Interactive prompt
 	const port = await clack.text({
 		message: "What port should the server run on?",
 		placeholder: "9929",
@@ -70,10 +94,16 @@ export async function promptPort(): Promise<number> {
 /**
  * Prompts the user whether to initialize git
  */
-export async function promptInitGit(): Promise<boolean> {
+export async function promptInitGit(cliValue?: boolean): Promise<boolean> {
+	// If CLI value provided, use it
+	if (cliValue !== undefined) {
+		return cliValue;
+	}
+
+	// Interactive prompt
 	const initGit = await clack.confirm({
 		message: "Initialize git repository?",
-		initialValue: true,
+		initialValue: false,
 	});
 
 	if (clack.isCancel(initGit)) {
@@ -87,11 +117,31 @@ export async function promptInitGit(): Promise<boolean> {
 /**
  * Prompts the user to select features
  */
-export async function promptFeatures(availableFeatures: Feature[]): Promise<string[]> {
+export async function promptFeatures(
+	availableFeatures: Feature[],
+	cliValue?: string[],
+): Promise<string[]> {
 	if (availableFeatures.length === 0) {
 		return [];
 	}
 
+	// If CLI value provided, validate and use it
+	if (cliValue !== undefined) {
+		const availableIds = new Set(availableFeatures.map((f) => f.id));
+		const invalid = cliValue.filter((id) => !availableIds.has(id));
+
+		if (invalid.length > 0) {
+			clack.outro(pc.red(`Error: Unknown features: ${invalid.join(", ")}`));
+			console.log(
+				pc.gray(`Available features: ${Array.from(availableIds).join(", ")}`),
+			);
+			process.exit(1);
+		}
+
+		return cliValue;
+	}
+
+	// Interactive prompt
 	const features = await clack.multiselect({
 		message: "Select features to include (optional):",
 		options: availableFeatures.map((f) => ({
@@ -116,12 +166,22 @@ export async function promptFeatures(availableFeatures: Feature[]): Promise<stri
 export async function collectProjectConfig(
 	availableFeatures: Feature[],
 	version: string,
+	cliOptions: CliOptions = {},
 ): Promise<{ config: ProjectConfig; projectPath: string }> {
-	const projectName = await promptProjectName();
+	const projectName = await promptProjectName(cliOptions.projectName);
 	const projectPath = validateProjectPath(projectName);
-	const port = await promptPort();
-	const features = await promptFeatures(availableFeatures);
-	const initGit = await promptInitGit();
+	const port = await promptPort(cliOptions.port);
+	const features = await promptFeatures(availableFeatures, cliOptions.features);
+
+	// Determine git initialization from CLI options
+	let initGit: boolean;
+	if (cliOptions.git !== undefined) {
+		initGit = cliOptions.git;
+	} else if (cliOptions.noGit !== undefined) {
+		initGit = !cliOptions.noGit;
+	} else {
+		initGit = await promptInitGit();
+	}
 
 	return {
 		config: {

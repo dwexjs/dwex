@@ -1,6 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import * as clack from "@clack/prompts";
 import pc from "picocolors";
+import { parseArgs, showHelp } from "./args.js";
 import { initializeGit } from "./git.js";
 import { getCreateDwexVersion } from "./package.js";
 import { collectProjectConfig } from "./prompts.js";
@@ -10,8 +11,17 @@ import { composeProject, discoverFeatures } from "./template.js";
  * Main CLI function
  */
 export async function run(): Promise<void> {
+	// Parse CLI arguments (skip first two: bun and script path)
+	const cliOptions = parseArgs(process.argv.slice(2));
+
+	// Show help if requested
+	if (cliOptions.help) {
+		showHelp();
+		process.exit(0);
+	}
+
 	console.log();
-	
+
 	// Get create-dwex version
 	const version = await getCreateDwexVersion();
 
@@ -21,7 +31,11 @@ export async function run(): Promise<void> {
 	const features = await discoverFeatures();
 
 	// Collect project configuration from user
-	const { config, projectPath } = await collectProjectConfig(features, version);
+	const { config, projectPath } = await collectProjectConfig(
+		features,
+		version,
+		cliOptions,
+	);
 
 	// Create project
 	const spinner = clack.spinner();
@@ -52,8 +66,8 @@ export async function run(): Promise<void> {
 		try {
 			const installProc = Bun.spawn(["bun", "install"], {
 				cwd: projectPath,
-				stdout: 'ignore',
-				stderr: 'ignore',
+				stdout: "ignore",
+				stderr: "ignore",
 			});
 			await installProc.exited;
 			if (installProc.exitCode === 0) {
@@ -71,8 +85,8 @@ export async function run(): Promise<void> {
 				["bunx", "biome", "format", "--write", "."],
 				{
 					cwd: projectPath,
-					stdout: 'ignore',
-					stderr: 'ignore',
+					stdout: "ignore",
+					stderr: "ignore",
 				},
 			);
 			await formatProc.exited;

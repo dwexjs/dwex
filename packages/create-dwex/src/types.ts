@@ -10,6 +10,18 @@ export interface ProjectConfig {
 }
 
 /**
+ * CLI Options parsed from command line arguments
+ */
+export interface CliOptions {
+	projectName?: string;
+	port?: number;
+	features?: string[];
+	git?: boolean;
+	noGit?: boolean;
+	help?: boolean;
+}
+
+/**
  * Feature information
  */
 export interface Feature {
@@ -34,4 +46,3 @@ export interface Feature {
 		methods?: Array<{ code: string }>;
 	};
 }
-
