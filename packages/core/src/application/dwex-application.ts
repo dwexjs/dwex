@@ -26,8 +26,10 @@ export class DwexApplication {
   private routesResolverLogger?: any;
   private routerExplorerLogger?: any;
   private dwexAppLogger?: any;
+  private startTime: bigint;
 
   constructor(private readonly rootModule: Type<any>) {
+    this.startTime = process.hrtime.bigint();
     this.container = new Container();
     this.router = new Router();
     this.requestHandler = new RequestHandler(this.container);
@@ -47,7 +49,7 @@ export class DwexApplication {
       this.routesResolverLogger = new Logger("RoutesResolver");
       this.routerExplorerLogger = new Logger("RouterExplorer");
       this.dwexAppLogger = new Logger("DwexApplication");
-    } catch (error) {
+    } catch {
       // Logger not available, that's okay
     }
   }
@@ -118,7 +120,21 @@ export class DwexApplication {
 
     // Log completion message
     if (this.dwexAppLogger) {
-      this.dwexAppLogger.log("Ready");
+      const endTime = process.hrtime.bigint();
+      const startupTimeNs = endTime - this.startTime;
+
+      const ms = Number(startupTimeNs) / 1e6;
+      const us = Number(startupTimeNs) / 1e3;
+
+      let formattedTime: string;
+
+      if (ms >= 1) {
+        formattedTime = `${ms.toFixed(2)}ms`;
+      } else {
+        formattedTime = `${us.toFixed(2)}μs`;
+      }
+
+      this.dwexAppLogger.log(`Ready in ${formattedTime}`);
     }
   }
 
