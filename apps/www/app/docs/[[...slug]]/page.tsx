@@ -20,19 +20,18 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
 
 	return (
 		<DocsPage toc={page.data.toc} full={page.data.full}>
-      <div className="flex items-center justify-between gap-2">
-        <div>
-
-			<DocsTitle>{page.data.title}</DocsTitle>
-			<DocsDescription>{page.data.description}</DocsDescription>
-        </div>
-      <div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
-				<LLMCopyButton markdownUrl={`${page.url}.mdx`} />
-				<ViewOptions
-					markdownUrl={`${page.url}.mdx`}
-					githubUrl={`https://github.com/dwexjs/dwex/blob/main/apps/www/content/docs/${page.path}`}
-				/>
-			</div>
+			<div className="flex flex-col lg:flex-row justify-between gap-2">
+				<div>
+					<DocsTitle>{page.data.title}</DocsTitle>
+					<DocsDescription>{page.data.description}</DocsDescription>
+				</div>
+				<div className="flex flex-row gap-2 items-center border-b pt-2 pb-6">
+					<LLMCopyButton markdownUrl={`${page.url}.mdx`} />
+					<ViewOptions
+						markdownUrl={`${page.url}.mdx`}
+						githubUrl={`https://github.com/dwexjs/dwex/blob/main/apps/www/content/docs/${page.path}`}
+					/>
+				</div>
 			</div>
 			<DocsBody>
 				<MDX
