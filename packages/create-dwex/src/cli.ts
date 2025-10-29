@@ -52,8 +52,6 @@ export async function run(): Promise<void> {
 		try {
 			const installProc = Bun.spawn(["bun", "install"], {
 				cwd: projectPath,
-				stdout: "inherit",
-				stderr: "inherit",
 			});
 			await installProc.exited;
 			if (installProc.exitCode === 0) {
