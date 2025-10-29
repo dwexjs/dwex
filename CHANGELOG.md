@@ -1,3 +1,13 @@
+## 1.0.0-beta.12 (2025-10-29)
+
+### 🩹 Fixes
+
+- **cli:** suppress stdout and stderr for Bun install and format processes ([e027127](https://github.com/dwexjs/dwex/commit/e027127))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.11 (2025-10-29)
 
 ### 🩹 Fixes
