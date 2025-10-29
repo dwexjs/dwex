@@ -1,3 +1,13 @@
+## 1.0.0-beta.11 (2025-10-29)
+
+### 🩹 Fixes
+
+- **cli:** remove stdout and stderr inheritance from Bun install process ([d8dc85c](https://github.com/dwexjs/dwex/commit/d8dc85c))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.10 (2025-10-29)
 
 This was a version bump only, there were no code changes.
