@@ -1,3 +1,13 @@
+## 1.0.0-beta.9 (2025-10-29)
+
+### 🚀 Features
+
+- log application startup time in milliseconds or microseconds ([2670559](https://github.com/dwexjs/dwex/commit/2670559))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.8 (2025-10-29)
 
 ### 🚀 Features
