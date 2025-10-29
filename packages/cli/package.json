@@ -1,6 +1,6 @@
 {
   "name": "@dwex/cli",
-  "version": "1.0.0-beta.9",
+  "version": "1.0.0-beta.10",
   "description": "CLI tool for building and developing Dwex applications",
   "type": "module",
   "bin": {
