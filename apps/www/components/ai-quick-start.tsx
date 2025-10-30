@@ -18,7 +18,7 @@ Before starting, you should familiarize yourself with the documentation:
 
 Once you are familiar with Dwex, create a new project using the information I provided. The command should look something like this, but you should adjust it based on my project description (e.g., adding '--features openapi' if it seems like I'll need an API with OpenAPI spec):
 
-bunx create-dwex <project-name> --port 9929 --no-git --features auth-jwt,openapi
+bun create dwex@latest <project-name> --port 9929 --no-git --features auth-jwt,openapi
 
 Then navigate to the project and start the development server:
 
