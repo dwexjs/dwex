@@ -1,3 +1,24 @@
+## 1.0.0-beta.14 (2025-10-30)
+
+### 🚀 Features
+
+- **ai:** introduce @dwex/ai package with Model Context Protocol integration, including core services, configuration, and documentation ([63b37b6](https://github.com/dwexjs/dwex/commit/63b37b6))
+- **docs:** add rewrites for MDX documentation and enhance page layout with copy button and view options ([0152683](https://github.com/dwexjs/dwex/commit/0152683))
+- **mdx:** integrate AIQuickStart component and remove deprecated LLM routes ([23c8ee1](https://github.com/dwexjs/dwex/commit/23c8ee1))
+- **mdx:** add TabsComponents to MDX components and enhance AIQuickStart instructions for clarity ([a56d271](https://github.com/dwexjs/dwex/commit/a56d271))
+
+### 🩹 Fixes
+
+- **ai-quick-start:** update project creation command to include auth-jwt and openapi features ([afdaec3](https://github.com/dwexjs/dwex/commit/afdaec3))
+- **ai-quick-start:** correct project creation command syntax for consistency ([42fd087](https://github.com/dwexjs/dwex/commit/42fd087))
+- **docs:** update layout for documentation page to improve responsiveness ([f31be66](https://github.com/dwexjs/dwex/commit/f31be66))
+- **llm:** update parameter type in GET function to use 'any' for slug handling ([0101696](https://github.com/dwexjs/dwex/commit/0101696))
+- **llm:** correct URL path in GET function for LLM pages ([85d5c44](https://github.com/dwexjs/dwex/commit/85d5c44))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.13 (2025-10-29)
 
 ### 🚀 Features
