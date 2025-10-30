@@ -7,20 +7,22 @@ import { buttonVariants } from "./ui/button";
 
 const AI_PROMPT = `I want to create a new Dwex project.
 
-Dwex is a TypeScript framework for building high-performance backend applications on Bun runtime. It uses decorators, dependency injection, and a modular architecture similar to NestJS but optimized for Bun.
+First, please ask me for the project title and a brief description of what I want to build.
 
-Before starting, read the documentation:
-1. First, fetch https://dwex.dev/llm.txt to see the list of available documentation pages
-2. Read the key pages you need from the list (they're in MDX format)
-3. Alternatively, if you need comprehensive context, fetch https://dwex.dev/llm-full.txt for the complete documentation
+Once you have that, you can learn about Dwex to help you set it up. Dwex is a TypeScript framework for building high-performance backend applications on Bun runtime. It uses decorators, dependency injection, and a modular architecture similar to NestJS but optimized for Bun.
 
-Once familiar with Dwex, create a new project using this single command:
+Before starting, you should familiarize yourself with the documentation:
+1. First, fetch https://dwex.dev/llm.txt to see the list of available documentation pages.
+2. Read the key pages you need from the list (they're in MDX format). This should give you enough context for most projects.
+3. Only if you find it absolutely necessary for a complex project, you can fetch https://dwex.dev/llm-full.txt for the complete documentation, but try to avoid this to be faster.
 
-bunx create-dwex my-app --port 9929 --no-git
+Once you are familiar with Dwex, create a new project using the information I provided. The command should look something like this, but you should adjust it based on my project description (e.g., adding '--features openapi' if it seems like I'll need an API with OpenAPI spec):
+
+bunx create-dwex <project-name> --port 9929 --no-git
 
 Then navigate to the project and start the development server:
 
-cd my-app
+cd <project-name>
 bun run src/main.ts
 
 The project uses:
@@ -29,7 +31,7 @@ The project uses:
 - reflect-metadata for dependency injection
 - ESM modules exclusively
 
-Please execute these commands and confirm the setup is complete.`;
+Please start by asking me for the project details. Then, execute the setup and confirm when it's complete.`;
 
 export function AIQuickStart() {
 	const [checked, onClick] = useCopyButton(() =>
@@ -38,7 +40,7 @@ export function AIQuickStart() {
 
 	return (
 		<div className="border rounded-lg p-4 bg-gradient-to-br from-fd-primary/5 to-fd-accent/5 dark:from-fd-primary/10 dark:to-fd-accent/10">
-			<h1 className="font-semibold text-lg">AI Quick Start</h1>
+			<Sparkles/>
 
 			<p className="text-sm text-fd-muted-foreground">
 				Let your AI assistant (Claude, ChatGPT, etc.) set up a complete Dwex
