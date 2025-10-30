@@ -26,6 +26,9 @@
     },
     {
       "path": "./packages/cli"
+    },
+    {
+      "path": "./packages/ai"
     }
   ]
 }

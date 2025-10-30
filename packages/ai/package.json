@@ -1,0 +1,30 @@
+{
+  "name": "@dwex/ai",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "!**/*.tsbuildinfo"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8",
+    "tslib": "^2.3.0"
+  },
+  "peerDependencies": {
+    "@dwex/core": "*",
+    "@dwex/common": "*",
+    "@dwex/logger": "*"
+  }
+}
