@@ -68,7 +68,6 @@
     "examples/basic": {
       "name": "basic",
       "dependencies": {
-        "@dwex/ai": "*",
         "@dwex/cli": "*",
         "@dwex/common": "*",
         "@dwex/core": "*",
@@ -94,7 +93,7 @@
     },
     "packages/ai": {
       "name": "@dwex/ai",
-      "version": "0.0.1",
+      "version": "1.0.0-beta.14",
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.0.4",
         "tslib": "^2.3.0",
@@ -108,7 +107,7 @@
     },
     "packages/cli": {
       "name": "@dwex/cli",
-      "version": "1.0.0-beta.13",
+      "version": "1.0.0-beta.14",
       "bin": {
         "dwex": "./dist/index.js",
       },
@@ -128,7 +127,7 @@
     },
     "packages/common": {
       "name": "@dwex/common",
-      "version": "1.0.0-beta.13",
+      "version": "1.0.0-beta.14",
       "dependencies": {
         "tslib": "^2.3.0",
       },
@@ -138,7 +137,7 @@
     },
     "packages/core": {
       "name": "@dwex/core",
-      "version": "1.0.0-beta.13",
+      "version": "1.0.0-beta.14",
       "dependencies": {
         "@dwex/common": "1.0.0-beta.1",
         "@dwex/logger": "1.0.0-beta.1",
@@ -152,12 +151,13 @@
     },
     "packages/create-dwex": {
       "name": "create-dwex",
-      "version": "1.0.0-beta.13",
+      "version": "1.0.0-beta.14",
       "bin": {
         "create-dwex": "./dist/index.js",
       },
       "dependencies": {
         "@clack/prompts": "^0.8.2",
+        "commander": "^14.0.2",
         "ejs": "^3.1.10",
         "picocolors": "^1.1.1",
         "tslib": "^2.3.0",
@@ -169,7 +169,7 @@
     },
     "packages/jwt": {
       "name": "@dwex/jwt",
-      "version": "1.0.0-beta.13",
+      "version": "1.0.0-beta.14",
       "dependencies": {
         "@dwex/common": "1.0.0-beta.1",
         "jose": "^5.9.6",
@@ -179,7 +179,7 @@
     },
     "packages/logger": {
       "name": "@dwex/logger",
-      "version": "1.0.0-beta.13",
+      "version": "1.0.0-beta.14",
       "dependencies": {
         "@dwex/common": "1.0.0-beta.1",
         "pino": "^10.1.0",
@@ -194,7 +194,7 @@
     },
     "packages/openapi": {
       "name": "@dwex/openapi",
-      "version": "1.0.0-beta.13",
+      "version": "1.0.0-beta.14",
       "dependencies": {
         "@dwex/common": "*",
         "@dwex/core": "*",
@@ -2354,6 +2354,8 @@
     "cosmiconfig/yaml": ["yaml@1.10.2", "", {}, "sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg=="],
 
     "create-dwex/@clack/prompts": ["@clack/prompts@0.8.2", "", { "dependencies": { "@clack/core": "0.3.5", "picocolors": "^1.0.0", "sisteransi": "^1.0.5" } }, "sha512-6b9Ab2UiZwJYA9iMyboYyW9yJvAO9V753ZhS+DHKEjZRKAxPPOb7MXXu84lsPFG+vZt6FRFniZ8rXi+zCIw4yQ=="],
+
+    "create-dwex/commander": ["commander@14.0.2", "", {}, "sha512-TywoWNNRbhoD0BXs1P3ZEScW8W5iKrnbithIl0YH+uCmBd0QpPOA8yc82DS3BIE5Ma6FnBVUsJ7wVUDz4dvOWQ=="],
 
     "duplexify/readable-stream": ["readable-stream@2.3.8", "", { "dependencies": { "core-util-is": "~1.0.0", "inherits": "~2.0.3", "isarray": "~1.0.0", "process-nextick-args": "~2.0.0", "safe-buffer": "~5.1.1", "string_decoder": "~1.1.1", "util-deprecate": "~1.0.1" } }, "sha512-8p0AUk4XODgIewSi0l8Epjs+EVnWiK7NoDIEGU0HhE7+ZyY8D1IMY7odu5lRrFXGg71L15KG8QrPmum45RTtdA=="],
 

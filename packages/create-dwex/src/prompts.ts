@@ -176,12 +176,12 @@ export async function promptAiAgents(cliValue?: string[]): Promise<string[]> {
 			{
 				value: "claude",
 				label: "Claude",
-				hint: "Generates CLAUDE.md with framework context and MCP setup",
+				hint: "Generates CLAUDE.md and .mcp.json for MCP server connection",
 			},
 			{
 				value: "cursor",
 				label: "Cursor",
-				hint: "Generates .cursorrules with Dwex patterns",
+				hint: "Generates .cursorrules and .cursor/mcp.json for MCP integration",
 			},
 			{
 				value: "copilot",
@@ -212,7 +212,7 @@ export async function collectProjectConfig(
 	const projectPath = validateProjectPath(projectName);
 	const port = await promptPort(cliOptions.port);
 	const features = await promptFeatures(availableFeatures, cliOptions.features);
-	const aiAgents = await promptAiAgents();
+	const aiAgents = await promptAiAgents(cliOptions.aiAgents);
 
 	// Determine git initialization from CLI options
 	let initGit: boolean;

@@ -17,6 +17,7 @@ export interface CliOptions {
 	projectName?: string;
 	port?: number;
 	features?: string[];
+	aiAgents?: string[];
 	git?: boolean;
 	noGit?: boolean;
 	help?: boolean;

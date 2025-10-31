@@ -49,13 +49,11 @@ import { AppModule } from "./app.module";
 
 const app = await DwexFactory.create(AppModule);
 
-// Setup MCP server
-AiModule.setup(app, {
-  path: "/mcp",              // Endpoint path
-  enableAuth: false,         // Disable auth for local development
-  logBufferSize: 1000,       // Keep last 1000 logs in memory
-  enabled: true,             // Enable MCP
-});
+// Setup MCP server with builder pattern
+new AiModule()
+  .setPath("/mcp")
+  .setLogBufferSize(1000)
+  .setup(app);
 
 await app.listen(3000);
 ```
@@ -94,11 +92,10 @@ Restart Claude Desktop. You'll see a 🔌 icon indicating MCP is connected.
 For production or shared environments:
 
 ```typescript
-AiModule.setup(app, {
-  path: "/mcp",
-  enableAuth: true,
-  apiKey: process.env.MCP_API_KEY,
-});
+new AiModule()
+  .setPath("/mcp")
+  .enableAuth(process.env.MCP_API_KEY)
+  .setup(app);
 ```
 
 Configure Claude Desktop:
@@ -545,18 +542,21 @@ AiModule.setup(app, mcpConfig[process.env.NODE_ENV || "development"]);
 ### 1. Always Use Authentication in Non-Local Environments
 
 ```typescript
-AiModule.setup(app, {
-  enableAuth: process.env.NODE_ENV !== "development",
-  apiKey: process.env.MCP_API_KEY,
-});
+const aiModule = new AiModule();
+if (process.env.NODE_ENV !== "development") {
+  aiModule.enableAuth(process.env.MCP_API_KEY);
+}
+aiModule.setup(app);
 ```
 
 ### 2. Disable in Production
 
 ```typescript
-AiModule.setup(app, {
-  enabled: process.env.NODE_ENV === "development",
-});
+const aiModule = new AiModule();
+if (process.env.NODE_ENV !== "development") {
+  aiModule.disable();
+}
+aiModule.setup(app);
 ```
 
 ### 3. Use Strong API Keys
@@ -669,9 +669,9 @@ Check AI assistant's error messages:
 For high-traffic applications:
 
 ```typescript
-AiModule.setup(app, {
-  logBufferSize: 10000, // Keep last 10,000 logs
-});
+new AiModule()
+  .setLogBufferSize(10000)
+  .setup(app);
 ```
 
 ### Multiple MCP Servers
@@ -699,9 +699,9 @@ Ask Claude: "Check the staging environment's routes"
 ### Custom Endpoint Path
 
 ```typescript
-AiModule.setup(app, {
-  path: "/api/introspection", // Custom path
-});
+new AiModule()
+  .setPath("/api/introspection")
+  .setup(app);
 ```
 
 Update Claude config:

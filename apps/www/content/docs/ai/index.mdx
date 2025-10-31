@@ -102,11 +102,17 @@ import { AppModule } from "./app.module";
 
 const app = await DwexFactory.create(AppModule);
 
-// Enable MCP introspection
-AiModule.setup(app, {
-  path: "/mcp",
-  enabled: process.env.NODE_ENV === "development",
-});
+// Enable MCP introspection with builder pattern
+new AiModule()
+  .setPath("/mcp")
+  .setup(app);
+
+// Or conditionally configure
+const aiModule = new AiModule().setPath("/mcp");
+if (process.env.NODE_ENV !== "development") {
+  aiModule.disable();
+}
+aiModule.setup(app);
 
 await app.listen(3000);
 ```

@@ -159,19 +159,33 @@ import { AppModule } from "./app.module";
 
 const app = await DwexFactory.create(AppModule);
 
-// Enable MCP introspection (dev only)
-AiModule.setup(app, {
-  path: "/mcp",
-  enabled: Bun.env.NODE_ENV === "development",
-  enableAuth: false,
-});
+// Enable MCP introspection (dev only) with builder pattern
+const aiModule = new AiModule().setPath("/mcp");
+if (Bun.env.NODE_ENV !== "development") {
+  aiModule.disable();
+}
+aiModule.setup(app);
 
 await app.listen(<%= port %>);
 ```
 
 ### Claude Desktop Configuration
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+**Option 1: Use the included `.mcp.json` file**
+
+A `.mcp.json` file has been generated in your project root. You can copy its contents to your Claude Desktop configuration:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```bash
+# Copy the config (macOS)
+cat .mcp.json >> ~/Library/Application\ Support/Claude/claude_desktop_config.json
+```
+
+**Option 2: Manually add to Claude Desktop config**
+
+Add this to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
@@ -183,7 +197,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop. You'll see a 🔌 icon when connected.
+After updating the configuration, restart Claude Desktop. You'll see a 🔌 icon when connected.
 
 ### Available MCP Tools
 

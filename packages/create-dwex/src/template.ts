@@ -314,7 +314,7 @@ async function applyAiAgentFiles(
 ): Promise<void> {
 	const aiAgents = config.aiAgents || [];
 
-	// Generate CLAUDE.md
+	// Generate CLAUDE.md and .mcp.json
 	if (aiAgents.includes("claude")) {
 		const claudeMdPath = join(
 			import.meta.dirname,
@@ -326,9 +326,21 @@ async function applyAiAgentFiles(
 		const content = await Bun.file(claudeMdPath).text();
 		const rendered = ejs.render(content, config);
 		await Bun.write(join(projectPath, "CLAUDE.md"), rendered);
+
+		// Generate .mcp.json for local MCP server connection
+		const mcpJsonPath = join(
+			import.meta.dirname,
+			"..",
+			"templates",
+			"base",
+			".mcp.json.ejs",
+		);
+		const mcpContent = await Bun.file(mcpJsonPath).text();
+		const mcpRendered = ejs.render(mcpContent, config);
+		await Bun.write(join(projectPath, ".mcp.json"), mcpRendered);
 	}
 
-	// Generate .cursorrules
+	// Generate .cursorrules and .cursor/mcp.json
 	if (aiAgents.includes("cursor")) {
 		const cursorRulesPath = join(
 			import.meta.dirname,
@@ -340,6 +352,22 @@ async function applyAiAgentFiles(
 		const content = await Bun.file(cursorRulesPath).text();
 		const rendered = ejs.render(content, config);
 		await Bun.write(join(projectPath, ".cursorrules"), rendered);
+
+		// Generate .cursor/mcp.json for Cursor IDE MCP server connection
+		const cursorMcpPath = join(
+			import.meta.dirname,
+			"..",
+			"templates",
+			"base",
+			".cursor",
+			"mcp.json.ejs",
+		);
+		const mcpContent = await Bun.file(cursorMcpPath).text();
+		const mcpRendered = ejs.render(mcpContent, config);
+
+		// Create .cursor directory if it doesn't exist
+		await mkdir(join(projectPath, ".cursor"), { recursive: true });
+		await Bun.write(join(projectPath, ".cursor", "mcp.json"), mcpRendered);
 	}
 
 	// Generate .github/copilot-instructions.md

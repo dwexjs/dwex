@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@clack/prompts": "^0.8.2",
+    "commander": "^14.0.2",
     "ejs": "^3.1.10",
     "picocolors": "^1.1.1",
     "tslib": "^2.3.0"

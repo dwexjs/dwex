@@ -1,101 +1,56 @@
+import { Command, InvalidArgumentError } from "commander";
 import pc from "picocolors";
 import type { CliOptions } from "./types.js";
 
 /**
- * Parses command line arguments into CLI options
+ * Creates and configures the Commander program
  */
-export function parseArgs(args: string[]): CliOptions {
-	const options: CliOptions = {};
+export function createProgram(version: string): Command {
+	const program = new Command();
 
-	for (let i = 0; i < args.length; i++) {
-		const arg = args[i];
-
-		// Check for help flag
-		if (arg === "--help" || arg === "-h") {
-			options.help = true;
-			continue;
-		}
-
-		// Check for port option
-		if (arg === "--port" || arg === "-p") {
-			const portValue = args[++i];
-			if (!portValue) {
-				console.error(pc.red("Error: --port requires a value"));
-				process.exit(1);
-			}
-			const port = Number.parseInt(portValue);
+	program
+		.name("create-dwex")
+		.description("Scaffolding tool for Dwex applications")
+		.version(version, "-v, --version", "Display version number")
+		.argument("[project-name]", "Name of the project")
+		.option("-p, --port <number>", "Port number for the server", (value) => {
+			const port = Number.parseInt(value, 10);
 			if (Number.isNaN(port) || port < 1 || port > 65535) {
-				console.error(
-					pc.red("Error: Port must be a number between 1 and 65535"),
+				throw new InvalidArgumentError(
+					"Port must be a number between 1 and 65535",
 				);
-				process.exit(1);
 			}
-			options.port = port;
-			continue;
-		}
-
-		// Check for features option
-		if (arg === "--features" || arg === "-f") {
-			const featuresValue = args[++i];
-			if (!featuresValue) {
-				console.error(pc.red("Error: --features requires a value"));
-				process.exit(1);
-			}
-			options.features = featuresValue.split(",").map((f) => f.trim());
-			continue;
-		}
-
-		// Check for git options
-		if (arg === "--git" || arg === "-g") {
-			options.git = true;
-			continue;
-		}
-
-		if (arg === "--no-git") {
-			options.noGit = true;
-			continue;
-		}
-
-		// If no flag prefix, treat as project name
-		if (!arg.startsWith("-")) {
-			if (!options.projectName) {
-				options.projectName = arg;
-			} else {
-				console.error(pc.red(`Error: Unknown argument: ${arg}`));
-				process.exit(1);
-			}
-		} else {
-			console.error(pc.red(`Error: Unknown option: ${arg}`));
-			process.exit(1);
-		}
-	}
-
-	// Validate git options
-	if (options.git && options.noGit) {
-		console.error(pc.red("Error: Cannot use both --git and --no-git"));
-		process.exit(1);
-	}
-
-	return options;
-}
-
-/**
- * Shows help message
- */
-export function showHelp(): void {
-	console.log(`
-${pc.bold("Usage:")} create-dwex ${pc.cyan("[project-name]")} ${pc.gray("[options]")}
-
-${pc.bold("Arguments:")}
-  ${pc.cyan("project-name")}              Name of the project (default: interactive prompt)
-
-${pc.bold("Options:")}
-  ${pc.cyan("-p, --port")} ${pc.gray("<number>")}      Port number for the server (default: 9929)
-  ${pc.cyan("-f, --features")} ${pc.gray("<list>")}    Comma-separated list of features
-  ${pc.cyan("-g, --git")}                 Initialize git repository
-  ${pc.cyan("--no-git")}                  Skip git initialization (default)
-  ${pc.cyan("-h, --help")}                Show this help message
-
+			return port;
+		})
+		.option(
+			"-f, --features <list>",
+			"Comma-separated list of features",
+			(value) => {
+				return value.split(",").map((f) => f.trim());
+			},
+		)
+		.option(
+			"-a, --ai <assistants>",
+			"Comma-separated list of AI assistants (claude, cursor, copilot)",
+			(value) => {
+				const assistants = value.split(",").map((a) => a.trim());
+				const validAssistants = ["claude", "cursor", "copilot"];
+				const invalid = assistants.filter(
+					(a) => !validAssistants.includes(a),
+				);
+				if (invalid.length > 0) {
+					throw new InvalidArgumentError(
+						`Invalid AI assistants: ${invalid.join(", ")}. Valid options: ${validAssistants.join(", ")}`,
+					);
+				}
+				return assistants;
+			},
+		)
+		.option("-g, --git", "Initialize git repository")
+		.option("--no-git", "Skip git initialization")
+		.addHelpText(
+			"after",
+			`
 ${pc.bold("Examples:")}
   ${pc.gray("# Interactive mode")}
   $ create-dwex
@@ -104,7 +59,7 @@ ${pc.bold("Examples:")}
   $ create-dwex my-app
 
   ${pc.gray("# Full command with all options")}
-  $ create-dwex my-app --port 3000 --features auth-jwt,openapi --git
+  $ create-dwex my-app --port 3000 --features auth-jwt,openapi --ai claude,cursor --git
 
   ${pc.gray("# Without git initialization")}
   $ create-dwex my-app --no-git
@@ -113,6 +68,59 @@ ${pc.bold("Available Features:")}
   ${pc.cyan("auth-jwt")}                  JWT authentication with guards and decorators
   ${pc.cyan("openapi")}                   OpenAPI/Swagger documentation
 
-${pc.dim("For more information, visit: https://dwexjs.com")}
-`);
+${pc.dim("For more information, visit: https://dwexjs.dev/docs/cli")}
+`,
+		)
+		.configureHelp({
+			sortOptions: false,
+			sortSubcommands: false,
+		})
+		.showHelpAfterError(true)
+		.exitOverride(); // Don't exit on errors, throw instead so we can handle them
+
+	return program;
+}
+
+/**
+ * Parses command line arguments into CLI options
+ */
+export function parseArgs(args: string[], version: string): CliOptions {
+	const program = createProgram(version);
+
+	try {
+		// Parse arguments (args includes executable path, so use default parsing)
+		program.parse(args);
+	} catch (error) {
+		// Commander throws when exitOverride is enabled
+		// This handles --help and --version gracefully
+		if (error instanceof Error) {
+			// Check if this is a help/version request (exit code 0) or an actual error
+			if ("exitCode" in error && error.exitCode === 0) {
+				process.exit(0);
+			}
+			// Re-throw actual errors
+			console.error(pc.red(`Error: ${error.message}`));
+			process.exit(1);
+		}
+		throw error;
+	}
+
+	const opts = program.opts();
+	const projectName = program.args[0];
+
+	// Build CLI options
+	const options: CliOptions = {
+		projectName,
+		port: opts.port,
+		features: opts.features,
+		aiAgents: opts.ai,
+	};
+
+	// Handle git options (Commander converts --no-git to git: false)
+	if (typeof opts.git === "boolean") {
+		options.git = opts.git;
+		options.noGit = !opts.git;
+	}
+
+	return options;
 }

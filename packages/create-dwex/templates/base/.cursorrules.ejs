@@ -6,6 +6,17 @@
 - Built for Bun runtime (NOT Node.js)
 - ESM modules only (type: "module")
 
+## MCP Server Configuration
+
+This project includes a `.cursor/mcp.json` file for Model Context Protocol integration. The MCP server provides real-time introspection of your Dwex application:
+
+- List all routes and their handlers
+- View service dependencies
+- Inspect middleware chains
+- Monitor application logs
+
+The MCP server is automatically configured and will be available at `http://localhost:<%= port %>/mcp` when your application is running.
+
 ## Core Principles
 
 ### 1. Use Decorators for All Framework Features

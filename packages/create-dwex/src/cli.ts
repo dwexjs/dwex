@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import * as clack from "@clack/prompts";
 import pc from "picocolors";
-import { parseArgs, showHelp } from "./args.js";
+import { parseArgs } from "./args.js";
 import { initializeGit } from "./git.js";
 import { getCreateDwexVersion } from "./package.js";
 import { collectProjectConfig } from "./prompts.js";
@@ -11,19 +11,14 @@ import { composeProject, discoverFeatures } from "./template.js";
  * Main CLI function
  */
 export async function run(): Promise<void> {
-	// Parse CLI arguments (skip first two: bun and script path)
-	const cliOptions = parseArgs(process.argv.slice(2));
+	// Get create-dwex version first (needed for Commander setup)
+	const version = await getCreateDwexVersion();
 
-	// Show help if requested
-	if (cliOptions.help) {
-		showHelp();
-		process.exit(0);
-	}
+	// Parse CLI arguments (Commander handles --help and --version automatically)
+	// Pass full process.argv - Commander will handle the executable path
+	const cliOptions = parseArgs(process.argv, version);
 
 	console.log();
-
-	// Get create-dwex version
-	const version = await getCreateDwexVersion();
 
 	clack.intro(pc.bgCyan(pc.black(` Dwex v${version} `)));
 
@@ -82,7 +77,7 @@ export async function run(): Promise<void> {
 
 		try {
 			const formatProc = Bun.spawn(
-				["bunx", "biome", "format", "--write", "."],
+				["bunx", "biome", "check", "--write", "."],
 				{
 					cwd: projectPath,
 					stdout: "ignore",
