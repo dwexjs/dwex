@@ -10,8 +10,8 @@ export class GitService implements IService {
 	private async runGitCommand(cwd: string, args: string[]): Promise<void> {
 		const proc = Bun.spawn(["git", ...args], {
 			cwd,
-			stdout: "inherit",
-			stderr: "inherit",
+			stdout: "pipe",
+			stderr: "pipe",
 		});
 
 		const exitCode = await proc.exited;

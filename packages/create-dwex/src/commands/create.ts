@@ -75,15 +75,20 @@ export class CreateCommand extends BaseCommand {
 		// 5. Create project structure
 		await this.createProject(projectPath, config, features);
 
-		// 6. Install dependencies
-		await this.installDependencies(projectPath);
-
-		// 7. Format project
-		await this.formatProject(projectPath);
-
-		// 8. Initialize git if requested
+		// 6. Initialize git if requested (before installing dependencies)
 		if (config.initGit) {
 			await this.initializeGit(projectPath);
+		}
+
+		// 7. Install dependencies
+		await this.installDependencies(projectPath);
+
+		// 8. Format project
+		await this.formatProject(projectPath);
+
+		// 9. Commit installed dependencies if git was initialized
+		if (config.initGit) {
+			await this.commitDependencies(projectPath);
 		}
 	}
 
@@ -206,6 +211,19 @@ export class CreateCommand extends BaseCommand {
 			await this.gitService.initializeRepository(projectPath);
 		} catch (error) {
 			Logger.warning("Failed to initialize git repository");
+			console.error(error);
+		}
+	}
+
+	/**
+	 * Commits installed dependencies
+	 */
+	private async commitDependencies(projectPath: string): Promise<void> {
+		try {
+			await this.gitService.addAll(projectPath);
+			await this.gitService.commit(projectPath, "chore: install dependencies");
+		} catch (error) {
+			// Silently fail - not critical if this fails
 			console.error(error);
 		}
 	}
