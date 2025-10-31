@@ -7,7 +7,10 @@ export { IntrospectionService } from "./services/introspection.service.js";
 export { LogBufferService } from "./services/log-buffer.service.js";
 
 // Configuration
-export { AI_MODULE_CONFIG, type AiModuleConfig } from "./config/ai-config.interface.js";
+export {
+	AI_MODULE_CONFIG,
+	type AiModuleConfig,
+} from "./config/ai-config.interface.js";
 
 // Types
 export type {
@@ -20,4 +23,8 @@ export type {
 } from "./types/mcp-types.js";
 
 // Tokens
-export { DWEX_CONTAINER, DWEX_ROUTER, DWEX_APPLICATION } from "./constants/tokens.js";
+export {
+	DWEX_CONTAINER,
+	DWEX_ROUTER,
+	DWEX_APPLICATION,
+} from "./constants/tokens.js";

@@ -16,7 +16,11 @@ export class DwexMcpHandler {
 
 			// Validate JSON-RPC version
 			if (jsonrpc !== "2.0") {
-				return this.createErrorResponse(id, -32600, "Invalid Request: jsonrpc must be 2.0");
+				return this.createErrorResponse(
+					id,
+					-32600,
+					"Invalid Request: jsonrpc must be 2.0",
+				);
 			}
 
 			// Route to appropriate handler based on method
@@ -46,7 +50,11 @@ export class DwexMcpHandler {
 					return this.createSuccessResponse(id, {});
 
 				default:
-					return this.createErrorResponse(id, -32601, `Method not found: ${method}`);
+					return this.createErrorResponse(
+						id,
+						-32601,
+						`Method not found: ${method}`,
+					);
 			}
 		} catch (error) {
 			console.error("Error handling MCP request:", error);
@@ -81,11 +89,13 @@ export class DwexMcpHandler {
 	 */
 	private async handleToolsList(id: any): Promise<any> {
 		const registeredTools = (this.mcpServer as any)._registeredTools || {};
-		const tools = Object.entries(registeredTools).map(([name, tool]: [string, any]) => ({
-			name: name, // Use the registered key as the name
-			description: tool.description || tool.title || "",
-			inputSchema: this.convertZodToJsonSchema(tool.inputSchema),
-		}));
+		const tools = Object.entries(registeredTools).map(
+			([name, tool]: [string, any]) => ({
+				name: name, // Use the registered key as the name
+				description: tool.description || tool.title || "",
+				inputSchema: this.convertZodToJsonSchema(tool.inputSchema),
+			}),
+		);
 
 		return this.createSuccessResponse(id, { tools });
 	}
@@ -119,11 +129,13 @@ export class DwexMcpHandler {
 	 * Handle resources/list request
 	 */
 	private async handleResourcesList(id: any): Promise<any> {
-		const resourceTemplates = (this.mcpServer as any)._registeredResourceTemplates || {};
+		const resourceTemplates =
+			(this.mcpServer as any)._registeredResourceTemplates || {};
 		const resources = Object.values(resourceTemplates).map((resource: any) => {
-			const uriTemplate = resource.resourceTemplate?._uriTemplate?.template ||
-			                   resource.resourceTemplate?.uriTemplate ||
-			                   "";
+			const uriTemplate =
+				resource.resourceTemplate?._uriTemplate?.template ||
+				resource.resourceTemplate?.uriTemplate ||
+				"";
 			return {
 				uri: uriTemplate,
 				name: resource.title || resource.metadata?.title || "Unknown",
@@ -142,7 +154,8 @@ export class DwexMcpHandler {
 		const { uri } = params;
 
 		// Find resource by URI
-		const resourceTemplates = (this.mcpServer as any)._registeredResourceTemplates || {};
+		const resourceTemplates =
+			(this.mcpServer as any)._registeredResourceTemplates || {};
 		const resource = Object.values(resourceTemplates).find(
 			(r: any) => r.resourceTemplate?._uriTemplate?.template === uri,
 		);
@@ -249,13 +262,15 @@ export class DwexMcpHandler {
 
 				properties[key] = {
 					type: fieldType,
-					description: schema._def?.description || schema.description || undefined,
+					description:
+						schema._def?.description || schema.description || undefined,
 				};
 
 				// Check if optional - if it's not optional, it's required
-				const isOptional = schema._def?.typeName === "ZodOptional" ||
-				                   schema.isOptional?.() ||
-				                   false;
+				const isOptional =
+					schema._def?.typeName === "ZodOptional" ||
+					schema.isOptional?.() ||
+					false;
 
 				if (!isOptional) {
 					required.push(key);

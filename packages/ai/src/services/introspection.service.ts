@@ -49,8 +49,14 @@ export class IntrospectionService {
 			method: route.method,
 			controller: route.controller?.constructor?.name || "Anonymous",
 			handler: route.handler?.name || "anonymous",
-			guards: route.guards?.map((g: any) => g?.name || g?.constructor?.name || "Anonymous") || [],
-			interceptors: route.interceptors?.map((i: any) => i?.name || i?.constructor?.name || "Anonymous") || [],
+			guards:
+				route.guards?.map(
+					(g: any) => g?.name || g?.constructor?.name || "Anonymous",
+				) || [],
+			interceptors:
+				route.interceptors?.map(
+					(i: any) => i?.name || i?.constructor?.name || "Anonymous",
+				) || [],
 			params: this.getRouteParams(route.handler),
 			metadata: this.getRouteMetadata(route.handler),
 		}));
@@ -75,7 +81,9 @@ export class IntrospectionService {
 			const tokenStr = this.tokenToString(token);
 			const name = wrapper.metatype?.name || tokenStr;
 			const scope = wrapper.scope || Scope.SINGLETON;
-			const isGlobal = wrapper.metatype ? this.reflector.get(GLOBAL_MODULE, wrapper.metatype) || false : false;
+			const isGlobal = wrapper.metatype
+				? this.reflector.get(GLOBAL_MODULE, wrapper.metatype) || false
+				: false;
 
 			// Get dependencies
 			const dependencies = this.getServiceDependencies(wrapper.metatype);
@@ -86,7 +94,9 @@ export class IntrospectionService {
 				scope: this.scopeToString(scope),
 				isGlobal,
 				dependencies,
-				metadata: wrapper.metatype ? this.getClassMetadata(wrapper.metatype) : undefined,
+				metadata: wrapper.metatype
+					? this.getClassMetadata(wrapper.metatype)
+					: undefined,
 			});
 		}
 
@@ -115,7 +125,8 @@ export class IntrospectionService {
 
 		for (const route of routes) {
 			if (route.controller) {
-				const controllerName = route.controller.constructor?.name || "Anonymous";
+				const controllerName =
+					route.controller.constructor?.name || "Anonymous";
 				if (!controllerMiddlewares.has(controllerName)) {
 					const middlewareMetadata = this.reflector.get(
 						MIDDLEWARE_METADATA,
@@ -128,7 +139,10 @@ export class IntrospectionService {
 			}
 		}
 
-		for (const [controllerName, middleware] of controllerMiddlewares.entries()) {
+		for (const [
+			controllerName,
+			middleware,
+		] of controllerMiddlewares.entries()) {
 			middlewares.push({
 				name: middleware?.name || middleware?.constructor?.name || "Anonymous",
 				type: "controller",

@@ -1,9 +1,17 @@
 import { Injectable } from "@dwex/core";
-import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import {
+	McpServer,
+	ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { RequestMethod } from "@dwex/common";
 import { IntrospectionService } from "./introspection.service.js";
 import { LogBufferService } from "./log-buffer.service.js";
+import {
+	arrayToCSV,
+	addCSVSummary,
+	objectToKeyValueCSV,
+} from "../utils/csv-formatter.js";
 
 /**
  * Service for managing the MCP server instance and registering tools/resources
@@ -34,7 +42,8 @@ export class McpService {
 			"list_routes",
 			{
 				title: "List Routes",
-				description: "List all registered routes in the Dwex application",
+				description:
+					"List all registered routes in the Dwex application (CSV format)",
 				inputSchema: {},
 				outputSchema: {
 					routes: z.array(
@@ -50,18 +59,24 @@ export class McpService {
 			},
 			async () => {
 				const routes = this.introspection.getRoutes();
-				const output = {
-					routes: routes.map((r) => ({
-						path: r.path,
-						method: RequestMethod[r.method],
-						controller: r.controller,
-						handler: r.handler,
-					})),
-					count: routes.length,
-				};
+				const routeData = routes.map((r) => ({
+					path: r.path,
+					method: RequestMethod[r.method],
+					controller: r.controller,
+					handler: r.handler,
+				}));
+
+				const csv = addCSVSummary(
+					arrayToCSV(routeData, ["path", "method", "controller", "handler"]),
+					`Total routes: ${routes.length}`,
+				);
+
 				return {
-					content: [{ type: "text", text: JSON.stringify(output, null, 2) }],
-					structuredContent: output,
+					content: [{ type: "text", text: csv }],
+					structuredContent: {
+						routes: routeData,
+						count: routes.length,
+					},
 				};
 			},
 		);
@@ -73,7 +88,16 @@ export class McpService {
 				title: "Get Route Details",
 				description: "Get detailed information about a specific route",
 				inputSchema: {
-					method: z.enum(["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "ALL"]),
+					method: z.enum([
+						"GET",
+						"POST",
+						"PUT",
+						"DELETE",
+						"PATCH",
+						"OPTIONS",
+						"HEAD",
+						"ALL",
+					]),
 					path: z.string().describe("The route path"),
 				},
 				outputSchema: {
@@ -114,7 +138,8 @@ export class McpService {
 			"list_services",
 			{
 				title: "List Services",
-				description: "List all services registered in the DI container",
+				description:
+					"List all services registered in the DI container (CSV format)",
 				inputSchema: {},
 				outputSchema: {
 					services: z.array(
@@ -130,18 +155,24 @@ export class McpService {
 			},
 			async () => {
 				const services = this.introspection.getServices();
-				const output = {
-					services: services.map((s) => ({
-						token: s.token,
-						name: s.name,
-						scope: s.scope,
-						isGlobal: s.isGlobal,
-					})),
-					count: services.length,
-				};
+				const serviceData = services.map((s) => ({
+					token: s.token,
+					name: s.name,
+					scope: s.scope,
+					isGlobal: s.isGlobal,
+				}));
+
+				const csv = addCSVSummary(
+					arrayToCSV(serviceData, ["token", "name", "scope", "isGlobal"]),
+					`Total services: ${services.length}`,
+				);
+
 				return {
-					content: [{ type: "text", text: JSON.stringify(output, null, 2) }],
-					structuredContent: output,
+					content: [{ type: "text", text: csv }],
+					structuredContent: {
+						services: serviceData,
+						count: services.length,
+					},
 				};
 			},
 		);
@@ -151,7 +182,8 @@ export class McpService {
 			"get_service_details",
 			{
 				title: "Get Service Details",
-				description: "Get detailed information about a specific service including dependencies",
+				description:
+					"Get detailed information about a specific service including dependencies",
 				inputSchema: {
 					token: z.string().describe("Service token or name"),
 				},
@@ -183,7 +215,8 @@ export class McpService {
 			"list_middlewares",
 			{
 				title: "List Middlewares",
-				description: "List all middlewares (global and controller-scoped)",
+				description:
+					"List all middlewares (global and controller-scoped) (CSV format)",
 				inputSchema: {},
 				outputSchema: {
 					middlewares: z.array(
@@ -198,17 +231,23 @@ export class McpService {
 			},
 			async () => {
 				const middlewares = this.introspection.getMiddlewares();
-				const output = {
-					middlewares: middlewares.map((m) => ({
-						name: m.name,
-						type: m.type,
-						controller: m.controller,
-					})),
-					count: middlewares.length,
-				};
+				const middlewareData = middlewares.map((m) => ({
+					name: m.name,
+					type: m.type,
+					controller: m.controller || "",
+				}));
+
+				const csv = addCSVSummary(
+					arrayToCSV(middlewareData, ["name", "type", "controller"]),
+					`Total middlewares: ${middlewares.length}`,
+				);
+
 				return {
-					content: [{ type: "text", text: JSON.stringify(output, null, 2) }],
-					structuredContent: output,
+					content: [{ type: "text", text: csv }],
+					structuredContent: {
+						middlewares: middlewareData,
+						count: middlewares.length,
+					},
 				};
 			},
 		);
@@ -218,7 +257,8 @@ export class McpService {
 			"get_dependency_graph",
 			{
 				title: "Get Dependency Graph",
-				description: "Get the full dependency graph of all services",
+				description:
+					"Get the full dependency graph of all services (CSV format)",
 				inputSchema: {},
 				outputSchema: {
 					nodes: z.array(
@@ -234,10 +274,21 @@ export class McpService {
 			},
 			async () => {
 				const nodes = this.introspection.getDependencyGraph();
-				const output = { nodes };
+
+				const csv = addCSVSummary(
+					arrayToCSV(nodes, [
+						"token",
+						"name",
+						"scope",
+						"dependencies",
+						"dependents",
+					]),
+					`Total nodes: ${nodes.length}`,
+				);
+
 				return {
-					content: [{ type: "text", text: JSON.stringify(output, null, 2) }],
-					structuredContent: output,
+					content: [{ type: "text", text: csv }],
+					structuredContent: { nodes },
 				};
 			},
 		);
@@ -247,20 +298,33 @@ export class McpService {
 			"get_logs",
 			{
 				title: "Get Logs",
-				description: "Get recent logs from the application buffer",
+				description: "Get recent logs from the application buffer (CSV format)",
 				inputSchema: {
 					level: z
 						.enum(["trace", "debug", "info", "warn", "error", "fatal"])
 						.optional()
 						.describe("Filter by log level"),
-					limit: z.number().optional().describe("Maximum number of logs to return"),
-					since: z.string().optional().describe("ISO timestamp to filter logs from"),
+					limit: z
+						.number()
+						.optional()
+						.describe("Maximum number of logs to return"),
+					since: z
+						.string()
+						.optional()
+						.describe("ISO timestamp to filter logs from"),
 				},
 				outputSchema: {
 					logs: z.array(
 						z.object({
 							timestamp: z.string(),
-							level: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]),
+							level: z.enum([
+								"trace",
+								"debug",
+								"info",
+								"warn",
+								"error",
+								"fatal",
+							]),
 							message: z.string(),
 							context: z.string().optional(),
 							data: z.any().optional(),
@@ -275,13 +339,24 @@ export class McpService {
 					limit,
 					since: since ? new Date(since) : undefined,
 				});
-				const output = {
-					logs,
-					count: logs.length,
-				};
+
+				const csv = addCSVSummary(
+					arrayToCSV(logs, [
+						"timestamp",
+						"level",
+						"message",
+						"context",
+						"data",
+					]),
+					`Total logs: ${logs.length}`,
+				);
+
 				return {
-					content: [{ type: "text", text: JSON.stringify(output, null, 2) }],
-					structuredContent: output,
+					content: [{ type: "text", text: csv }],
+					structuredContent: {
+						logs,
+						count: logs.length,
+					},
 				};
 			},
 		);
@@ -297,16 +372,37 @@ export class McpService {
 			new ResourceTemplate("dwex://routes", { list: undefined }),
 			{
 				title: "Routes Collection",
-				description: "All registered routes in the application",
+				description: "All registered routes in the application (CSV format)",
 			},
 			async (uri) => {
 				const routes = this.introspection.getRoutes();
+				const routeData = routes.map((r) => ({
+					path: r.path,
+					method: RequestMethod[r.method],
+					controller: r.controller,
+					handler: r.handler,
+					guards: r.guards,
+					interceptors: r.interceptors,
+				}));
+
+				const csv = addCSVSummary(
+					arrayToCSV(routeData, [
+						"path",
+						"method",
+						"controller",
+						"handler",
+						"guards",
+						"interceptors",
+					]),
+					`Total routes: ${routes.length}`,
+				);
+
 				return {
 					contents: [
 						{
 							uri: uri.href,
-							text: JSON.stringify(routes, null, 2),
-							mimeType: "application/json",
+							text: csv,
+							mimeType: "text/csv",
 						},
 					],
 				};
@@ -319,16 +415,28 @@ export class McpService {
 			new ResourceTemplate("dwex://services", { list: undefined }),
 			{
 				title: "Services Collection",
-				description: "All services in the DI container",
+				description: "All services in the DI container (CSV format)",
 			},
 			async (uri) => {
 				const services = this.introspection.getServices();
+
+				const csv = addCSVSummary(
+					arrayToCSV(services, [
+						"token",
+						"name",
+						"scope",
+						"isGlobal",
+						"dependencies",
+					]),
+					`Total services: ${services.length}`,
+				);
+
 				return {
 					contents: [
 						{
 							uri: uri.href,
-							text: JSON.stringify(services, null, 2),
-							mimeType: "application/json",
+							text: csv,
+							mimeType: "text/csv",
 						},
 					],
 				};
@@ -341,16 +449,28 @@ export class McpService {
 			new ResourceTemplate("dwex://logs", { list: undefined }),
 			{
 				title: "Logs Collection",
-				description: "Recent application logs",
+				description: "Recent application logs (CSV format)",
 			},
 			async (uri) => {
 				const logs = this.logBuffer.getLogs();
+
+				const csv = addCSVSummary(
+					arrayToCSV(logs, [
+						"timestamp",
+						"level",
+						"message",
+						"context",
+						"data",
+					]),
+					`Total logs: ${logs.length}`,
+				);
+
 				return {
 					contents: [
 						{
 							uri: uri.href,
-							text: JSON.stringify(logs, null, 2),
-							mimeType: "application/json",
+							text: csv,
+							mimeType: "text/csv",
 						},
 					],
 				};
@@ -363,16 +483,18 @@ export class McpService {
 			new ResourceTemplate("dwex://health", { list: undefined }),
 			{
 				title: "Health Status",
-				description: "Application health and statistics",
+				description: "Application health and statistics (CSV key-value format)",
 			},
 			async (uri) => {
 				const health = this.introspection.getHealth();
+				const csv = objectToKeyValueCSV(health);
+
 				return {
 					contents: [
 						{
 							uri: uri.href,
-							text: JSON.stringify(health, null, 2),
-							mimeType: "application/json",
+							text: csv,
+							mimeType: "text/csv",
 						},
 					],
 				};

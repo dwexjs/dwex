@@ -1,7 +1,10 @@
 import "reflect-metadata";
 import { Injectable, Inject } from "@dwex/core";
 import type { McpLogEntry } from "../types/mcp-types.js";
-import { AI_MODULE_CONFIG, type AiModuleConfig } from "../config/ai-config.interface.js";
+import {
+	AI_MODULE_CONFIG,
+	type AiModuleConfig,
+} from "../config/ai-config.interface.js";
 
 /**
  * Service for buffering recent log entries
@@ -13,9 +16,7 @@ export class LogBufferService {
 	private maxSize: number;
 	private currentIndex = 0;
 
-	constructor(
-		@Inject(AI_MODULE_CONFIG) config: AiModuleConfig,
-	) {
+	constructor(@Inject(AI_MODULE_CONFIG) config: AiModuleConfig) {
 		this.maxSize = config.logBufferSize ?? 1000;
 	}
 
@@ -43,7 +44,10 @@ export class LogBufferService {
 		let logs = [...this.buffer];
 
 		// Sort by timestamp (newest first)
-		logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+		logs.sort(
+			(a, b) =>
+				new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+		);
 
 		// Filter by level
 		if (options?.level) {
@@ -53,7 +57,9 @@ export class LogBufferService {
 		// Filter by time
 		if (options?.since) {
 			const sinceTime = options.since.getTime();
-			logs = logs.filter((log) => new Date(log.timestamp).getTime() >= sinceTime);
+			logs = logs.filter(
+				(log) => new Date(log.timestamp).getTime() >= sinceTime,
+			);
 		}
 
 		// Limit results

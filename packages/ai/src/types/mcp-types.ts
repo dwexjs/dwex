@@ -26,7 +26,7 @@ export interface McpRouteParam {
 /**
  * Service information exposed via MCP
  */
-export interface McpServiceInfo {
+export interface McpServiceInfo extends Record<string, unknown> {
 	token: string;
 	name: string;
 	scope: "SINGLETON" | "REQUEST" | "TRANSIENT";
@@ -48,7 +48,7 @@ export interface McpMiddlewareInfo {
 /**
  * Log entry in the buffer
  */
-export interface McpLogEntry {
+export interface McpLogEntry extends Record<string, unknown> {
 	timestamp: string;
 	level: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 	message: string;
@@ -59,7 +59,7 @@ export interface McpLogEntry {
 /**
  * Dependency graph node
  */
-export interface McpDependencyNode {
+export interface McpDependencyNode extends Record<string, unknown> {
 	token: string;
 	name: string;
 	scope: "SINGLETON" | "REQUEST" | "TRANSIENT";
@@ -70,7 +70,7 @@ export interface McpDependencyNode {
 /**
  * Application health status
  */
-export interface McpHealthStatus {
+export interface McpHealthStatus extends Record<string, unknown> {
 	status: "healthy" | "degraded" | "unhealthy";
 	uptime: number;
 	timestamp: string;
