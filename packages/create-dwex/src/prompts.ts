@@ -161,6 +161,46 @@ export async function promptFeatures(
 }
 
 /**
+ * Prompts the user to select AI assistants
+ */
+export async function promptAiAgents(cliValue?: string[]): Promise<string[]> {
+	// If CLI value provided, use it
+	if (cliValue !== undefined) {
+		return cliValue;
+	}
+
+	// Interactive prompt
+	const aiAgents = await clack.multiselect({
+		message: "Which AI assistants do you use? (optional)",
+		options: [
+			{
+				value: "claude",
+				label: "Claude",
+				hint: "Generates CLAUDE.md with framework context and MCP setup",
+			},
+			{
+				value: "cursor",
+				label: "Cursor",
+				hint: "Generates .cursorrules with Dwex patterns",
+			},
+			{
+				value: "copilot",
+				label: "GitHub Copilot",
+				hint: "Generates .github/copilot-instructions.md",
+			},
+		],
+		required: false,
+	});
+
+	if (clack.isCancel(aiAgents)) {
+		clack.cancel("Operation cancelled");
+		process.exit(0);
+	}
+
+	return (aiAgents as string[]) || [];
+}
+
+/**
  * Collects all project configuration from user prompts
  */
 export async function collectProjectConfig(
@@ -172,6 +212,7 @@ export async function collectProjectConfig(
 	const projectPath = validateProjectPath(projectName);
 	const port = await promptPort(cliOptions.port);
 	const features = await promptFeatures(availableFeatures, cliOptions.features);
+	const aiAgents = await promptAiAgents();
 
 	// Determine git initialization from CLI options
 	let initGit: boolean;
@@ -190,6 +231,7 @@ export async function collectProjectConfig(
 			features,
 			version,
 			initGit,
+			aiAgents,
 		},
 		projectPath,
 	};

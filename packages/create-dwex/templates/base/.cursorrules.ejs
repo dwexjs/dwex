@@ -1,0 +1,355 @@
+# Dwex Framework - Cursor Rules
+
+## Framework Overview
+- TypeScript-first framework for building web applications
+- Decorator-based architecture with dependency injection
+- Built for Bun runtime (NOT Node.js)
+- ESM modules only (type: "module")
+
+## Core Principles
+
+### 1. Use Decorators for All Framework Features
+```typescript
+// Good - Using decorators
+@Injectable()
+export class UserService {
+  constructor(private db: DatabaseService) {}
+}
+
+@Controller("/users")
+export class UserController {
+  @Get()
+  findAll() {}
+}
+
+// Bad - Manual class registration
+const userService = new UserService();
+app.register(userService);
+```
+
+### 2. Prefer Bun APIs Over Node.js
+```typescript
+// Good - Bun APIs
+const data = await Bun.file("config.json").json();
+await Bun.write("output.txt", content);
+const port = Bun.env.PORT;
+
+// Bad - Node.js APIs
+import { readFileSync } from "node:fs";
+import { env } from "node:process";
+```
+
+### 3. Constructor Injection Only
+```typescript
+// Good - Constructor injection
+@Injectable()
+export class UserService {
+  constructor(
+    private db: DatabaseService,
+    private logger: LoggerService
+  ) {}
+}
+
+// Bad - Property injection or manual instantiation
+export class UserService {
+  @Inject() db: DatabaseService; // DON'T DO THIS
+}
+```
+
+## Code Style
+
+### Indentation and Quotes
+- Use **tabs** for indentation (NOT spaces)
+- Use **double quotes** for strings
+- Format with Biome: `bunx biome format --write .`
+
+### File Organization
+```
+src/
+├── app.module.ts          # Root module
+├── app.controller.ts      # Root controller
+├── main.ts                # Entry point
+└── modules/
+    └── users/
+        ├── users.module.ts
+        ├── users.controller.ts
+        ├── users.service.ts
+        └── dto/
+            ├── create-user.dto.ts
+            └── update-user.dto.ts
+```
+
+## Common Patterns
+
+### Module Structure
+```typescript
+import { Module } from "@dwex/core";
+import { UserController } from "./user.controller";
+import { UserService } from "./user.service";
+
+@Module({
+  imports: [],                  // Other modules to import
+  controllers: [UserController], // HTTP controllers
+  providers: [UserService],      // Injectable services
+})
+export class UserModule {}
+```
+
+### Controller Pattern
+```typescript
+import { Controller, Get, Post, Put, Delete, Body, Param } from "@dwex/core";
+
+@Controller("/users")
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @Get()
+  async findAll() {
+    return this.userService.findAll();
+  }
+
+  @Get("/:id")
+  async findOne(@Param("id") id: string) {
+    return this.userService.findOne(id);
+  }
+
+  @Post()
+  async create(@Body() data: CreateUserDto) {
+    return this.userService.create(data);
+  }
+
+  @Put("/:id")
+  async update(@Param("id") id: string, @Body() data: UpdateUserDto) {
+    return this.userService.update(id, data);
+  }
+
+  @Delete("/:id")
+  async remove(@Param("id") id: string) {
+    return this.userService.remove(id);
+  }
+}
+```
+
+### Service Pattern
+```typescript
+import { Injectable } from "@dwex/core";
+
+@Injectable()
+export class UserService {
+  constructor(
+    private db: DatabaseService,
+    private logger: LoggerService
+  ) {}
+
+  async findAll(): Promise<User[]> {
+    this.logger.log("Finding all users");
+    return this.db.users.findMany();
+  }
+
+  async findOne(id: string): Promise<User> {
+    return this.db.users.findUnique({ where: { id } });
+  }
+
+  async create(data: CreateUserDto): Promise<User> {
+    return this.db.users.create({ data });
+  }
+}
+```
+
+### DTO Pattern
+```typescript
+export interface CreateUserDto {
+  email: string;
+  name: string;
+  password: string;
+}
+
+export interface UpdateUserDto {
+  email?: string;
+  name?: string;
+}
+```
+
+## Guards and Interceptors
+
+### Guard Example
+```typescript
+import { Injectable, type CanActivate, type ExecutionContext } from "@dwex/core";
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  constructor(private jwtService: JwtService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.getRequest();
+    const token = request.headers.authorization?.replace("Bearer ", "");
+
+    if (!token) {
+      return false;
+    }
+
+    try {
+      const payload = await this.jwtService.verify(token);
+      request.user = payload;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+
+// Usage
+@Controller("/admin")
+@UseGuards(AuthGuard)
+export class AdminController {
+  @Get()
+  getDashboard() {}
+}
+```
+
+### Interceptor Example
+```typescript
+import { Injectable, type Interceptor, type ExecutionContext, type CallHandler } from "@dwex/core";
+
+@Injectable()
+export class LoggingInterceptor implements Interceptor {
+  constructor(private logger: LoggerService) {}
+
+  async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
+    const request = context.getRequest();
+    this.logger.log(`Incoming: ${request.method} ${request.url}`);
+
+    const start = Date.now();
+    const result = await next.handle();
+    const duration = Date.now() - start;
+
+    this.logger.log(`Completed in ${duration}ms`);
+    return result;
+  }
+}
+```
+
+## Environment Variables
+```typescript
+// Use Bun.env, not process.env
+const port = parseInt(Bun.env.PORT || "3000");
+const dbUrl = Bun.env.DATABASE_URL;
+const nodeEnv = Bun.env.NODE_ENV;
+```
+
+## Testing Pattern
+```typescript
+import { describe, it, expect, beforeEach } from "vitest";
+import { UserService } from "./user.service";
+
+describe("UserService", () => {
+  let service: UserService;
+
+  beforeEach(() => {
+    service = new UserService(mockDb, mockLogger);
+  });
+
+  it("should find all users", async () => {
+    const users = await service.findAll();
+    expect(users).toBeDefined();
+  });
+});
+```
+
+## Common Mistakes to Avoid
+
+### ❌ Don't call app.init() manually
+```typescript
+// Bad
+const app = await DwexFactory.create(AppModule);
+await app.init(); // DON'T - DwexFactory.create() already calls this
+await app.listen(3000);
+
+// Good
+const app = await DwexFactory.create(AppModule);
+await app.listen(3000);
+```
+
+### ❌ Don't use Node.js APIs
+```typescript
+// Bad
+import fs from "node:fs";
+import path from "node:path";
+
+// Good - Use Bun APIs
+const file = Bun.file("data.json");
+const data = await file.json();
+```
+
+### ❌ Don't manually instantiate services
+```typescript
+// Bad
+const userService = new UserService(db, logger);
+
+// Good - Use dependency injection
+@Injectable()
+export class OrderService {
+  constructor(private userService: UserService) {}
+}
+```
+
+### ❌ Don't forget @Injectable() decorator
+```typescript
+// Bad - Will fail at runtime
+export class UserService {
+  constructor(private db: DatabaseService) {}
+}
+
+// Good
+@Injectable()
+export class UserService {
+  constructor(private db: DatabaseService) {}
+}
+```
+
+## HTTP Method Decorators
+- `@Get(path?)` - GET requests
+- `@Post(path?)` - POST requests
+- `@Put(path?)` - PUT requests
+- `@Delete(path?)` - DELETE requests
+- `@Patch(path?)` - PATCH requests
+
+## Parameter Decorators
+- `@Param(name)` - Route parameters
+- `@Query(name?)` - Query string parameters
+- `@Body()` - Request body
+- `@Headers(name?)` - Request headers
+- `@Req()` - Raw request object
+- `@Res()` - Raw response object
+
+## Dependency Injection Scopes
+- `SINGLETON` (default) - One instance shared across entire app
+- `REQUEST` - New instance per HTTP request
+- `TRANSIENT` - New instance every time it's injected
+
+```typescript
+@Injectable({ scope: Scope.REQUEST })
+export class RequestScopedService {}
+```
+
+## Main Entry Point Pattern
+```typescript
+import "reflect-metadata";
+import { DwexFactory } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+const port = parseInt(Bun.env.PORT || "<%= port %>");
+await app.listen(port);
+```
+
+## When Suggesting Code
+1. Always use decorators for framework features
+2. Use tabs for indentation, double quotes for strings
+3. Prefer Bun APIs over Node.js APIs
+4. Use constructor injection for dependencies
+5. Add proper TypeScript types
+6. Follow the module/controller/service pattern
+7. Suggest using @dwex/logger for logging
+8. Remember this is Bun, not Node.js

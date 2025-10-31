@@ -1,0 +1,173 @@
+# Dwex Framework - GitHub Copilot Instructions
+
+## Project Context
+This is a **Dwex** application - a TypeScript-first web framework built for Bun runtime with decorator-based architecture and dependency injection.
+
+## Key Framework Principles
+
+### 1. Always Use Decorators
+```typescript
+// ✅ Correct
+@Injectable()
+export class UserService {}
+
+@Controller("/users")
+export class UserController {}
+
+// ❌ Incorrect
+export class UserService {} // Missing @Injectable()
+```
+
+### 2. Use Bun APIs, Not Node.js
+```typescript
+// ✅ Correct - Bun APIs
+const file = await Bun.file("config.json").json();
+await Bun.write("output.txt", data);
+const port = Bun.env.PORT;
+
+// ❌ Incorrect - Node.js APIs
+import { readFileSync } from "fs";
+const data = readFileSync("config.json");
+```
+
+### 3. Constructor Injection Only
+```typescript
+// ✅ Correct
+@Injectable()
+export class OrderService {
+  constructor(private userService: UserService) {}
+}
+
+// ❌ Incorrect
+export class OrderService {
+  userService = new UserService(); // Don't instantiate manually
+}
+```
+
+## Code Style
+
+- **Indentation**: Use tabs (not spaces)
+- **Quotes**: Double quotes for strings
+- **Module System**: ESM (`import/export`)
+- **Runtime**: Bun (not Node.js)
+
+## Common Patterns
+
+### Module
+```typescript
+import { Module } from "@dwex/core";
+
+@Module({
+  imports: [DatabaseModule],
+  controllers: [UserController],
+  providers: [UserService],
+})
+export class UserModule {}
+```
+
+### Controller
+```typescript
+import { Controller, Get, Post, Body, Param } from "@dwex/core";
+
+@Controller("/users")
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
+  @Post()
+  create(@Body() data: CreateUserDto) {
+    return this.userService.create(data);
+  }
+
+  @Get("/:id")
+  findOne(@Param("id") id: string) {
+    return this.userService.findOne(id);
+  }
+}
+```
+
+### Service
+```typescript
+import { Injectable } from "@dwex/core";
+
+@Injectable()
+export class UserService {
+  constructor(private db: DatabaseService) {}
+
+  async findAll(): Promise<User[]> {
+    return this.db.users.findMany();
+  }
+
+  async create(data: CreateUserDto): Promise<User> {
+    return this.db.users.create({ data });
+  }
+}
+```
+
+## HTTP Decorators
+
+- `@Get(path?)` - GET requests
+- `@Post(path?)` - POST requests
+- `@Put(path?)` - PUT requests
+- `@Delete(path?)` - DELETE requests
+- `@Patch(path?)` - PATCH requests
+
+## Parameter Decorators
+
+- `@Param(name)` - Route parameters
+- `@Query(name?)` - Query string
+- `@Body()` - Request body
+- `@Headers(name?)` - Request headers
+
+## Guards
+```typescript
+import { Injectable, type CanActivate, type ExecutionContext } from "@dwex/core";
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.getRequest();
+    // Validate auth
+    return true;
+  }
+}
+
+// Usage
+@UseGuards(AuthGuard)
+@Get("/protected")
+protectedRoute() {}
+```
+
+## Common Mistakes to Avoid
+
+❌ Don't call `app.init()` manually - `DwexFactory.create()` already calls it
+❌ Don't use Node.js APIs - use Bun APIs
+❌ Don't manually instantiate services - use dependency injection
+❌ Don't forget `@Injectable()` decorator on services
+❌ Don't use spaces for indentation - use tabs
+
+## File Structure
+```
+src/
+├── main.ts                # Entry point
+├── app.module.ts          # Root module
+├── app.controller.ts      # Root controller
+└── modules/
+    └── users/
+        ├── users.module.ts
+        ├── users.controller.ts
+        └── users.service.ts
+```
+
+## When Suggesting Code
+
+1. Use decorators for all framework features
+2. Use tabs for indentation, double quotes for strings
+3. Prefer Bun APIs over Node.js APIs
+4. Use constructor injection for dependencies
+5. Add proper TypeScript types
+6. Follow module/controller/service pattern

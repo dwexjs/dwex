@@ -1,0 +1,343 @@
+# <%= projectName %> - Dwex Framework
+
+## Project Overview
+
+This is a Dwex application - a modern, TypeScript-first framework for building web applications with Bun runtime. Dwex provides a decorator-based architecture inspired by frameworks like NestJS but optimized for Bun's performance.
+
+## Framework Architecture
+
+**Decorator-Based**: Dwex uses TypeScript decorators extensively for metadata and dependency injection:
+- `@Module()` - Defines application modules with providers, controllers, and imports
+- `@Controller()` - Marks classes as HTTP controllers
+- `@Injectable()` - Marks classes as injectable services (singleton by default)
+- `@Get()`, `@Post()`, `@Put()`, `@Delete()`, `@Patch()` - HTTP method decorators
+- `@Param()`, `@Query()`, `@Body()`, `@Headers()` - Request data extractors
+- `@UseGuards()` - Apply guards for authorization/authentication
+- `@UseInterceptors()` - Apply interceptors for request/response transformation
+
+**Dependency Injection**: Dwex has a built-in DI container with:
+- Constructor injection (recommended)
+- Three scopes: `SINGLETON` (default), `REQUEST`, `TRANSIENT`
+- Automatic resolution of dependencies via reflect-metadata
+
+**Module System**: Organize code into cohesive modules:
+```typescript
+@Module({
+  imports: [DatabaseModule, AuthModule],  // Other modules to import
+  controllers: [UserController],           // HTTP controllers
+  providers: [UserService],                // Injectable services
+})
+export class UserModule {}
+```
+
+## Tech Stack
+
+- **Runtime**: Bun (NOT Node.js)
+- **Language**: TypeScript 5.9+ with strict mode
+- **Module System**: ESM (type: "module")
+- **Formatting**: Biome (tabs, double quotes)
+- **Testing**: Vitest
+
+## Code Style & Conventions
+
+1. **Use Bun APIs** over Node.js APIs wherever possible:
+   - File I/O: `Bun.file()`, `Bun.write()` instead of `fs` module
+   - Environment: `Bun.env` instead of `process.env`
+   - Shell: `Bun.$` instead of `child_process`
+
+2. **Indentation**: Use tabs (NOT spaces)
+
+3. **Quotes**: Double quotes for strings
+
+4. **Decorators**: Always use decorators for framework features, never manual registration
+
+5. **File Structure**:
+   ```
+   src/
+   ├── app.module.ts          # Root module
+   ├── app.controller.ts      # Root controller
+   ├── main.ts                # Application entry point
+   └── modules/
+       └── users/
+           ├── users.module.ts
+           ├── users.controller.ts
+           ├── users.service.ts
+           └── users.db.ts (if needed)
+   ```
+
+## Project Structure
+
+```
+<%= projectName %>/
+├── src/
+│   ├── main.ts              # App entry point (DwexFactory.create + listen)
+│   ├── app.module.ts        # Root module
+│   └── app.controller.ts    # Root controller
+├── package.json
+├── tsconfig.json
+├── biome.json               # Formatter/linter config
+└── README.md
+```
+
+## Common Patterns
+
+### Creating a Service
+
+```typescript
+import { Injectable } from "@dwex/core";
+
+@Injectable()
+export class UserService {
+  // Dependencies injected via constructor
+  constructor(private db: DatabaseService) {}
+
+  async findAll(): Promise<User[]> {
+    return this.db.users.findMany();
+  }
+
+  async create(data: CreateUserDto): Promise<User> {
+    return this.db.users.create({ data });
+  }
+}
+```
+
+### Creating a Controller
+
+```typescript
+import { Controller, Get, Post, Body, Param } from "@dwex/core";
+
+@Controller("/users")
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
+  @Get("/:id")
+  findOne(@Param("id") id: string) {
+    return this.userService.findOne(id);
+  }
+
+  @Post()
+  create(@Body() data: CreateUserDto) {
+    return this.userService.create(data);
+  }
+}
+```
+
+### Creating a Module
+
+```typescript
+import { Module } from "@dwex/core";
+
+@Module({
+  imports: [],                    // Other modules
+  controllers: [UserController],  // HTTP controllers
+  providers: [UserService],       // Services
+})
+export class UserModule {}
+```
+
+## MCP HTTP Server (AI Introspection)
+
+This application can expose an MCP (Model Context Protocol) server to allow AI assistants like Claude to introspect the running application in real-time.
+
+### Setup MCP
+
+```bash
+bun add @dwex/ai
+```
+
+Update `src/main.ts`:
+
+```typescript
+import { DwexFactory } from "@dwex/core";
+import { AiModule } from "@dwex/ai";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+// Enable MCP introspection (dev only)
+AiModule.setup(app, {
+  path: "/mcp",
+  enabled: Bun.env.NODE_ENV === "development",
+  enableAuth: false,
+});
+
+await app.listen(<%= port %>);
+```
+
+### Claude Desktop Configuration
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "<%= projectName %>": {
+      "url": "http://localhost:<%= port %>/mcp"
+    }
+  }
+}
+```
+
+Restart Claude Desktop. You'll see a 🔌 icon when connected.
+
+### Available MCP Tools
+
+- `list_routes` - List all registered routes with controllers and handlers
+- `get_route_details` - Get detailed info about a specific route (guards, interceptors, params)
+- `list_services` - List all services in the DI container
+- `get_service_details` - Get service dependencies
+- `list_middlewares` - List global and controller middlewares
+- `get_dependency_graph` - Get full dependency graph of services
+- `get_logs` - Retrieve recent application logs (requires @dwex/logger)
+
+### Example Usage
+
+```
+You: "What routes are available?"
+AI: *Uses list_routes tool*
+AI: "Your app has <%= projectName === 'my-dwex-app' ? '2' : 'N' %> routes:
+     - GET / (AppController.root)
+     - GET /ping (AppController.ping)"
+
+You: "What does UserService depend on?"
+AI: *Uses get_service_details tool*
+AI: "UserService depends on:
+     - DatabaseService
+     - LoggerService"
+```
+
+## Running the App
+
+```bash
+# Development
+bun run src/main.ts
+
+# Production (if you add build script)
+bun run build
+bun run dist/main.js
+```
+
+## Testing
+
+```bash
+# Run tests
+bun test
+
+# Watch mode
+bun test --watch
+```
+
+## Scaffolding Commands
+
+Generate code with Dwex CLI (if installed):
+
+```bash
+# Generate module
+dwex generate module products
+
+# Generate controller
+dwex generate controller products
+
+# Generate service
+dwex generate service products
+
+# Generate resource (module + controller + service)
+dwex generate resource products
+```
+
+## Common Tasks
+
+### Add a New Endpoint
+
+1. Create a method in a controller with decorator:
+   ```typescript
+   @Get("/hello")
+   sayHello() {
+     return { message: "Hello!" };
+   }
+   ```
+
+2. That's it! Dwex auto-registers routes.
+
+### Add Dependency Injection
+
+1. Mark class with `@Injectable()`:
+   ```typescript
+   @Injectable()
+   export class MyService {}
+   ```
+
+2. Add to module providers:
+   ```typescript
+   @Module({
+     providers: [MyService],
+   })
+   ```
+
+3. Inject via constructor:
+   ```typescript
+   constructor(private myService: MyService) {}
+   ```
+
+### Add Authentication Guard
+
+```typescript
+import { Injectable, type CanActivate, type ExecutionContext } from "@dwex/core";
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.getRequest();
+    const token = request.headers.authorization;
+    // Validate token
+    return !!token;
+  }
+}
+
+// Use on controller or route
+@UseGuards(AuthGuard)
+@Get("/protected")
+protectedRoute() {
+  return { data: "secret" };
+}
+```
+
+## Important Notes
+
+1. **Always use Bun APIs** - Don't use Node.js `fs`, `path`, etc.
+2. **Never call `app.init()` manually** - `DwexFactory.create()` calls it internally
+3. **Use @dwex/logger** for logging if you want MCP introspection to see logs
+4. **Decorators require `reflect-metadata`** - Already imported in `main.ts`
+5. **Format with Biome** - Run `bunx biome format --write .`
+
+## Environment Variables
+
+Access via `Bun.env`:
+
+```typescript
+const port = parseInt(Bun.env.PORT || "3000");
+const dbUrl = Bun.env.DATABASE_URL;
+```
+
+## Helpful Links
+
+- Dwex Documentation: https://dwex.dev
+- Bun Documentation: https://bun.sh/docs
+- TypeScript Decorators: https://www.typescriptlang.org/docs/handbook/decorators.html
+
+## Questions to Ask Me (Claude)
+
+When building with Dwex, you can ask me:
+- "Create a ProductsModule with CRUD operations"
+- "Add authentication to the /api/users endpoint"
+- "Why is the /api/orders route returning 404?" (I'll check via MCP)
+- "What services depend on DatabaseService?" (I'll analyze dependency graph)
+- "Show me error logs from the last 5 minutes" (I'll fetch via MCP)
+- "How should I organize the authentication logic?"
+
+I can help with code generation, debugging, architecture decisions, and real-time application introspection via MCP!

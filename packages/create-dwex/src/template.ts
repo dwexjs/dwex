@@ -306,6 +306,65 @@ async function applyFeaturesToAppController(
 }
 
 /**
+ * Generates AI agent configuration files based on user selection
+ */
+async function applyAiAgentFiles(
+	projectPath: string,
+	config: ProjectConfig,
+): Promise<void> {
+	const aiAgents = config.aiAgents || [];
+
+	// Generate CLAUDE.md
+	if (aiAgents.includes("claude")) {
+		const claudeMdPath = join(
+			import.meta.dirname,
+			"..",
+			"templates",
+			"base",
+			"CLAUDE.md.ejs",
+		);
+		const content = await Bun.file(claudeMdPath).text();
+		const rendered = ejs.render(content, config);
+		await Bun.write(join(projectPath, "CLAUDE.md"), rendered);
+	}
+
+	// Generate .cursorrules
+	if (aiAgents.includes("cursor")) {
+		const cursorRulesPath = join(
+			import.meta.dirname,
+			"..",
+			"templates",
+			"base",
+			".cursorrules.ejs",
+		);
+		const content = await Bun.file(cursorRulesPath).text();
+		const rendered = ejs.render(content, config);
+		await Bun.write(join(projectPath, ".cursorrules"), rendered);
+	}
+
+	// Generate .github/copilot-instructions.md
+	if (aiAgents.includes("copilot")) {
+		const copilotPath = join(
+			import.meta.dirname,
+			"..",
+			"templates",
+			"base",
+			".github",
+			"copilot-instructions.md.ejs",
+		);
+		const content = await Bun.file(copilotPath).text();
+		const rendered = ejs.render(content, config);
+
+		// Create .github directory if it doesn't exist
+		await mkdir(join(projectPath, ".github"), { recursive: true });
+		await Bun.write(
+			join(projectPath, ".github", "copilot-instructions.md"),
+			rendered,
+		);
+	}
+}
+
+/**
  * Composes a project from base template and selected features
  */
 export async function composeProject(
@@ -339,4 +398,7 @@ export async function composeProject(
 
 	// 7. Apply features to app.controller.ts
 	await applyFeaturesToAppController(projectPath, features);
+
+	// 8. Generate AI agent configuration files
+	await applyAiAgentFiles(projectPath, config);
 }

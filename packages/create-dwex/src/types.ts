@@ -7,6 +7,7 @@ export interface ProjectConfig {
 	features: string[];
 	version: string;
 	initGit: boolean;
+	aiAgents: string[];
 }
 
 /**
