@@ -32,14 +32,13 @@ const DEFAULT_CONFIG: AiModuleConfig = {
  * ```typescript
  * // In your app.ts or main.ts
  * const app = await DwexFactory.create(AppModule);
- * await app.init();
  *
- * // Setup MCP after app initialization
- * AiModule.setup(app, {
- *   enableAuth: false,
- *   logBufferSize: 1000,
- *   path: '/mcp'
- * });
+ * // Setup MCP with builder pattern
+ * new AiModule()
+ *   .setPath("/mcp")
+ *   .enableAuth(process.env.MCP_API_KEY)
+ *   .setLogBufferSize(1000)
+ *   .setup(app);
  *
  * await app.listen(3000);
  * // MCP server available at: http://localhost:3000/mcp
@@ -47,8 +46,85 @@ const DEFAULT_CONFIG: AiModuleConfig = {
  */
 @Module({})
 export class AiModule {
+	private config: AiModuleConfig;
+
+	constructor() {
+		this.config = { ...DEFAULT_CONFIG };
+	}
+
 	/**
-	 * Configure AI Module with custom options (not recommended - use setup() instead)
+	 * Set the MCP endpoint path
+	 * @param path - The endpoint path (default: "/mcp")
+	 * @returns this instance for chaining
+	 */
+	setPath(path: string): this {
+		this.config.path = path;
+		return this;
+	}
+
+	/**
+	 * Enable authentication with an API key
+	 * @param apiKey - The API key to use for authentication
+	 * @returns this instance for chaining
+	 */
+	enableAuth(apiKey?: string): this {
+		this.config.enableAuth = true;
+		if (apiKey) {
+			this.config.apiKey = apiKey;
+		}
+		return this;
+	}
+
+	/**
+	 * Disable authentication
+	 * @returns this instance for chaining
+	 */
+	disableAuth(): this {
+		this.config.enableAuth = false;
+		this.config.apiKey = undefined;
+		return this;
+	}
+
+	/**
+	 * Set the API key for authentication
+	 * @param apiKey - The API key
+	 * @returns this instance for chaining
+	 */
+	setApiKey(apiKey: string): this {
+		this.config.apiKey = apiKey;
+		return this;
+	}
+
+	/**
+	 * Set the log buffer size
+	 * @param size - Number of logs to keep in memory (default: 1000)
+	 * @returns this instance for chaining
+	 */
+	setLogBufferSize(size: number): this {
+		this.config.logBufferSize = size;
+		return this;
+	}
+
+	/**
+	 * Enable the MCP server
+	 * @returns this instance for chaining
+	 */
+	enable(): this {
+		this.config.enabled = true;
+		return this;
+	}
+
+	/**
+	 * Disable the MCP server
+	 * @returns this instance for chaining
+	 */
+	disable(): this {
+		this.config.enabled = false;
+		return this;
+	}
+
+	/**
+	 * Configure AI Module with custom options (not recommended - use builder pattern instead)
 	 * This method is kept for potential future use with proper lifecycle hooks
 	 */
 	static forRoot(config: AiModuleConfig = {}): DynamicModule {
@@ -72,28 +148,24 @@ export class AiModule {
 
 	/**
 	 * Setup MCP server on a Dwex application
-	 * This should be called AFTER app.init() but BEFORE app.listen()
+	 * This should be called AFTER DwexFactory.create() but BEFORE app.listen()
 	 *
 	 * @param app - The Dwex application instance
-	 * @param config - Optional configuration
 	 *
 	 * @example
 	 * ```typescript
 	 * const app = await DwexFactory.create(AppModule);
-	 * await app.init();
 	 *
-	 * AiModule.setup(app, {
-	 *   enableAuth: false,
-	 *   path: '/mcp'
-	 * });
+	 * new AiModule()
+	 *   .setPath("/mcp")
+	 *   .enableAuth(process.env.MCP_API_KEY)
+	 *   .setup(app);
 	 *
 	 * await app.listen(3000);
 	 * ```
 	 */
-	static setup(app: DwexApplication, config: AiModuleConfig = {}): void {
-		const mergedConfig = { ...DEFAULT_CONFIG, ...config };
-
-		if (!mergedConfig.enabled) {
+	setup(app: DwexApplication): void {
+		if (!this.config.enabled) {
 			return;
 		}
 
@@ -118,7 +190,7 @@ export class AiModule {
 
 		container.addProvider({
 			provide: AI_MODULE_CONFIG,
-			useValue: mergedConfig,
+			useValue: this.config,
 		});
 
 		// Register services
@@ -133,22 +205,25 @@ export class AiModule {
 		const mcpHandler = new DwexMcpHandler(mcpService.server);
 
 		// Manually register the MCP route
-		const path = mergedConfig.path || "/mcp";
+		const path = this.config.path || "/mcp";
 		const controller = {
 			constructor: {
 				name: "McpController",
 			},
 		};
 
+		// Capture config in closure for use in handler
+		const config = this.config;
+
 		// Create the handler that will handle MCP requests
 		const handler = async function (this: any, req: any, res: any, body: any) {
 			// Authentication check if enabled
-			if (mergedConfig.enableAuth) {
+			if (config.enableAuth) {
 				const apiKey =
 					req.headers?.["x-api-key"] ||
 					req.headers?.["authorization"]?.replace("Bearer ", "");
 
-				if (!apiKey || apiKey !== mergedConfig.apiKey) {
+				if (!apiKey || apiKey !== config.apiKey) {
 					return res.status(401).json({
 						jsonrpc: "2.0",
 						error: {
