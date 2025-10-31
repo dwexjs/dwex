@@ -1,0 +1,194 @@
+---
+title: AI-Powered Development
+description: Build faster with AI assistants that understand your Dwex application
+---
+
+## Overview
+
+Dwex is designed from the ground up to work seamlessly with AI assistants like **Claude**, **Cursor**, and **GitHub Copilot**. By providing your AI assistant with the right context about your Dwex application, you unlock powerful capabilities for faster development, better debugging, and easier onboarding.
+
+## How AI Helps with Dwex
+
+### 1. Intelligent Code Generation
+
+AI assistants understand Dwex's decorator-based architecture and can generate correct code:
+
+```typescript
+// Just tell your AI: "Create a UserService with CRUD operations"
+// It generates properly structured code:
+
+@Injectable()
+export class UserService {
+  constructor(private db: DatabaseService) {}
+
+  async findAll(): Promise<User[]> {
+    return this.db.users.findMany();
+  }
+
+  async create(data: CreateUserDto): Promise<User> {
+    return this.db.users.create({ data });
+  }
+}
+```
+
+### 2. Real-Time Application Introspection
+
+With the `@dwex/ai` module, AI can inspect your running application:
+
+```
+You: "Why is the /api/users endpoint returning 500?"
+AI: *Inspects routes, services, and logs via MCP*
+AI: "The UserService has a circular dependency with AuthService.
+     Here's the dependency graph..."
+```
+
+### 3. Debugging and Troubleshooting
+
+AI can analyze logs, dependencies, and routes to help you debug faster:
+
+```
+You: "The app is slow"
+AI: *Checks application logs*
+AI: "I see 47 slow query warnings. UserService.findAll is taking 3.2s
+     average. Missing index on users.email field."
+```
+
+### 4. Team Onboarding
+
+New developers can ask AI about your codebase:
+
+```
+Developer: "How does authentication work?"
+AI: *Uses MCP to inspect routes and services*
+AI: "POST /api/auth/login uses AuthService which depends on:
+     - JwtService for tokens
+     - UserService for user lookup
+     - BcryptService for password verification"
+```
+
+## Getting Started with AI
+
+When you create a new Dwex project, `create-dwex` can automatically set up AI assistant configuration files:
+
+```bash
+bun create dwex my-app
+```
+
+During setup, you'll be asked which AI assistants you use. Select from:
+- **Claude** - Generates `CLAUDE.md` with framework context and MCP setup
+- **Cursor** - Generates `.cursorrules` with Dwex best practices
+- **GitHub Copilot** - Generates `.github/copilot-instructions.md`
+
+These files teach your AI assistant about:
+- Dwex architecture and patterns
+- Decorator usage (`@Controller`, `@Injectable`, `@Get`, etc.)
+- Dependency injection
+- Module structure
+- Testing conventions
+- Scaffolding commands
+
+## Real-Time Introspection
+
+For advanced AI capabilities, enable MCP (Model Context Protocol) server in your application:
+
+```bash
+bun add @dwex/ai
+```
+
+```typescript
+import { DwexFactory } from "@dwex/core";
+import { AiModule } from "@dwex/ai";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+// Enable MCP introspection
+AiModule.setup(app, {
+  path: "/mcp",
+  enabled: process.env.NODE_ENV === "development",
+});
+
+await app.listen(3000);
+```
+
+This allows AI to:
+- **List routes** and inspect handlers, guards, interceptors
+- **View services** and their dependencies
+- **Analyze dependency graph** to understand relationships
+- **Read application logs** for debugging
+- **Monitor middleware** chain
+
+## Scaffolding Commands
+
+Dwex provides AI-friendly commands to generate boilerplate code. Your AI assistant can use these when configured:
+
+```bash
+# Generate a new module
+dwex generate module users
+
+# Generate a controller
+dwex generate controller users
+
+# Generate a service
+dwex generate service users
+
+# Generate a complete resource (module + controller + service)
+dwex generate resource products
+```
+
+## Use Cases
+
+### 1. Code Generation
+
+```
+You: "Create a ProductsModule with CRUD operations"
+AI: *Generates module, controller, service with proper decorators*
+```
+
+### 2. Debugging
+
+```
+You: "Why is /api/orders returning 404?"
+AI: *Checks routes via MCP*
+AI: "OrderController is registered but the route is /order (singular).
+     Did you mean to use /orders?"
+```
+
+### 3. Architecture Questions
+
+```
+You: "How should I organize authentication?"
+AI: *Reads CLAUDE.md or .cursorrules*
+AI: "Create an AuthModule with:
+     - AuthService for business logic
+     - AuthGuard for route protection
+     - JwtStrategy for token validation"
+```
+
+### 4. Refactoring
+
+```
+You: "Can I safely rename UserService to AccountService?"
+AI: *Uses dependency graph via MCP*
+AI: "UserService is used by:
+     - AuthService
+     - ProfileController
+     - OrderService
+     I'll update all 3 references..."
+```
+
+## Benefits
+
+1. **Faster Onboarding** - New developers get instant answers about architecture
+2. **Consistent Code** - AI generates code following Dwex patterns
+3. **Better Debugging** - Real-time introspection finds issues quickly
+4. **Reduced Context Switching** - Ask AI instead of searching docs
+5. **Refactoring Confidence** - AI analyzes dependencies before changes
+
+## Next Steps
+
+<Cards>
+  <Card title="MCP Server Setup" href="/docs/ai/mcp" />
+  <Card title="Scaffolding CLI" href="/docs/cli/overview" />
+  <Card title="Modules" href="/docs/fundamentals/modules" />
+</Cards>
