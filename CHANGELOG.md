@@ -1,3 +1,14 @@
+## 1.0.0-beta.15 (2025-10-31)
+
+### 🚀 Features
+
+- **ai:** add MCP config generation for AI assistants ([b074fa0](https://github.com/dwexjs/dwex/commit/b074fa0))
+- **cli:** add support for AI agent configurations ([89e08e4](https://github.com/dwexjs/dwex/commit/89e08e4))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.14 (2025-10-30)
 
 ### 🚀 Features
