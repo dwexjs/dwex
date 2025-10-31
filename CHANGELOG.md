@@ -1,3 +1,17 @@
+## 1.0.0-beta.16 (2025-10-31)
+
+### 🚀 Features
+
+- **ai:** convert MCP tool responses from JSON to CSV for lower token usage ([14a1705](https://github.com/dwexjs/dwex/commit/14a1705))
+
+### 🩹 Fixes
+
+- **create-dwex:** ensure .gitignore is created before git init and hide git output ([580623f](https://github.com/dwexjs/dwex/commit/580623f))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.15 (2025-10-31)
 
 ### 🚀 Features
