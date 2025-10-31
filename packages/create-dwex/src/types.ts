@@ -7,7 +7,6 @@ export interface ProjectConfig {
 	features: string[];
 	version: string;
 	initGit: boolean;
-	aiAgents: string[];
 }
 
 /**
@@ -17,7 +16,6 @@ export interface CliOptions {
 	projectName?: string;
 	port?: number;
 	features?: string[];
-	aiAgents?: string[];
 	git?: boolean;
 	noGit?: boolean;
 	help?: boolean;
@@ -47,4 +45,47 @@ export interface Feature {
 		imports?: string[];
 		methods?: Array<{ code: string }>;
 	};
+}
+
+/**
+ * Base command interface
+ */
+export interface ICommand {
+	execute(): Promise<void>;
+}
+
+/**
+ * Service interface for dependency injection
+ */
+export interface IService {
+	// Marker interface for services
+}
+
+/**
+ * Template processor context
+ */
+export interface ProcessorContext {
+	projectPath: string;
+	config: ProjectConfig;
+	features: Feature[];
+}
+
+/**
+ * Template processor interface
+ */
+export interface IProcessor {
+	process(context: ProcessorContext): Promise<void>;
+}
+
+/**
+ * Validator function type
+ */
+export type Validator<T> = (value: T) => string | undefined;
+
+/**
+ * Command context with all dependencies
+ */
+export interface CommandContext {
+	version: string;
+	cliOptions: CliOptions;
 }

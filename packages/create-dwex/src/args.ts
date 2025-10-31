@@ -29,23 +29,6 @@ export function createProgram(version: string): Command {
 				return value.split(",").map((f) => f.trim());
 			},
 		)
-		.option(
-			"-a, --ai <assistants>",
-			"Comma-separated list of AI assistants (claude, cursor, copilot)",
-			(value) => {
-				const assistants = value.split(",").map((a) => a.trim());
-				const validAssistants = ["claude", "cursor", "copilot"];
-				const invalid = assistants.filter(
-					(a) => !validAssistants.includes(a),
-				);
-				if (invalid.length > 0) {
-					throw new InvalidArgumentError(
-						`Invalid AI assistants: ${invalid.join(", ")}. Valid options: ${validAssistants.join(", ")}`,
-					);
-				}
-				return assistants;
-			},
-		)
 		.option("-g, --git", "Initialize git repository")
 		.option("--no-git", "Skip git initialization")
 		.addHelpText(
@@ -59,7 +42,7 @@ ${pc.bold("Examples:")}
   $ create-dwex my-app
 
   ${pc.gray("# Full command with all options")}
-  $ create-dwex my-app --port 3000 --features auth-jwt,openapi --ai claude,cursor --git
+  $ create-dwex my-app --port 3000 --features auth-jwt,openapi
 
   ${pc.gray("# Without git initialization")}
   $ create-dwex my-app --no-git
@@ -113,7 +96,6 @@ export function parseArgs(args: string[], version: string): CliOptions {
 		projectName,
 		port: opts.port,
 		features: opts.features,
-		aiAgents: opts.ai,
 	};
 
 	// Handle git options (Commander converts --no-git to git: false)
