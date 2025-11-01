@@ -4,7 +4,12 @@ import { Command } from "commander";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildCommand, devCommand, generateCommand } from "./commands/index.js";
+import {
+	buildCommand,
+	devCommand,
+	generateCommand,
+	updateCommand,
+} from "./commands/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -28,6 +33,7 @@ async function main() {
 	await buildCommand(program);
 	await devCommand(program);
 	await generateCommand(program);
+	await updateCommand(program);
 
 	// Parse arguments
 	await program.parseAsync(process.argv);
