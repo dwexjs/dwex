@@ -1,6 +1,10 @@
 import { join } from "node:path";
 import type { Feature, IService, ProjectConfig } from "../types.js";
-import { getTemplatePath, listDirectories, readJsonWithEjs } from "../utils/fs.js";
+import {
+	getTemplatePath,
+	listDirectories,
+	readJsonWithEjs,
+} from "../utils/fs.js";
 
 /**
  * Service for handling feature discovery and loading

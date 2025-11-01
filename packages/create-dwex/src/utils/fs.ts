@@ -34,6 +34,20 @@ export function getTemplatePath(...segments: string[]): string {
 
 /**
  * Recursively processes template files with EJS
+ *
+ * This function copies all files and directories from sourceDir to targetDir,
+ * processing them with EJS templating. It handles:
+ * - All files including hidden files (starting with .)
+ * - All subdirectories recursively
+ * - EJS template files (*.ejs) - strips .ejs extension and renders content
+ * - Non-template files - copies as-is but still processes with EJS
+ *
+ * Files are written directly, overwriting any existing files at the target path.
+ * This allows features to override base files when needed.
+ *
+ * @param sourceDir - Source directory to copy from
+ * @param targetDir - Target directory to copy to
+ * @param config - Project configuration for EJS rendering
  */
 export async function processTemplateFiles(
 	sourceDir: string,
@@ -47,6 +61,7 @@ export async function processTemplateFiles(
 		let targetPath = join(targetDir, entry.name);
 
 		if (entry.isDirectory()) {
+			// Create directory and recursively process its contents
 			await mkdir(targetPath, { recursive: true });
 			await processTemplateFiles(sourcePath, targetPath, config);
 		} else {
@@ -58,7 +73,9 @@ export async function processTemplateFiles(
 				targetPath = targetPath.slice(0, -4); // Remove .ejs extension
 			}
 
-			// Process file with EJS
+			// Process file with EJS and write to target
+			// All files are processed with EJS, even if they don't have .ejs extension
+			// This allows variable interpolation in any file type
 			const content = await Bun.file(sourcePath).text();
 			const rendered = ejs.render(content, config);
 			await Bun.write(targetPath, rendered);
@@ -84,7 +101,9 @@ export async function readJsonWithEjs<T>(
 export async function listDirectories(path: string): Promise<string[]> {
 	try {
 		const entries = await readdir(path, { withFileTypes: true });
-		return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+		return entries
+			.filter((entry) => entry.isDirectory())
+			.map((entry) => entry.name);
 	} catch {
 		return [];
 	}

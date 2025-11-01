@@ -3,6 +3,13 @@ import { getTemplatePath, processTemplateFiles } from "../utils/fs.js";
 
 /**
  * Service for handling template operations
+ *
+ * Template processing follows a strict order:
+ * 1. Base template - ALL base files are copied (including .gitignore, hidden files, etc.)
+ * 2. Feature files - Features can add new files or override base files
+ *
+ * This ensures every generated project has a complete base structure,
+ * regardless of which features are selected.
  */
 export class TemplateService implements IService {
 	/**
@@ -21,6 +28,14 @@ export class TemplateService implements IService {
 
 	/**
 	 * Processes and copies the base template to the project directory
+	 *
+	 * This method copies ALL files from templates/base/ including:
+	 * - Hidden files (.gitignore, .cursorrules, .github/, .vscode/, etc.)
+	 * - Configuration files (package.json, tsconfig.json, biome.json, etc.)
+	 * - Source code (src/ directory and all contents)
+	 * - Documentation (README.md, CLAUDE.md, etc.)
+	 *
+	 * All files are processed with EJS templating to inject project configuration.
 	 */
 	async processBaseTemplate(
 		projectPath: string,
@@ -32,6 +47,14 @@ export class TemplateService implements IService {
 
 	/**
 	 * Processes and copies feature files to the project directory
+	 *
+	 * Feature files are copied from templates/features/{featureId}/files/
+	 * They can:
+	 * - Add new files to the project
+	 * - Override base template files (e.g., a feature might replace app.controller.ts)
+	 * - Add new directories and subdirectories
+	 *
+	 * If a feature has no files/ directory, this method silently skips it.
 	 */
 	async processFeatureFiles(
 		featureId: string,

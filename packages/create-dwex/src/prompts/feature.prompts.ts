@@ -2,7 +2,10 @@ import * as clack from "@clack/prompts";
 import pc from "picocolors";
 import type { Feature } from "../types.js";
 import { BasePrompt } from "./base.js";
-import { validateFeatureIds, validateAiAssistants } from "../utils/validation.js";
+import {
+	validateFeatureIds,
+	validateAiAssistants,
+} from "../utils/validation.js";
 import { Logger } from "../utils/logger.js";
 
 /**

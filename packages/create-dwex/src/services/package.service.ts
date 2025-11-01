@@ -9,7 +9,12 @@ export class PackageService implements IService {
 	 * Gets the version from create-dwex package.json
 	 */
 	async getVersion(): Promise<string> {
-		const packageJsonPath = join(import.meta.dirname, "..", "..", "package.json");
+		const packageJsonPath = join(
+			import.meta.dirname,
+			"..",
+			"..",
+			"package.json",
+		);
 		const packageJson = await Bun.file(packageJsonPath).json();
 		return packageJson.version || "0.0.1";
 	}
@@ -60,14 +65,11 @@ export class PackageService implements IService {
 	 */
 	async formatProject(projectPath: string): Promise<boolean> {
 		try {
-			const formatProc = Bun.spawn(
-				["bunx", "biome", "check", "--write", "."],
-				{
-					cwd: projectPath,
-					stdout: "ignore",
-					stderr: "ignore",
-				},
-			);
+			const formatProc = Bun.spawn(["bunx", "biome", "check", "--write", "."], {
+				cwd: projectPath,
+				stdout: "ignore",
+				stderr: "ignore",
+			});
 			await formatProc.exited;
 			return formatProc.exitCode === 0;
 		} catch {

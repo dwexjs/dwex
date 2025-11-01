@@ -56,9 +56,8 @@ export class CreateCommand extends BaseCommand {
 		const availableFeatures = await this.featureService.discoverFeatures();
 
 		// 2. Collect project configuration from user
-		const { config, projectPath } = await this.collectConfiguration(
-			availableFeatures,
-		);
+		const { config, projectPath } =
+			await this.collectConfiguration(availableFeatures);
 
 		// 3. Load selected features
 		const features = await this.featureService.loadFeatures(
@@ -137,6 +136,12 @@ export class CreateCommand extends BaseCommand {
 
 	/**
 	 * Creates the project structure using processors
+	 *
+	 * Processing order:
+	 * 1. Base template - ALL base files are copied first (including .gitignore, etc.)
+	 * 2. Feature files - Features may add new files or override base files
+	 * 3. Dependencies - Merge package.json dependencies from features
+	 * 4. AI config - Generate .mcp.json if needed
 	 */
 	private async createProject(
 		projectPath: string,
@@ -153,6 +158,8 @@ export class CreateCommand extends BaseCommand {
 			// Process using chain of processors
 			const context = { projectPath, config, features };
 
+			// IMPORTANT: Base template MUST be processed first to ensure
+			// all base files (.gitignore, etc.) are present regardless of features
 			await this.baseProcessor.process(context);
 			await this.featureProcessor.process(context);
 			await this.packageService.mergeDependencies(projectPath, features);
@@ -179,7 +186,8 @@ export class CreateCommand extends BaseCommand {
 		spinner.start("Installing dependencies...");
 
 		try {
-			const success = await this.packageService.installDependencies(projectPath);
+			const success =
+				await this.packageService.installDependencies(projectPath);
 			if (success) {
 				spinner.stop(pc.green("Dependencies installed"));
 			} else {

@@ -4,12 +4,23 @@ import { TemplateService } from "../services/template.service.js";
 
 /**
  * Processor for applying feature files and modifications
+ *
+ * This processor runs AFTER the base template processor to layer
+ * feature-specific files and modifications on top of the base structure.
+ *
+ * Features can:
+ * 1. Add new files from templates/features/{feature}/files/
+ * 2. Override existing base files (if a feature provides a file with the same path)
+ * 3. Modify core files (app.module.ts, main.ts, app.controller.ts) via configuration
+ *
+ * The base template is always processed first, so all base files (including
+ * .gitignore, config files, etc.) are guaranteed to be present.
  */
 export class FeatureProcessor implements IProcessor {
 	constructor(private readonly templateService: TemplateService) {}
 
 	async process(context: ProcessorContext): Promise<void> {
-		// Apply feature files
+		// Apply feature files - these may add new files or override base files
 		for (const feature of context.features) {
 			await this.templateService.processFeatureFiles(
 				feature.id,
