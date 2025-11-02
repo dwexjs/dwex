@@ -89,6 +89,9 @@ export class CreateCommand extends BaseCommand {
 		if (config.initGit) {
 			await this.commitDependencies(projectPath);
 		}
+
+		// 10. Show next steps
+		this.showNextSteps(config.projectName);
 	}
 
 	/**
@@ -234,5 +237,18 @@ export class CreateCommand extends BaseCommand {
 			// Silently fail - not critical if this fails
 			console.error(error);
 		}
+	}
+
+	/**
+	 * Shows next steps to the user
+	 */
+	private showNextSteps(projectName: string): void {
+		const steps = [
+			pc.cyan(`cd ${projectName}`),
+			pc.cyan("bun run dev"),
+		].join("\n");
+
+		Logger.note(steps, "Next steps");
+		Logger.outro(pc.green("Happy coding!"));
 	}
 }
