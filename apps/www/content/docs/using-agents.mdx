@@ -1,0 +1,302 @@
+---
+title: Using AI Agents
+description: Build production-ready Dwex backends with AI coding agents like Claude Code and Cursor
+---
+
+## Overview
+
+Dwex is designed to work seamlessly with AI coding agents, enabling you to build **production-quality backends in minutes** instead of days. With proper AI configuration, agents like Claude Code, Cursor, and GitHub Copilot understand Dwex's patterns and can generate entire features autonomously.
+
+## Why AI Agents Understand Dwex
+
+Dwex's decorator-based architecture is **inherently AI-friendly**. AI agents can easily parse and generate declarative code patterns:
+
+```typescript
+@Controller("/products")
+export class ProductController {
+	constructor(private productService: ProductService) {}
+
+	@Get()
+	async findAll(@Query("category") category?: string) {
+		return this.productService.findAll(category);
+	}
+
+	@Post()
+	@UseGuards(AuthGuard)
+	async create(@Body() data: CreateProductDto) {
+		return this.productService.create(data);
+	}
+}
+```
+
+AI agents understand:
+- Route structure from `@Controller` and method decorators
+- Dependency injection from constructor parameters
+- Request handling from parameter decorators (`@Body`, `@Query`, `@Param`)
+- Guards and interceptors from metadata
+
+## Pre-Configured AI Context
+
+When you create a Dwex project with `bun create dwex`, you get AI configuration files automatically:
+
+| File | AI Agent | Purpose |
+|------|----------|---------|
+| `CLAUDE.md` | Claude Code / Claude | Framework patterns, best practices, architecture guidelines |
+| `.cursorrules` | Cursor | Code generation templates, Dwex conventions |
+| `.github/copilot-instructions.md` | GitHub Copilot | Pattern recognition, code suggestions |
+
+These files teach AI agents about:
+- Decorator usage patterns
+- Dependency injection
+- Module/controller/service architecture
+- Common mistakes to avoid
+- Testing conventions
+- Bun-specific APIs
+
+**Example prompt:**
+```
+You: "Create a complete authentication module with JWT"
+
+AI: *Reads CLAUDE.md for patterns*
+    *Generates AuthModule, AuthService, AuthController*
+    *Implements AuthGuard with proper CanActivate interface*
+    *Creates DTOs with validation*
+    *Adds tests*
+```
+
+## AI-Powered Development Workflow
+
+### 1. Generate Complete Features
+
+AI can scaffold entire modules with proper architecture:
+
+```
+You: "Create a blog module with posts, comments, and categories"
+
+AI generates:
+  ✓ BlogModule, PostsModule, CommentsModule, CategoriesModule
+  ✓ Services with CRUD operations
+  ✓ Controllers with REST endpoints
+  ✓ DTOs with validation
+  ✓ Relationships between entities
+  ✓ Error handling and tests
+
+Time: ~2 minutes vs. 2+ hours manually
+```
+
+### 2. Add Complex Features
+
+AI understands Dwex patterns for advanced functionality:
+
+```
+You: "Add JWT authentication with email/password, registration, and password reset"
+
+AI generates:
+  ✓ AuthModule with proper dependency injection
+  ✓ AuthService (login, register, password reset logic)
+  ✓ AuthController with /auth/login, /auth/register endpoints
+  ✓ AuthGuard for protecting routes
+  ✓ JwtStrategy for token validation
+  ✓ Password hashing with bcrypt
+  ✓ DTOs for login/register
+
+Time: ~5 minutes vs. 2-3 hours manually
+```
+
+### 3. Database Integration
+
+AI can set up database layers with proper patterns:
+
+```
+You: "Set up Prisma with PostgreSQL for users, posts, and comments"
+
+AI generates:
+  ✓ Prisma schema with relationships
+  ✓ PrismaService as injectable singleton
+  ✓ Updated services to use Prisma client
+  ✓ Migration commands
+  ✓ Environment variables documentation
+
+Time: ~3 minutes vs. 1 hour manually
+```
+
+
+## Best Practices
+
+### Be Specific with Requirements
+
+<Tabs>
+<Tab value="good" label="Good">
+
+```
+Create a ProductService with CRUD operations.
+Include pagination for findAll (10 items per page).
+Add category filtering and search by name.
+Use Prisma for database access.
+Include error handling for not found cases.
+```
+
+</Tab>
+
+<Tab value="bad" label="Bad">
+
+```
+Create a product service
+```
+
+</Tab>
+</Tabs>
+
+### Leverage MCP for Complex Tasks
+
+Enable [MCP](/docs/mcp) for:
+- **Debugging:** AI inspects actual application structure
+- **Refactoring:** AI verifies dependencies before changes
+- **Understanding:** AI explores codebase autonomously
+
+### Iterate Incrementally
+
+Build features in stages for better control:
+
+```
+1. "Create basic UserModule with CRUD"
+   → Review and test
+
+2. "Add email validation to UserService"
+   → Verify validation works
+
+3. "Add user profile pictures with file upload"
+   → Test file upload
+
+4. "Add user roles and permissions"
+   → Final review
+```
+
+### Review Security-Critical Code
+
+Always review AI-generated code for:
+- ✓ Authentication and authorization logic
+- ✓ Input validation and sanitization
+- ✓ SQL injection prevention
+- ✓ XSS protection
+- ✓ Secret management (use environment variables)
+
+AI generates secure patterns, but human review is essential for security-critical features.
+
+### Use Scaffolding Commands
+
+Let AI leverage Dwex CLI for faster generation:
+
+```
+You: "Use the Dwex CLI to generate a products resource"
+
+AI: *Runs `dwex generate resource products`*
+    *Module, controller, service, and DTOs created*
+    *You customize as needed*
+```
+
+## Understanding AI Limitations
+
+### AI Excels At:
+- ✅ Boilerplate generation (modules, controllers, services)
+- ✅ CRUD operations following Dwex patterns
+- ✅ Standard architectural patterns
+- ✅ Refactoring with clear requirements
+- ✅ Test generation for common scenarios
+
+### AI Needs Guidance For:
+- ⚠️ Complex business logic and domain rules
+- ⚠️ Performance optimizations and caching strategies
+- ⚠️ Architecture decisions (monolith vs. microservices)
+- ⚠️ Domain-specific algorithms
+- ⚠️ Advanced security requirements
+
+### Always:
+1. **Understand the code** - Don't blindly accept AI output
+2. **Test thoroughly** - Run tests and verify edge cases
+3. **Review security** - Especially auth, validation, and data access
+4. **Iterate** - Refine AI output with follow-up prompts
+
+## Tips for Maximum Productivity
+
+### 1. Combine Multiple AI Tools
+
+Use different AI agents for different tasks:
+- **Claude Code** - Complex features, debugging, architecture
+- **Cursor** - Inline code completion, quick edits
+- **GitHub Copilot** - Autocomplete, boilerplate, repetitive code
+
+### 2. Provide Context Files
+
+Keep project context in markdown files:
+
+```markdown title="ARCHITECTURE.md"
+# E-Commerce App Architecture
+
+## Database
+- PostgreSQL with Prisma
+- Models: User, Product, Order, Cart
+
+## Authentication
+- JWT with refresh tokens
+- Roles: admin, customer
+
+## Features
+- Product catalog with categories
+- Shopping cart with persistence
+- Order tracking
+```
+
+AI reads this for better code generation.
+
+### 3. Ask for Explanations
+
+```
+You: "Explain how dependency injection works in this AuthModule"
+
+AI: *Reads module code*
+    *Shows provider registration*
+    *Explains constructor injection*
+    *Visualizes dependency tree*
+```
+
+Understanding AI-generated code makes you a better developer.
+
+### 4. Use MCP for Real-Time Feedback
+
+```
+You: "Create OrdersModule and verify it's registered correctly"
+
+AI: *Generates OrdersModule*
+    *Uses MCP to check dependency graph*
+    *Confirms routes are registered*
+    *Verifies services are injectable*
+
+    "✓ OrdersModule created and registered in AppModule
+     ✓ Routes available at /api/orders
+     ✓ OrderService injectable in DI container"
+```
+
+## Getting Started
+
+When you create a new Dwex project:
+
+```bash
+bun create dwex my-app
+```
+
+Select which AI assistants you use during setup. Dwex generates the appropriate configuration files automatically.
+
+From there, your AI assistant is ready to:
+- Generate controllers, services, and modules
+- Debug issues using MCP introspection
+- Answer questions about your codebase
+- Refactor code safely with dependency awareness
+
+## Next Steps
+
+<Cards>
+  <Card title="MCP Integration" href="/docs/mcp" />
+  <Card title="CLI Scaffolding" href="/docs/cli/overview" />
+  <Card title="Quick Start" href="/docs" />
+</Cards>

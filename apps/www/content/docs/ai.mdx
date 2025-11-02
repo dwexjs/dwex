@@ -1,0 +1,204 @@
+---
+title: AI-First Framework
+description: Dwex is the first web framework designed from the ground up for AI-powered development
+---
+
+## Overview
+
+Dwex is the **world's first AI-first web framework**. Unlike traditional frameworks that were retrofitted for AI assistance, Dwex was designed from day one to work seamlessly with AI coding agents like Claude, Cursor, and GitHub Copilot.
+
+## What Makes Dwex AI-First?
+
+### 1. Built-In AI Context
+
+Every Dwex project comes with pre-configured AI assistant instructions:
+
+- **CLAUDE.md** - Framework guidelines and patterns for Claude Code
+- **.cursorrules** - Cursor AI rules and best practices
+- **.github/copilot-instructions.md** - GitHub Copilot context
+
+These files teach AI assistants about Dwex's architecture, conventions, and patterns—enabling them to generate correct, idiomatic code without you having to explain the framework every time.
+
+### 2. Real-Time Application Introspection
+
+The `@dwex/ai` module provides **MCP (Model Context Protocol)** server capabilities, allowing AI assistants to:
+
+- Inspect your application's routes, services, and dependencies in real-time
+- Debug issues by analyzing logs and dependency graphs
+- Answer questions about your codebase structure
+- Monitor application health and performance
+
+Think of it as giving your AI assistant "x-ray vision" into your running application.
+
+### 3. Declarative, Pattern-Based Architecture
+
+Dwex's decorator-based architecture is **inherently AI-friendly**:
+
+```typescript
+@Controller("/users")
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @Get()
+  async findAll() {
+    return this.userService.findAll();
+  }
+
+  @Post()
+  @UseGuards(AuthGuard)
+  async create(@Body() data: CreateUserDto) {
+    return this.userService.create(data);
+  }
+}
+```
+
+AI assistants can easily understand and generate this declarative code because:
+- Patterns are explicit and consistent
+- Dependencies are clearly declared
+- Metadata is self-documenting
+- Structure follows conventions
+
+### 4. Intelligent Scaffolding
+
+Dwex's CLI provides AI-friendly scaffolding commands that AI assistants can use automatically:
+
+```bash
+# AI can run these commands to generate boilerplate
+dwex generate module users
+dwex generate controller products
+dwex generate resource orders
+```
+
+AI assistants can leverage these commands to generate entire features with proper structure, saving you from writing repetitive code.
+
+## How AI Transforms Dwex Development
+
+### From Idea to Production Faster
+
+With AI assistance, building a Dwex application becomes a conversation:
+
+```
+You: "Create an authentication system with JWT tokens"
+
+AI: *Uses scaffolding to generate AuthModule*
+    *Creates AuthService with login/register methods*
+    *Implements AuthGuard for route protection*
+    *Adds JWT middleware and token validation*
+    *Generates proper DTOs and error handling*
+
+Result: Production-ready auth system in seconds
+```
+
+### Debugging at AI Speed
+
+AI can diagnose issues instantly using MCP introspection:
+
+```
+You: "The /api/orders endpoint is returning 500"
+
+AI: *Inspects route via MCP*
+    *Checks OrderService dependencies*
+    *Analyzes recent error logs*
+    *Identifies circular dependency*
+
+Result: Root cause found in seconds, not hours
+```
+
+### Refactoring with Confidence
+
+AI understands your entire application structure:
+
+```
+You: "Refactor PaymentService to use Stripe instead of PayPal"
+
+AI: *Uses dependency graph via MCP*
+    *Identifies all services using PaymentService*
+    *Updates implementations across 5 files*
+    *Generates new DTOs and interfaces*
+    *Updates tests and documentation*
+
+Result: Safe, comprehensive refactoring
+```
+
+### Zero-Friction Onboarding
+
+New developers can ask AI about your codebase:
+
+```
+Developer: "How does authentication work in this app?"
+
+AI: *Inspects AuthModule via MCP*
+    *Shows dependency tree*
+    *Explains guard implementation*
+    *Provides code examples*
+
+Result: Instant understanding without reading docs
+```
+
+## The AI-First Development Workflow
+
+1. **Start with Intent** - Tell your AI what you want to build
+2. **AI Generates Code** - Using Dwex patterns from CLAUDE.md/.cursorrules
+3. **AI Self-Validates** - Uses MCP to inspect what was created
+4. **Iterative Refinement** - AI debugs and improves using real-time introspection
+5. **Ship to Production** - With confidence from AI-verified architecture
+
+## Why This Matters
+
+Traditional frameworks require developers to:
+- Manually explain architecture to AI assistants
+- Copy-paste documentation into prompts
+- Debug AI-generated code that doesn't follow framework patterns
+- Spend time teaching AI instead of building features
+
+Dwex eliminates this friction by:
+- **Pre-configuring** AI assistants with framework knowledge
+- **Providing introspection** so AI can verify its own work
+- **Enforcing patterns** that AI can reliably understand and generate
+- **Enabling AI autonomy** through scaffolding and MCP tools
+
+## Real-World Benefits
+
+### 10x Faster Feature Development
+
+AI generates entire modules with proper structure, error handling, validation, and tests—in seconds.
+
+### Instant Debugging
+
+AI can inspect your running application, analyze logs, and trace dependencies without you manually searching files.
+
+### Consistent Code Quality
+
+AI-generated code follows Dwex patterns automatically, ensuring consistency across your entire team.
+
+### Reduced Cognitive Load
+
+Offload boilerplate generation, debugging, and refactoring to AI while you focus on business logic.
+
+### Better Collaboration
+
+New team members can ask AI about the codebase instead of interrupting senior developers.
+
+## Getting Started
+
+When you create a new Dwex project:
+
+```bash
+bun create dwex my-app
+```
+
+You'll be asked which AI assistants you use. Select your preferences and Dwex will generate the appropriate configuration files automatically.
+
+From there, your AI assistant is ready to:
+- Generate controllers, services, and modules
+- Debug issues using application introspection
+- Answer questions about your codebase
+- Refactor code safely with dependency awareness
+
+## Next Steps
+
+<Cards>
+  <Card title="Using AI Agents" href="/docs/ai/using-agents" />
+  <Card title="MCP Setup" href="/docs/ai/mcp"   />
+  <Card title="Quick Start" href="/docs" />
+</Cards>
