@@ -1,6 +1,6 @@
 {
   "name": "@dwex/ai",
-  "version": "1.0.0-beta.17",
+  "version": "1.0.0-beta.18",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -23,8 +23,8 @@
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@dwex/core": "1.0.0-beta.17",
-    "@dwex/common": "1.0.0-beta.17",
-    "@dwex/logger": "1.0.0-beta.17"
+    "@dwex/core": "1.0.0-beta.18",
+    "@dwex/common": "1.0.0-beta.18",
+    "@dwex/logger": "1.0.0-beta.18"
   }
 }

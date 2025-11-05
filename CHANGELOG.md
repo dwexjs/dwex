@@ -1,3 +1,14 @@
+## 1.0.0-beta.18 (2025-11-05)
+
+### 🚀 Features
+
+- implement full module encapsulation with exports/imports enforcement ([c3a6b79](https://github.com/dwexjs/dwex/commit/c3a6b79))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh
+
 ## 1.0.0-beta.17 (2025-11-05)
 
 ### 🚀 Features
