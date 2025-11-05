@@ -1,13 +1,15 @@
 import { Controller, Get, Injectable } from "@dwex/core";
 import { Logger } from "@dwex/logger";
+import { UsersService } from "./users/users.service";
 
 /**
  * Main application controller
  */
-@Injectable()
 @Controller()
 export class AppController {
 	private readonly logger = new Logger(AppController.name);
+
+	constructor(private usersService: UsersService) {}
 
 	/**
 	 * Public root endpoint
@@ -24,5 +26,13 @@ export class AppController {
 	ping() {
 		this.logger.log("Ping endpoint called");
 		return { message: "pong", timestamp: new Date().toISOString() };
+	}
+
+	/**
+	 * Get user with products - should fail due to module encapsulation
+	 */
+	@Get("user/:id")
+	getUser() {
+		return this.usersService.getUserWithProducts(1);
 	}
 }

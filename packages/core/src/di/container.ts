@@ -14,6 +14,7 @@ import {
 	type Type,
 	type ValueProvider,
 } from "@dwex/common";
+import type { ModuleContainer, ModuleRef } from "./module-container.js";
 
 /**
  * Token type for dependency injection.
@@ -43,6 +44,29 @@ interface InstanceWrapper<T = any> {
 export class Container {
 	private readonly providers = new Map<InjectionToken, InstanceWrapper>();
 	private readonly resolving = new Set<InjectionToken>();
+	private moduleContainer?: ModuleContainer;
+	private readonly providerModuleMap = new Map<InjectionToken, ModuleRef>();
+
+	/**
+	 * Sets the module container for module-scoped provider resolution
+	 */
+	setModuleContainer(moduleContainer: ModuleContainer): void {
+		this.moduleContainer = moduleContainer;
+	}
+
+	/**
+	 * Associates a provider with a module
+	 */
+	setProviderModule(token: InjectionToken, moduleRef: ModuleRef): void {
+		this.providerModuleMap.set(token, moduleRef);
+	}
+
+	/**
+	 * Gets the module that owns a provider
+	 */
+	getProviderModule(token: InjectionToken): ModuleRef | undefined {
+		return this.providerModuleMap.get(token);
+	}
 
 	/**
 	 * Adds a provider to the container.
@@ -102,16 +126,38 @@ export class Container {
 	 *
 	 * @param token - The injection token
 	 * @param optional - Whether the dependency is optional
+	 * @param moduleRef - The module context for scoped resolution
 	 * @returns The resolved instance
 	 * @throws Error if the provider is not found and not optional
 	 */
-	get<T = any>(token: InjectionToken, optional = false): T {
+	get<T = any>(
+		token: InjectionToken,
+		optional = false,
+		moduleRef?: ModuleRef,
+	): T {
+		// If module scoping is enabled, check module boundaries first
+		if (this.moduleContainer && moduleRef) {
+			const resolved = this.moduleContainer.resolveProvider(token, moduleRef);
+			if (!resolved) {
+				if (optional) {
+					return undefined as T;
+				}
+				const error = this.moduleContainer.generateNotFoundError(
+					token,
+					moduleRef,
+				);
+				throw new Error(error);
+			}
+			// Continue with resolution using the found provider
+		}
+
 		const wrapper = this.providers.get(token);
 
 		if (!wrapper) {
 			if (optional) {
 				return undefined as T;
 			}
+
 			throw new Error(
 				`No provider found for ${this.tokenToString(token)}. ` +
 					`Make sure it's decorated with @Injectable() and added to a module.`,
@@ -132,14 +178,14 @@ export class Container {
 
 		// Always create new instance for transient
 		if (wrapper.scope === Scope.TRANSIENT) {
-			return this.createInstance(token, wrapper);
+			return this.createInstance(token, wrapper, moduleRef);
 		}
 
 		// Resolve and cache for singleton
 		if (!wrapper.isResolved) {
 			this.resolving.add(token);
 			try {
-				wrapper.instance = this.createInstance(token, wrapper);
+				wrapper.instance = this.createInstance(token, wrapper, moduleRef);
 				wrapper.isResolved = true;
 			} finally {
 				this.resolving.delete(token);
@@ -164,34 +210,43 @@ export class Container {
 	 *
 	 * @param token - The injection token
 	 * @param wrapper - The instance wrapper
+	 * @param moduleRef - The module context for scoped resolution
 	 * @returns The created instance
 	 */
 	private createInstance<T = any>(
 		token: InjectionToken,
 		wrapper: InstanceWrapper,
+		moduleRef?: ModuleRef,
 	): T {
 		const providerDef = wrapper.metatype;
+
+		// Use the provider's own module for resolving its dependencies
+		// This ensures dependencies are resolved in the provider's module context
+		const providerModule = this.providerModuleMap.get(token) || moduleRef;
 
 		// Handle factory provider
 		if (this.isFactoryProvider(providerDef)) {
 			const factoryProvider = providerDef as FactoryProvider;
 			const dependencies = this.resolveDependencies(
 				factoryProvider.inject || [],
+				providerModule,
 			);
 			return factoryProvider.useFactory(...dependencies);
 		}
 
 		// Handle existing provider
 		if (this.isExistingProvider(providerDef)) {
-			return this.get(providerDef as InjectionToken);
+			return this.get(providerDef as InjectionToken, false, providerModule);
 		}
 
 		// Handle class provider
 		const ClassToInstantiate = providerDef as Type<T>;
 
 		// Get constructor dependencies
-		const dependencies =
-			this.resolveConstructorDependencies(ClassToInstantiate);
+		const dependencies = this.resolveConstructorDependencies(
+			ClassToInstantiate,
+			providerModule,
+		);
 
 		return new ClassToInstantiate(...dependencies);
 	}
@@ -200,9 +255,13 @@ export class Container {
 	 * Resolves constructor dependencies for a class.
 	 *
 	 * @param target - The target class
+	 * @param moduleRef - The module context for scoped resolution
 	 * @returns Array of resolved dependencies
 	 */
-	private resolveConstructorDependencies(target: Type<any>): any[] {
+	private resolveConstructorDependencies(
+		target: Type<any>,
+		moduleRef?: ModuleRef,
+	): any[] {
 		const paramTypes: any[] =
 			Reflect.getMetadata("design:paramtypes", target) || [];
 
@@ -231,7 +290,7 @@ export class Container {
 				);
 			}
 
-			return this.get(token, isOptional);
+			return this.get(token, isOptional, moduleRef);
 		});
 	}
 
@@ -239,10 +298,14 @@ export class Container {
 	 * Resolves an array of dependencies.
 	 *
 	 * @param tokens - Array of injection tokens
+	 * @param moduleRef - The module context for scoped resolution
 	 * @returns Array of resolved dependencies
 	 */
-	private resolveDependencies(tokens: InjectionToken[]): any[] {
-		return tokens.map((token) => this.get(token));
+	private resolveDependencies(
+		tokens: InjectionToken[],
+		moduleRef?: ModuleRef,
+	): any[] {
+		return tokens.map((token) => this.get(token, false, moduleRef));
 	}
 
 	/**

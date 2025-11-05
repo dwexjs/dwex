@@ -1,4 +1,5 @@
 import {
+	GLOBAL_MODULE,
 	HttpException,
 	type HttpsOptions,
 	type MiddlewareFunction,
@@ -9,6 +10,7 @@ import {
 } from "@dwex/common";
 import "reflect-metadata";
 import { Container } from "../di/container.js";
+import { ModuleContainer, type ModuleRef } from "../di/module-container.js";
 import { RequestHandler } from "../router/request-handler.js";
 import { Router } from "../router/router.js";
 
@@ -17,9 +19,11 @@ import { Router } from "../router/router.js";
  */
 export class DwexApplication {
 	private readonly container: Container;
+	private readonly moduleContainer: ModuleContainer;
 	private readonly router: Router;
 	private readonly requestHandler: RequestHandler;
 	private readonly globalMiddleware: MiddlewareFunction[] = [];
+	private readonly controllerModuleMap = new Map<Type<any>, ModuleRef>();
 	private server?: ReturnType<typeof Bun.serve>;
 	private tlsEnabled = false;
 	private instanceLoaderLogger?: any;
@@ -31,6 +35,8 @@ export class DwexApplication {
 	constructor(private readonly rootModule: Type<any>) {
 		this.startTime = process.hrtime.bigint();
 		this.container = new Container();
+		this.moduleContainer = new ModuleContainer();
+		this.container.setModuleContainer(this.moduleContainer);
 		this.router = new Router();
 		this.requestHandler = new RequestHandler(this.container);
 	}
@@ -316,7 +322,8 @@ export class DwexApplication {
 		moduleClass: Type<any>,
 		register = true,
 		logOnly = false,
-	): Promise<void> {
+		parentModule?: ModuleRef,
+	): Promise<ModuleRef> {
 		const metadata: ModuleMetadata | undefined = Reflect.getMetadata(
 			MODULE_METADATA,
 			moduleClass,
@@ -326,6 +333,12 @@ export class DwexApplication {
 			throw new Error(`${moduleClass.name} is not decorated with @Module()`);
 		}
 
+		// Create or get module reference
+		let moduleRef = this.moduleContainer.getModule(moduleClass);
+		if (!moduleRef) {
+			moduleRef = this.moduleContainer.addModule(moduleClass);
+		}
+
 		// Log module initialization (only on second pass if logger available)
 		if (logOnly && this.instanceLoaderLogger) {
 			this.instanceLoaderLogger.log(
@@ -333,12 +346,76 @@ export class DwexApplication {
 			);
 		}
 
-		// const isGlobal = Reflect.getMetadata(GLOBAL_MODULE, moduleClass);
+		// Scan imported modules first (only on first pass)
+		if (register && metadata.imports) {
+			for (const importedModule of metadata.imports) {
+				if (typeof importedModule === "function") {
+					const importedModuleRef = await this.scanModule(
+						importedModule,
+						register,
+						logOnly,
+						moduleRef,
+					);
+					moduleRef.addImport(importedModuleRef);
+				} else {
+					// Dynamic module
+					const dynamicModule = await importedModule;
+					if ("module" in dynamicModule) {
+						const importedModuleRef = await this.scanModule(
+							dynamicModule.module,
+							register,
+							logOnly,
+							moduleRef,
+						);
+						moduleRef.addImport(importedModuleRef);
+
+						// Handle dynamic module providers
+						if (register && dynamicModule.providers) {
+							for (const provider of dynamicModule.providers) {
+								importedModuleRef.addProvider(provider);
+								this.container.addProvider(provider);
+
+								// Track provider ownership
+								const token =
+									typeof provider === "function" ? provider : provider.provide;
+								if (token) {
+									this.container.setProviderModule(token, importedModuleRef);
+								}
+							}
+						}
+
+						// Handle dynamic module exports
+						if (register && dynamicModule.exports) {
+							for (const exportToken of dynamicModule.exports) {
+								importedModuleRef.addExport(exportToken);
+							}
+						}
+
+						// Handle global flag
+						if (dynamicModule.global) {
+							Reflect.defineMetadata(
+								GLOBAL_MODULE,
+								true,
+								dynamicModule.module,
+							);
+						}
+					}
+				}
+			}
+		}
 
 		// Register providers (only on first pass)
 		if (register && metadata.providers) {
 			for (const provider of metadata.providers) {
+				moduleRef.addProvider(provider);
 				this.container.addProvider(provider);
+
+				// Track which module owns this provider
+				const token =
+					typeof provider === "function" ? provider : provider.provide;
+				if (token) {
+					this.container.setProviderModule(token, moduleRef);
+				}
 			}
 
 			// Call OnModuleInit lifecycle hooks for providers
@@ -346,46 +423,39 @@ export class DwexApplication {
 				const token =
 					typeof provider === "function" ? provider : provider.provide;
 				if (token) {
-					const instance = this.container.get(token);
+					const instance = this.container.get(token, false, moduleRef);
 					await this.container.callModuleInitHook(instance);
 				}
 			}
 		}
 
-		// Scan imported modules
-		if (metadata.imports) {
-			for (const importedModule of metadata.imports) {
-				if (typeof importedModule === "function") {
-					await this.scanModule(importedModule, register, logOnly);
-				} else {
-					// Dynamic module
-					const dynamicModule = await importedModule;
-					if ("module" in dynamicModule) {
-						await this.scanModule(dynamicModule.module, register, logOnly);
-
-						if (register && dynamicModule.providers) {
-							for (const provider of dynamicModule.providers) {
-								this.container.addProvider(provider);
-							}
-						}
-					}
-				}
+		// Register exports (only on first pass)
+		if (register && metadata.exports) {
+			for (const exportToken of metadata.exports) {
+				moduleRef.addExport(exportToken);
 			}
 		}
 
 		// Register controllers (only on first pass)
 		if (register && metadata.controllers) {
 			for (const ControllerClass of metadata.controllers) {
-				// Add controller as a provider so it can be injected
+				// Add controller as a provider to the module
+				moduleRef.addProvider(ControllerClass);
 				this.container.addProvider(ControllerClass);
 
-				// Create controller instance
-				const controller = this.container.get(ControllerClass);
+				// Track which module this controller belongs to
+				this.controllerModuleMap.set(ControllerClass, moduleRef);
+				this.container.setProviderModule(ControllerClass, moduleRef);
+
+				// Create controller instance with module context
+				const controller = this.container.get(ControllerClass, false, moduleRef);
 
 				// Register routes
 				this.router.registerController(controller, ControllerClass);
 			}
 		}
+
+		return moduleRef;
 	}
 
 	/**

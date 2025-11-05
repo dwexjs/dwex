@@ -101,6 +101,15 @@ export class PostService {
 }
 ```
 
+<Callout type="info">
+**Module Encapsulation**: Services can only be injected if they are:
+1. Defined in the same module as the consumer
+2. Exported by an imported module
+3. Provided by a global module
+
+If you try to inject a service that isn't accessible, you'll get a helpful error message pointing you to the solution.
+</Callout>
+
 ## Global Modules
 
 If a module should be available everywhere without explicit imports, mark it as global:
@@ -313,6 +322,20 @@ Keep module internals private:
 })
 export class UserModule {}
 ```
+
+<Callout type="warn">
+**Breaking Change in v1.0+**: Module encapsulation is now strictly enforced. If a service isn't exported, other modules cannot inject it, even if they import the module. This prevents tight coupling and makes dependencies explicit.
+
+**Error Example**:
+```
+No provider found for UserRepository in PostModule.
+
+However, this provider exists in:
+  - UserModule (not exported) - Add UserRepository to 'UserModule.exports'
+```
+
+**Solution**: Either export the provider or create a public service that uses it internally.
+</Callout>
 
 ### 3. Use Shared Modules Wisely
 

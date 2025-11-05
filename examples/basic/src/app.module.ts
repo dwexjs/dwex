@@ -2,6 +2,7 @@ import { Module } from "@dwex/core";
 import { JwtModule } from "@dwex/jwt";
 import { LoggerModule } from "@dwex/logger";
 import { AppController } from "./app.controller";
+import { UsersModule } from "./users/users.module";
 
 /**
  * Root application module
@@ -15,6 +16,7 @@ import { AppController } from "./app.controller";
 			signOptions: { expiresIn: "1h" },
 			issuer: "dwex-app",
 		}),
+		UsersModule,
 	],
 	controllers: [AppController],
 	providers: [],
