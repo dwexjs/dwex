@@ -30,7 +30,7 @@ import { CONTROLLER_PATH } from "@dwex/common";
  * ```
  */
 export function Controller(path = ""): ClassDecorator {
-  return (target: Function) => {
-    Reflect.defineMetadata(CONTROLLER_PATH, path, target);
-  };
+	return (target: Function) => {
+		Reflect.defineMetadata(CONTROLLER_PATH, path, target);
+	};
 }

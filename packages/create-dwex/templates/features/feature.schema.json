@@ -37,6 +37,32 @@
         }
       ]
     },
+    "devDependencies": {
+      "type": "object",
+      "description": "NPM dev dependencies to add to package.json",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [
+        {
+          "drizzle-kit": "^0.30.1",
+          "prisma": "^6.1.0"
+        }
+      ]
+    },
+    "scripts": {
+      "type": "object",
+      "description": "NPM scripts to add to package.json",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "examples": [
+        {
+          "db:generate": "drizzle-kit generate",
+          "db:migrate": "drizzle-kit migrate"
+        }
+      ]
+    },
     "conflicts": {
       "type": "array",
       "description": "Feature IDs that conflict with this feature",

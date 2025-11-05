@@ -29,6 +29,10 @@ export function createProgram(version: string): Command {
 				return value.split(",").map((f) => f.trim());
 			},
 		)
+		.option(
+			"-d, --database <type>",
+			"Database ORM to use (drizzle, prisma, none)",
+		)
 		.option("-g, --git", "Initialize git repository")
 		.option("--no-git", "Skip git initialization")
 		.addHelpText(
@@ -42,7 +46,7 @@ ${pc.bold("Examples:")}
   $ create-dwex my-app
 
   ${pc.gray("# Full command with all options")}
-  $ create-dwex my-app --port 3000 --features auth-jwt,openapi
+  $ create-dwex my-app --port 3000 --features auth-jwt,openapi --database drizzle
 
   ${pc.gray("# Without git initialization")}
   $ create-dwex my-app --no-git
@@ -96,6 +100,7 @@ export function parseArgs(args: string[], version: string): CliOptions {
 		projectName,
 		port: opts.port,
 		features: opts.features,
+		database: opts.database,
 	};
 
 	// Handle git options (Commander converts --no-git to git: false)

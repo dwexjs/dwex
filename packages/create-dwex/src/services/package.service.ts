@@ -29,12 +29,26 @@ export class PackageService implements IService {
 		const packageJsonPath = join(projectPath, "package.json");
 		const packageJson = JSON.parse(await Bun.file(packageJsonPath).text());
 
-		// Merge dependencies from all features
+		// Merge dependencies, devDependencies, and scripts from all features
 		for (const feature of features) {
 			if (feature.dependencies) {
 				packageJson.dependencies = {
 					...packageJson.dependencies,
 					...feature.dependencies,
+				};
+			}
+
+			if (feature.devDependencies) {
+				packageJson.devDependencies = {
+					...packageJson.devDependencies,
+					...feature.devDependencies,
+				};
+			}
+
+			if (feature.scripts) {
+				packageJson.scripts = {
+					...packageJson.scripts,
+					...feature.scripts,
 				};
 			}
 		}

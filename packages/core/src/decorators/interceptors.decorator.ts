@@ -1,8 +1,8 @@
 import "reflect-metadata";
 import {
-  type DwexInterceptor,
-  INTERCEPTORS_METADATA,
-  type Type,
+	type DwexInterceptor,
+	INTERCEPTORS_METADATA,
+	type Type,
 } from "@dwex/common";
 
 /**
@@ -32,24 +32,24 @@ import {
  * ```
  */
 export function UseInterceptors(
-  ...interceptors: Array<Type<DwexInterceptor>>
+	...interceptors: Array<Type<DwexInterceptor>>
 ): MethodDecorator & ClassDecorator {
-  return (
-    target: any,
-    propertyKey?: string | symbol,
-    descriptor?: PropertyDescriptor
-  ) => {
-    if (descriptor) {
-      // Method decorator
-      Reflect.defineMetadata(
-        INTERCEPTORS_METADATA,
-        interceptors,
-        descriptor.value
-      );
-      return descriptor;
-    }
-    // Class decorator
-    Reflect.defineMetadata(INTERCEPTORS_METADATA, interceptors, target);
-    return target;
-  };
+	return (
+		target: any,
+		propertyKey?: string | symbol,
+		descriptor?: PropertyDescriptor,
+	) => {
+		if (descriptor) {
+			// Method decorator
+			Reflect.defineMetadata(
+				INTERCEPTORS_METADATA,
+				interceptors,
+				descriptor.value,
+			);
+			return descriptor;
+		}
+		// Class decorator
+		Reflect.defineMetadata(INTERCEPTORS_METADATA, interceptors, target);
+		return target;
+	};
 }

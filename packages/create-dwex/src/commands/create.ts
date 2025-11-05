@@ -15,6 +15,7 @@ import {
 	GitInitPrompt,
 } from "../prompts/project.prompts.js";
 import { FeatureSelectionPrompt } from "../prompts/feature.prompts.js";
+import { DatabasePrompt } from "../prompts/database.prompts.js";
 import { Logger } from "../utils/logger.js";
 import { createDirectory } from "../utils/fs.js";
 
@@ -53,44 +54,55 @@ export class CreateCommand extends BaseCommand {
 
 	async execute(): Promise<void> {
 		// 1. Discover available features
-		const availableFeatures = await this.featureService.discoverFeatures();
+		const allFeatures = await this.featureService.discoverFeatures();
 
-		// 2. Collect project configuration from user
+		// 2. Filter out database features (they're handled by separate database prompt)
+		const availableFeatures = allFeatures.filter(
+			(f) => !f.id.startsWith("db-"),
+		);
+
+		// 3. Collect project configuration from user
 		const { config, projectPath } =
 			await this.collectConfiguration(availableFeatures);
 
-		// 3. Load selected features
+		// 4. Auto-add database feature based on selection
+		const selectedFeatures = [...config.features];
+		if (config.database) {
+			selectedFeatures.push(`db-${config.database}`);
+		}
+
+		// 5. Load selected features
 		const features = await this.featureService.loadFeatures(
-			config.features,
+			selectedFeatures,
 			config,
 		);
 
-		// 4. Check for feature conflicts
+		// 6. Check for feature conflicts
 		const conflicts = this.featureService.checkConflicts(features);
 		if (conflicts.length > 0) {
 			Logger.error(`Feature conflicts detected:\n${conflicts.join("\n")}`);
 		}
 
-		// 5. Create project structure
+		// 7. Create project structure
 		await this.createProject(projectPath, config, features);
 
-		// 6. Initialize git if requested (before installing dependencies)
+		// 8. Initialize git if requested (before installing dependencies)
 		if (config.initGit) {
 			await this.initializeGit(projectPath);
 		}
 
-		// 7. Install dependencies
+		// 9. Install dependencies
 		await this.installDependencies(projectPath);
 
-		// 8. Format project
+		// 10. Format project
 		await this.formatProject(projectPath);
 
-		// 9. Commit installed dependencies if git was initialized
+		// 11. Commit installed dependencies if git was initialized
 		if (config.initGit) {
 			await this.commitDependencies(projectPath);
 		}
 
-		// 10. Show next steps
+		// 12. Show next steps
 		this.showNextSteps(config.projectName);
 	}
 
@@ -105,6 +117,7 @@ export class CreateCommand extends BaseCommand {
 		const pathValidator = new ProjectPathValidator();
 		const portPrompt = new PortPrompt();
 		const featurePrompt = new FeatureSelectionPrompt(availableFeatures);
+		const databasePrompt = new DatabasePrompt();
 		const gitPrompt = new GitInitPrompt();
 
 		// Collect values
@@ -114,6 +127,7 @@ export class CreateCommand extends BaseCommand {
 		const projectPath = pathValidator.validate(projectName);
 		const port = await portPrompt.execute(this.cliOptions.port);
 		const features = await featurePrompt.execute(this.cliOptions.features);
+		const database = await databasePrompt.execute(this.cliOptions.database);
 
 		// Determine git initialization
 		let initGit: boolean;
@@ -130,6 +144,7 @@ export class CreateCommand extends BaseCommand {
 				projectName,
 				port,
 				features,
+				database,
 				version: this.version,
 				initGit,
 			},
@@ -243,10 +258,9 @@ export class CreateCommand extends BaseCommand {
 	 * Shows next steps to the user
 	 */
 	private showNextSteps(projectName: string): void {
-		const steps = [
-			pc.cyan(`cd ${projectName}`),
-			pc.cyan("bun run dev"),
-		].join("\n");
+		const steps = [pc.cyan(`cd ${projectName}`), pc.cyan("bun run dev")].join(
+			"\n",
+		);
 
 		Logger.note(steps, "Next steps");
 		Logger.outro(pc.green("Happy coding!"));

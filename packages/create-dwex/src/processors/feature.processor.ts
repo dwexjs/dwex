@@ -44,38 +44,46 @@ export class FeatureProcessor implements IProcessor {
 		const appModulePath = join(context.projectPath, "src", "app.module.ts");
 		let content = await Bun.file(appModulePath).text();
 
-		const allImports: string[] = [];
-		const moduleImports: string[] = ["LoggerModule"];
-		const controllers: string[] = ["AppController"];
-		const providers: string[] = [];
+		const allImports: Set<string> = new Set();
+		const moduleImports: Set<string> = new Set(["LoggerModule"]);
+		const controllers: Set<string> = new Set(["AppController"]);
+		const providers: Set<string> = new Set();
 
-		// Collect all feature configurations
+		// Collect all feature configurations (using Sets to avoid duplicates)
 		for (const feature of context.features) {
 			if (feature.imports) {
-				allImports.push(...feature.imports);
+				for (const imp of feature.imports) {
+					allImports.add(imp);
+				}
 			}
 			if (feature.moduleConfig?.imports) {
-				moduleImports.push(...feature.moduleConfig.imports);
+				for (const imp of feature.moduleConfig.imports) {
+					moduleImports.add(imp);
+				}
 			}
 			if (feature.moduleConfig?.controllers) {
-				controllers.push(...feature.moduleConfig.controllers);
+				for (const ctrl of feature.moduleConfig.controllers) {
+					controllers.add(ctrl);
+				}
 			}
 			if (feature.moduleConfig?.providers) {
-				providers.push(...feature.moduleConfig.providers);
+				for (const prov of feature.moduleConfig.providers) {
+					providers.add(prov);
+				}
 			}
 		}
 
 		// Build the new imports section
 		const baseImports =
 			'import { Module } from "@dwex/core";\nimport { LoggerModule } from "@dwex/logger";\nimport { AppController } from "./app.controller";';
-		const newImports = [baseImports, ...allImports].join("\n");
+		const newImports = [baseImports, ...Array.from(allImports)].join("\n");
 
 		// Build the module decorator
 		let moduleDecorator = "@Module({\n";
-		moduleDecorator += `\timports: [${moduleImports.join(", ")}],\n`;
-		moduleDecorator += `\tcontrollers: [${controllers.join(", ")}],\n`;
-		if (providers.length > 0) {
-			moduleDecorator += `\tproviders: [${providers.join(", ")}],\n`;
+		moduleDecorator += `\timports: [${Array.from(moduleImports).join(", ")}],\n`;
+		moduleDecorator += `\tcontrollers: [${Array.from(controllers).join(", ")}],\n`;
+		if (providers.size > 0) {
+			moduleDecorator += `\tproviders: [${Array.from(providers).join(", ")}],\n`;
 		}
 		moduleDecorator += "})";
 

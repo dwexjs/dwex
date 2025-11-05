@@ -1,0 +1,624 @@
+---
+title: Drizzle ORM
+description: Set up and use Drizzle ORM for type-safe SQL queries in your Dwex application
+---
+
+## Overview
+
+Drizzle ORM is a lightweight, performant TypeScript ORM with a focus on type safety and SQL-like syntax. In Dwex, it integrates seamlessly using Bun's native SQLite driver for maximum performance.
+
+## Installation
+
+If you created your project with database support using `bun create dwex`, Drizzle is already set up. Otherwise, install manually:
+
+```bash
+bun add drizzle-orm
+bun add -d drizzle-kit
+```
+
+## Project Structure
+
+Drizzle setup in Dwex follows this structure:
+
+```
+src/
+├── db/
+│   ├── index.ts       # DatabaseService
+│   └── schema.ts      # Database schema definitions
+├── app.module.ts
+└── main.ts
+drizzle.config.ts      # Drizzle Kit configuration
+drizzle/               # Generated migrations (auto-created)
+```
+
+## Configuration
+
+### Drizzle Config
+
+Create a `drizzle.config.ts` file at the root of your project:
+
+```typescript title="drizzle.config.ts"
+import { defineConfig } from "drizzle-kit";
+
+export default defineConfig({
+	schema: "./src/db/schema.ts",
+	out: "./drizzle",
+	dialect: "sqlite",
+	dbCredentials: {
+		url: process.env.DATABASE_URL || "local.db",
+	},
+});
+```
+
+### Environment Variables
+
+Add database configuration to your `.env` file:
+
+```bash title=".env"
+DATABASE_URL="local.db"
+```
+
+For other databases, adjust accordingly:
+
+```bash
+# PostgreSQL
+DATABASE_URL="postgresql://user:password@localhost:5432/mydb"
+
+# MySQL
+DATABASE_URL="mysql://user:password@localhost:3306/mydb"
+```
+
+## Database Service
+
+The `DatabaseService` initializes the database connection when your application starts using the `OnModuleInit` lifecycle hook:
+
+```typescript title="src/db/index.ts"
+import { Injectable, OnModuleInit } from "@dwex/core";
+import { drizzle, type BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
+import { Database } from "bun:sqlite";
+import * as schema from "./schema";
+
+/**
+ * Database service using Drizzle ORM
+ *
+ * This service initializes the database connection using Bun's SQLite driver
+ * and provides a Drizzle ORM instance for type-safe database queries.
+ */
+@Injectable()
+export class DatabaseService implements OnModuleInit {
+	private _db!: BunSQLiteDatabase<typeof schema>;
+
+	/**
+	 * Get the Drizzle ORM instance
+	 */
+	get db(): BunSQLiteDatabase<typeof schema> {
+		return this._db;
+	}
+
+	async onModuleInit() {
+		const sqlite = new Database(process.env.DATABASE_URL || "local.db");
+		this._db = drizzle(sqlite, { schema });
+	}
+}
+```
+
+### Lifecycle Hook
+
+The `OnModuleInit` interface ensures the database connection is established before your application starts:
+
+1. Module is registered in your app
+2. `onModuleInit()` is called automatically
+3. Database connection is established
+4. Application is ready to handle requests
+
+## Schema Definition
+
+Define your database schema in `src/db/schema.ts`:
+
+```typescript title="src/db/schema.ts"
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+
+/**
+ * Users table schema
+ */
+export const users = sqliteTable("users", {
+	id: integer("id").primaryKey(),
+	name: text("name").notNull(),
+	email: text("email").notNull().unique(),
+	createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+		() => new Date(),
+	),
+});
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+```
+
+### Adding More Tables
+
+```typescript title="src/db/schema.ts"
+export const posts = sqliteTable("posts", {
+	id: integer("id").primaryKey(),
+	title: text("title").notNull(),
+	content: text("content").notNull(),
+	authorId: integer("author_id").references(() => users.id),
+	published: integer("published", { mode: "boolean" }).default(false),
+	createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+		() => new Date(),
+	),
+});
+
+export type Post = typeof posts.$inferSelect;
+export type NewPost = typeof posts.$inferInsert;
+```
+
+## Register in Module
+
+Add `DatabaseService` to your application module:
+
+```typescript title="src/app.module.ts"
+import { Module } from "@dwex/core";
+import { DatabaseService } from "./db";
+
+@Module({
+	providers: [DatabaseService],
+})
+export class AppModule {}
+```
+
+## Using in Services
+
+Inject `DatabaseService` into your services or controllers:
+
+```typescript title="src/user/user.service.ts"
+import { Injectable } from "@dwex/core";
+import { DatabaseService } from "../db";
+import { users, type NewUser } from "../db/schema";
+import { eq } from "drizzle-orm";
+
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+
+	async findAll() {
+		return await this.db.db.select().from(users);
+	}
+
+	async findOne(id: number) {
+		const result = await this.db.db
+			.select()
+			.from(users)
+			.where(eq(users.id, id))
+			.limit(1);
+
+		return result[0];
+	}
+
+	async create(data: NewUser) {
+		const result = await this.db.db.insert(users).values(data).returning();
+		return result[0];
+	}
+
+	async update(id: number, data: Partial<NewUser>) {
+		const result = await this.db.db
+			.update(users)
+			.set(data)
+			.where(eq(users.id, id))
+			.returning();
+
+		return result[0];
+	}
+
+	async delete(id: number) {
+		await this.db.db.delete(users).where(eq(users.id, id));
+	}
+}
+```
+
+## Using in Controllers
+
+```typescript title="src/user/user.controller.ts"
+import { Controller, Get, Post, Put, Delete, Body, Param } from "@dwex/core";
+import { UserService } from "./user.service";
+import { type NewUser } from "../db/schema";
+
+@Controller("users")
+export class UserController {
+	constructor(private readonly userService: UserService) {}
+
+	@Get()
+	async findAll() {
+		return await this.userService.findAll();
+	}
+
+	@Get(":id")
+	async findOne(@Param("id") id: string) {
+		return await this.userService.findOne(Number(id));
+	}
+
+	@Post()
+	async create(@Body() data: NewUser) {
+		return await this.userService.create(data);
+	}
+
+	@Put(":id")
+	async update(@Param("id") id: string, @Body() data: Partial<NewUser>) {
+		return await this.userService.update(Number(id), data);
+	}
+
+	@Delete(":id")
+	async delete(@Param("id") id: string) {
+		await this.userService.delete(Number(id));
+		return { success: true };
+	}
+}
+```
+
+## Migrations
+
+### Generate Migrations
+
+After modifying your schema, generate migration files:
+
+```bash
+bun run db:generate
+```
+
+This creates SQL migration files in the `drizzle/` directory based on your schema changes.
+
+### Apply Migrations
+
+Run migrations to update your database:
+
+```bash
+bun run db:migrate
+```
+
+This applies all pending migrations to your database.
+
+### Drizzle Studio
+
+Launch the visual database browser:
+
+```bash
+bun run db:studio
+```
+
+This opens a web interface where you can:
+
+- Browse tables and data
+- Run queries
+- Edit records
+- Visualize relationships
+
+## Query Examples
+
+### Select Queries
+
+```typescript
+// Select all
+const allUsers = await this.db.db.select().from(users);
+
+// Select specific columns
+const names = await this.db.db.select({ name: users.name }).from(users);
+
+// With conditions
+import { eq, and, or, like, gt } from "drizzle-orm";
+
+const user = await this.db.db
+	.select()
+	.from(users)
+	.where(eq(users.email, "user@example.com"));
+
+const activeUsers = await this.db.db
+	.select()
+	.from(users)
+	.where(
+		and(
+			eq(users.active, true),
+			gt(users.createdAt, new Date("2024-01-01")),
+		),
+	);
+```
+
+### Insert Queries
+
+```typescript
+// Insert single record
+const newUser = await this.db.db
+	.insert(users)
+	.values({
+		name: "John Doe",
+		email: "john@example.com",
+	})
+	.returning();
+
+// Insert multiple records
+const newUsers = await this.db.db
+	.insert(users)
+	.values([
+		{ name: "Alice", email: "alice@example.com" },
+		{ name: "Bob", email: "bob@example.com" },
+	])
+	.returning();
+```
+
+### Update Queries
+
+```typescript
+// Update with condition
+const updated = await this.db.db
+	.update(users)
+	.set({ name: "Jane Doe" })
+	.where(eq(users.id, 1))
+	.returning();
+
+// Update multiple fields
+const updated = await this.db.db
+	.update(users)
+	.set({
+		name: "Jane Doe",
+		email: "jane@example.com",
+	})
+	.where(eq(users.id, 1))
+	.returning();
+```
+
+### Delete Queries
+
+```typescript
+// Delete with condition
+await this.db.db.delete(users).where(eq(users.id, 1));
+
+// Delete multiple
+await this.db.db
+	.delete(users)
+	.where(eq(users.active, false));
+```
+
+### Joins
+
+```typescript
+import { posts, users } from "../db/schema";
+
+// Inner join
+const postsWithAuthors = await this.db.db
+	.select({
+		post: posts,
+		author: users,
+	})
+	.from(posts)
+	.innerJoin(users, eq(posts.authorId, users.id));
+
+// Left join
+const allPostsWithAuthors = await this.db.db
+	.select()
+	.from(posts)
+	.leftJoin(users, eq(posts.authorId, users.id));
+```
+
+### Transactions
+
+```typescript
+await this.db.db.transaction(async (tx) => {
+	const user = await tx.insert(users).values({
+		name: "John Doe",
+		email: "john@example.com",
+	}).returning();
+
+	await tx.insert(posts).values({
+		title: "My First Post",
+		content: "Hello World",
+		authorId: user[0].id,
+	});
+});
+```
+
+## Advanced Queries
+
+### Pagination
+
+```typescript
+import { desc } from "drizzle-orm";
+
+async findPaginated(page: number = 1, limit: number = 10) {
+	const offset = (page - 1) * limit;
+
+	const results = await this.db.db
+		.select()
+		.from(users)
+		.orderBy(desc(users.createdAt))
+		.limit(limit)
+		.offset(offset);
+
+	const total = await this.db.db
+		.select({ count: sql<number>`count(*)` })
+		.from(users);
+
+	return {
+		data: results,
+		pagination: {
+			page,
+			limit,
+			total: total[0].count,
+			totalPages: Math.ceil(total[0].count / limit),
+		},
+	};
+}
+```
+
+### Search
+
+```typescript
+import { like, or } from "drizzle-orm";
+
+async search(query: string) {
+	return await this.db.db
+		.select()
+		.from(users)
+		.where(
+			or(
+				like(users.name, `%${query}%`),
+				like(users.email, `%${query}%`),
+			),
+		);
+}
+```
+
+### Aggregations
+
+```typescript
+import { sql, count, avg, sum } from "drizzle-orm";
+
+// Count records
+const userCount = await this.db.db
+	.select({ count: count() })
+	.from(users);
+
+// Group by with count
+const postsByAuthor = await this.db.db
+	.select({
+		authorId: posts.authorId,
+		count: count(),
+	})
+	.from(posts)
+	.groupBy(posts.authorId);
+```
+
+## NPM Scripts
+
+The following scripts are available when Drizzle is installed:
+
+```json title="package.json"
+{
+	"scripts": {
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio"
+	}
+}
+```
+
+## Best Practices
+
+1. **Use Type Inference**: Leverage `$inferSelect` and `$inferInsert` for type safety
+2. **Organize Schemas**: Keep related tables in the same schema file
+3. **Use Transactions**: Wrap related operations in transactions for data consistency
+4. **Index Properly**: Add indexes to frequently queried columns
+5. **Handle Errors**: Always handle database errors appropriately
+6. **Use Prepared Statements**: Drizzle automatically uses prepared statements for security
+
+## Example: Complete CRUD Service
+
+```typescript title="src/user/user.service.ts"
+import { Injectable, NotFoundException } from "@dwex/core";
+import { DatabaseService } from "../db";
+import { users, type User, type NewUser } from "../db/schema";
+import { eq, like, or, desc } from "drizzle-orm";
+
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+
+	async findAll(page: number = 1, limit: number = 10) {
+		const offset = (page - 1) * limit;
+
+		return await this.db.db
+			.select()
+			.from(users)
+			.orderBy(desc(users.createdAt))
+			.limit(limit)
+			.offset(offset);
+	}
+
+	async findOne(id: number): Promise<User> {
+		const result = await this.db.db
+			.select()
+			.from(users)
+			.where(eq(users.id, id))
+			.limit(1);
+
+		if (!result[0]) {
+			throw new NotFoundException(`User #${id} not found`);
+		}
+
+		return result[0];
+	}
+
+	async findByEmail(email: string): Promise<User | null> {
+		const result = await this.db.db
+			.select()
+			.from(users)
+			.where(eq(users.email, email))
+			.limit(1);
+
+		return result[0] || null;
+	}
+
+	async search(query: string) {
+		return await this.db.db
+			.select()
+			.from(users)
+			.where(
+				or(
+					like(users.name, `%${query}%`),
+					like(users.email, `%${query}%`),
+				),
+			);
+	}
+
+	async create(data: NewUser): Promise<User> {
+		const result = await this.db.db
+			.insert(users)
+			.values(data)
+			.returning();
+
+		return result[0];
+	}
+
+	async update(id: number, data: Partial<NewUser>): Promise<User> {
+		const result = await this.db.db
+			.update(users)
+			.set(data)
+			.where(eq(users.id, id))
+			.returning();
+
+		if (!result[0]) {
+			throw new NotFoundException(`User #${id} not found`);
+		}
+
+		return result[0];
+	}
+
+	async delete(id: number): Promise<void> {
+		const result = await this.db.db
+			.delete(users)
+			.where(eq(users.id, id))
+			.returning();
+
+		if (!result[0]) {
+			throw new NotFoundException(`User #${id} not found`);
+		}
+	}
+}
+```
+
+## Next Steps
+
+<Cards>
+	<Card
+		title="Dependency Injection"
+		href="/docs/fundamentals/dependency-injection"
+		description="Learn more about injecting services"
+	/>
+	<Card
+		title="Controllers"
+		href="/docs/overview/controllers"
+		description="Build REST endpoints with controllers"
+	/>
+	<Card
+		title="Drizzle Docs"
+		href="https://orm.drizzle.team/docs/overview"
+		description="Official Drizzle ORM documentation"
+	/>
+</Cards>

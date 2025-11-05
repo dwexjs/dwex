@@ -1,0 +1,159 @@
+---
+title: Database
+description: Connect your Dwex application to SQL databases with Drizzle ORM or Prisma
+---
+
+## Overview
+
+Dwex provides seamless integration with popular SQL ORMs through the `DatabaseService` pattern. Choose between Drizzle ORM for lightweight, type-safe queries or Prisma for a more feature-rich ORM with excellent tooling.
+
+## Supported ORMs
+
+<Cards>
+	<Card
+		title="Drizzle ORM"
+		href="/docs/database/drizzle"
+		description="Lightweight, type-safe ORM with SQL-like syntax using Bun's native SQLite driver"
+	/>
+	<Card
+		title="Prisma"
+		href="/docs/database/prisma"
+		description="Feature-rich ORM with automatic migrations and powerful query builder"
+	/>
+</Cards>
+
+## Quick Start
+
+The easiest way to add database support to your project is during creation with the `create-dwex` CLI:
+
+```bash
+bun create dwex my-app
+```
+
+When prompted, select your preferred database ORM:
+
+```
+? Select database ORM (Use arrow keys)
+  None
+> Drizzle ORM - SQL database integration with type-safe queries
+  Prisma - SQL database integration with automatic migrations
+```
+
+The CLI will automatically:
+
+- Install required dependencies
+- Generate database configuration files
+- Create a `DatabaseService` with lifecycle hooks
+- Add example schema definitions
+- Configure npm scripts for migrations and database tools
+
+## Adding to an Existing Project
+
+If you already have a Dwex project, you can manually add database support by following the setup guide for your chosen ORM:
+
+- [Drizzle Setup Guide](/docs/database/drizzle)
+- [Prisma Setup Guide](/docs/database/prisma)
+
+## DatabaseService Pattern
+
+Both ORMs follow the same pattern in Dwex using a `DatabaseService` that implements the `OnModuleInit` lifecycle hook:
+
+```typescript
+import { Injectable, OnModuleInit } from "@dwex/core";
+
+@Injectable()
+export class DatabaseService implements OnModuleInit {
+	async onModuleInit() {
+		// Initialize database connection when module loads
+	}
+}
+```
+
+This ensures your database connection is established before your application starts handling requests.
+
+## Environment Variables
+
+Both ORMs use the `DATABASE_URL` environment variable for connection configuration:
+
+```bash title=".env"
+DATABASE_URL="local.db"
+```
+
+For SQLite (default), this is just a file path. For other databases:
+
+```bash
+# PostgreSQL
+DATABASE_URL="postgresql://user:password@localhost:5432/mydb"
+
+# MySQL
+DATABASE_URL="mysql://user:password@localhost:3306/mydb"
+```
+
+## Using the Database Service
+
+Once set up, inject `DatabaseService` into your controllers or services:
+
+```typescript
+import { Injectable } from "@dwex/core";
+import { DatabaseService } from "./db";
+
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+
+	async findAll() {
+		// Drizzle
+		return await this.db.db.select().from(users);
+
+		// Prisma
+		return await this.db.user.findMany();
+	}
+}
+```
+
+## Common Scripts
+
+Both ORMs provide npm scripts for database management:
+
+| Script | Description |
+|--------|-------------|
+| `bun run db:generate` | Generate migration files from schema changes |
+| `bun run db:migrate` | Apply pending migrations to database |
+| `bun run db:studio` | Open visual database browser |
+
+## Choosing an ORM
+
+### Use Drizzle if you:
+
+- Want maximum performance with minimal overhead
+- Prefer SQL-like syntax and control
+- Are building with Bun's native SQLite driver
+- Need lightweight, zero-dependency runtime
+- Like to write raw SQL when needed
+
+### Use Prisma if you:
+
+- Want excellent TypeScript support and IntelliSense
+- Prefer declarative schema definitions
+- Need automatic migration generation
+- Value comprehensive documentation and tooling
+- Want a more beginner-friendly experience
+
+Both ORMs are excellent choices and work seamlessly with Dwex. The decision often comes down to personal preference and specific project requirements.
+
+## Next Steps
+
+Choose your ORM and follow the detailed setup guide:
+
+<Cards>
+	<Card
+		title="Drizzle ORM Setup"
+		href="/docs/database/drizzle"
+		description="Set up Drizzle with type-safe queries and Bun's SQLite driver"
+	/>
+	<Card
+		title="Prisma Setup"
+		href="/docs/database/prisma"
+		description="Set up Prisma with automatic migrations and powerful tooling"
+	/>
+</Cards>

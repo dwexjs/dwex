@@ -340,6 +340,16 @@ export class DwexApplication {
 			for (const provider of metadata.providers) {
 				this.container.addProvider(provider);
 			}
+
+			// Call OnModuleInit lifecycle hooks for providers
+			for (const provider of metadata.providers) {
+				const token =
+					typeof provider === "function" ? provider : provider.provide;
+				if (token) {
+					const instance = this.container.get(token);
+					await this.container.callModuleInitHook(instance);
+				}
+			}
 		}
 
 		// Scan imported modules

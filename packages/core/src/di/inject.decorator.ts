@@ -21,16 +21,16 @@ import { SELF_DECLARED_DEPS } from "@dwex/common";
  * ```
  */
 export function Inject(token: string | symbol | Type<any>): ParameterDecorator {
-  return (
-    target: object,
-    propertyKey: string | symbol | undefined,
-    parameterIndex: number
-  ) => {
-    const existingInjectedParams: Array<{ index: number; token: any }> =
-      Reflect.getOwnMetadata(SELF_DECLARED_DEPS, target) || [];
+	return (
+		target: object,
+		propertyKey: string | symbol | undefined,
+		parameterIndex: number,
+	) => {
+		const existingInjectedParams: Array<{ index: number; token: any }> =
+			Reflect.getOwnMetadata(SELF_DECLARED_DEPS, target) || [];
 
-    existingInjectedParams.push({ index: parameterIndex, token });
+		existingInjectedParams.push({ index: parameterIndex, token });
 
-    Reflect.defineMetadata(SELF_DECLARED_DEPS, existingInjectedParams, target);
-  };
+		Reflect.defineMetadata(SELF_DECLARED_DEPS, existingInjectedParams, target);
+	};
 }

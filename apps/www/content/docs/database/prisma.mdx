@@ -1,0 +1,840 @@
+---
+title: Prisma
+description: Set up and use Prisma ORM for powerful database operations in your Dwex application
+---
+
+## Overview
+
+Prisma is a modern, feature-rich ORM that provides excellent TypeScript support, automatic migrations, and a powerful query builder. In Dwex, it integrates seamlessly using the `DatabaseService` pattern with the `OnModuleInit` lifecycle hook.
+
+## Installation
+
+If you created your project with database support using `bun create dwex`, Prisma is already set up. Otherwise, install manually:
+
+```bash
+bun add @prisma/client
+bun add -d prisma
+```
+
+## Project Structure
+
+Prisma setup in Dwex follows this structure:
+
+```
+src/
+├── db/
+│   └── index.ts           # DatabaseService
+├── app.module.ts
+└── main.ts
+prisma/
+├── schema.prisma          # Database schema
+└── migrations/            # Migration history (auto-created)
+```
+
+## Schema Definition
+
+Define your database schema in `prisma/schema.prisma`:
+
+```prisma title="prisma/schema.prisma"
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Example User model
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+}
+```
+
+### Environment Variables
+
+Add database configuration to your `.env` file:
+
+```bash title=".env"
+DATABASE_URL="file:./local.db"
+```
+
+For other databases:
+
+```bash
+# PostgreSQL
+DATABASE_URL="postgresql://user:password@localhost:5432/mydb"
+
+# MySQL
+DATABASE_URL="mysql://user:password@localhost:3306/mydb"
+```
+
+## Database Service
+
+The `DatabaseService` extends `PrismaClient` and implements the `OnModuleInit` lifecycle hook:
+
+```typescript title="src/db/index.ts"
+import { Injectable, OnModuleInit } from "@dwex/core";
+import { PrismaClient } from "@prisma/client";
+
+/**
+ * Database service using Prisma ORM
+ *
+ * This service extends PrismaClient and implements OnModuleInit
+ * to connect to the database when the module initializes.
+ */
+@Injectable()
+export class DatabaseService extends PrismaClient implements OnModuleInit {
+	async onModuleInit() {
+		await this.$connect();
+	}
+}
+```
+
+### Lifecycle Hook
+
+The `OnModuleInit` interface ensures the database connection is established before your application starts:
+
+1. Module is registered in your app
+2. `onModuleInit()` is called automatically
+3. Prisma connects to the database via `$connect()`
+4. Application is ready to handle requests
+
+### Graceful Shutdown (Optional)
+
+You can also implement `OnModuleDestroy` for graceful shutdown:
+
+```typescript title="src/db/index.ts"
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@dwex/core";
+import { PrismaClient } from "@prisma/client";
+
+@Injectable()
+export class DatabaseService
+	extends PrismaClient
+	implements OnModuleInit, OnModuleDestroy {
+
+	async onModuleInit() {
+		await this.$connect();
+	}
+
+	async onModuleDestroy() {
+		await this.$disconnect();
+	}
+}
+```
+
+## Register in Module
+
+Add `DatabaseService` to your application module:
+
+```typescript title="src/app.module.ts"
+import { Module } from "@dwex/core";
+import { DatabaseService } from "./db";
+
+@Module({
+	providers: [DatabaseService],
+})
+export class AppModule {}
+```
+
+## Generate Prisma Client
+
+After defining your schema, generate the Prisma Client:
+
+```bash
+bun run db:generate
+```
+
+This generates TypeScript types and the Prisma Client based on your schema.
+
+## Using in Services
+
+Inject `DatabaseService` into your services. Since it extends `PrismaClient`, you can use it directly:
+
+```typescript title="src/user/user.service.ts"
+import { Injectable, NotFoundException } from "@dwex/core";
+import { DatabaseService } from "../db";
+import type { User, Prisma } from "@prisma/client";
+
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+
+	async findAll() {
+		return await this.db.user.findMany();
+	}
+
+	async findOne(id: number): Promise<User> {
+		const user = await this.db.user.findUnique({
+			where: { id },
+		});
+
+		if (!user) {
+			throw new NotFoundException(`User #${id} not found`);
+		}
+
+		return user;
+	}
+
+	async create(data: Prisma.UserCreateInput): Promise<User> {
+		return await this.db.user.create({
+			data,
+		});
+	}
+
+	async update(id: number, data: Prisma.UserUpdateInput): Promise<User> {
+		return await this.db.user.update({
+			where: { id },
+			data,
+		});
+	}
+
+	async delete(id: number): Promise<User> {
+		return await this.db.user.delete({
+			where: { id },
+		});
+	}
+}
+```
+
+## Using in Controllers
+
+```typescript title="src/user/user.controller.ts"
+import { Controller, Get, Post, Put, Delete, Body, Param } from "@dwex/core";
+import { UserService } from "./user.service";
+import type { Prisma } from "@prisma/client";
+
+@Controller("users")
+export class UserController {
+	constructor(private readonly userService: UserService) {}
+
+	@Get()
+	async findAll() {
+		return await this.userService.findAll();
+	}
+
+	@Get(":id")
+	async findOne(@Param("id") id: string) {
+		return await this.userService.findOne(Number(id));
+	}
+
+	@Post()
+	async create(@Body() data: Prisma.UserCreateInput) {
+		return await this.userService.create(data);
+	}
+
+	@Put(":id")
+	async update(
+		@Param("id") id: string,
+		@Body() data: Prisma.UserUpdateInput,
+	) {
+		return await this.userService.update(Number(id), data);
+	}
+
+	@Delete(":id")
+	async delete(@Param("id") id: string) {
+		return await this.userService.delete(Number(id));
+	}
+}
+```
+
+## Schema Examples
+
+### Adding More Models
+
+```prisma title="prisma/schema.prisma"
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  posts     Post[]
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  published Boolean  @default(false)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+### Relations
+
+```prisma
+// One-to-Many
+model User {
+  id    Int     @id @default(autoincrement())
+  posts Post[]
+}
+
+model Post {
+  id       Int  @id @default(autoincrement())
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
+}
+
+// Many-to-Many
+model Post {
+  id         Int        @id @default(autoincrement())
+  categories Category[] @relation("PostCategories")
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  posts Post[] @relation("PostCategories")
+}
+
+// One-to-One
+model User {
+  id      Int      @id @default(autoincrement())
+  profile Profile?
+}
+
+model Profile {
+  id     Int  @id @default(autoincrement())
+  bio    String
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+}
+```
+
+## Migrations
+
+### Create Migration
+
+After modifying your schema, create a migration:
+
+```bash
+bun run db:migrate
+```
+
+This will:
+
+1. Prompt you for a migration name
+2. Generate SQL migration files
+3. Apply the migration to your database
+4. Update Prisma Client
+
+### Migration in Production
+
+For production deployments, run migrations separately:
+
+```bash
+bunx prisma migrate deploy
+```
+
+### Reset Database
+
+Reset your database (development only):
+
+```bash
+bunx prisma migrate reset
+```
+
+This will:
+
+- Drop the database
+- Create a new database
+- Apply all migrations
+- Run seed script if configured
+
+## Prisma Studio
+
+Launch the visual database browser:
+
+```bash
+bun run db:studio
+```
+
+This opens a web interface where you can:
+
+- Browse and edit data
+- Create, update, and delete records
+- Visualize relationships
+- Run queries
+
+## Query Examples
+
+### Find Queries
+
+```typescript
+// Find all
+const users = await this.db.user.findMany();
+
+// Find with conditions
+const activeUsers = await this.db.user.findMany({
+	where: {
+		active: true,
+	},
+});
+
+// Find with multiple conditions
+const results = await this.db.user.findMany({
+	where: {
+		AND: [
+			{ active: true },
+			{ email: { contains: "@example.com" } },
+		],
+	},
+});
+
+// Find unique
+const user = await this.db.user.findUnique({
+	where: { email: "user@example.com" },
+});
+
+// Find first
+const firstUser = await this.db.user.findFirst({
+	where: { active: true },
+	orderBy: { createdAt: "desc" },
+});
+```
+
+### Select Specific Fields
+
+```typescript
+const users = await this.db.user.findMany({
+	select: {
+		id: true,
+		name: true,
+		email: true,
+	},
+});
+```
+
+### Include Relations
+
+```typescript
+const usersWithPosts = await this.db.user.findMany({
+	include: {
+		posts: true,
+	},
+});
+
+// Nested includes
+const usersWithPostsAndComments = await this.db.user.findMany({
+	include: {
+		posts: {
+			include: {
+				comments: true,
+			},
+		},
+	},
+});
+```
+
+### Create Queries
+
+```typescript
+// Create single record
+const user = await this.db.user.create({
+	data: {
+		email: "user@example.com",
+		name: "John Doe",
+	},
+});
+
+// Create with relations
+const user = await this.db.user.create({
+	data: {
+		email: "user@example.com",
+		name: "John Doe",
+		posts: {
+			create: [
+				{ title: "First Post", content: "Hello World" },
+				{ title: "Second Post", content: "Goodbye World" },
+			],
+		},
+	},
+});
+
+// Create many
+const users = await this.db.user.createMany({
+	data: [
+		{ email: "user1@example.com", name: "Alice" },
+		{ email: "user2@example.com", name: "Bob" },
+	],
+});
+```
+
+### Update Queries
+
+```typescript
+// Update single record
+const user = await this.db.user.update({
+	where: { id: 1 },
+	data: { name: "Jane Doe" },
+});
+
+// Update many
+const count = await this.db.user.updateMany({
+	where: { active: false },
+	data: { active: true },
+});
+
+// Upsert (update or create)
+const user = await this.db.user.upsert({
+	where: { email: "user@example.com" },
+	update: { name: "Updated Name" },
+	create: {
+		email: "user@example.com",
+		name: "New User",
+	},
+});
+```
+
+### Delete Queries
+
+```typescript
+// Delete single record
+const user = await this.db.user.delete({
+	where: { id: 1 },
+});
+
+// Delete many
+const count = await this.db.user.deleteMany({
+	where: { active: false },
+});
+```
+
+### Transactions
+
+```typescript
+await this.db.$transaction(async (tx) => {
+	const user = await tx.user.create({
+		data: {
+			email: "user@example.com",
+			name: "John Doe",
+		},
+	});
+
+	await tx.post.create({
+		data: {
+			title: "First Post",
+			content: "Hello World",
+			authorId: user.id,
+		},
+	});
+});
+
+// Sequential operations
+const [users, posts] = await this.db.$transaction([
+	this.db.user.findMany(),
+	this.db.post.findMany(),
+]);
+```
+
+## Advanced Queries
+
+### Pagination
+
+```typescript
+async findPaginated(page: number = 1, limit: number = 10) {
+	const skip = (page - 1) * limit;
+
+	const [users, total] = await this.db.$transaction([
+		this.db.user.findMany({
+			skip,
+			take: limit,
+			orderBy: { createdAt: "desc" },
+		}),
+		this.db.user.count(),
+	]);
+
+	return {
+		data: users,
+		pagination: {
+			page,
+			limit,
+			total,
+			totalPages: Math.ceil(total / limit),
+		},
+	};
+}
+```
+
+### Search
+
+```typescript
+async search(query: string) {
+	return await this.db.user.findMany({
+		where: {
+			OR: [
+				{ name: { contains: query } },
+				{ email: { contains: query } },
+			],
+		},
+	});
+}
+```
+
+### Filtering
+
+```typescript
+// String filters
+const users = await this.db.user.findMany({
+	where: {
+		email: { contains: "@example.com" },
+		name: { startsWith: "John" },
+	},
+});
+
+// Number filters
+const users = await this.db.user.findMany({
+	where: {
+		age: { gte: 18, lte: 65 },
+	},
+});
+
+// Date filters
+const users = await this.db.user.findMany({
+	where: {
+		createdAt: {
+			gte: new Date("2024-01-01"),
+		},
+	},
+});
+```
+
+### Aggregations
+
+```typescript
+// Count
+const count = await this.db.user.count({
+	where: { active: true },
+});
+
+// Aggregate
+const result = await this.db.user.aggregate({
+	_count: true,
+	_avg: { age: true },
+	_sum: { points: true },
+	_min: { age: true },
+	_max: { age: true },
+});
+
+// Group by
+const usersByCity = await this.db.user.groupBy({
+	by: ["city"],
+	_count: true,
+	_avg: { age: true },
+});
+```
+
+### Raw Queries
+
+```typescript
+// Raw SQL query
+const users = await this.db.$queryRaw`
+  SELECT * FROM User WHERE email LIKE ${"%.com"}
+`;
+
+// Execute raw SQL
+await this.db.$executeRaw`
+  UPDATE User SET active = true WHERE id = ${userId}
+`;
+```
+
+## NPM Scripts
+
+The following scripts are available when Prisma is installed:
+
+```json title="package.json"
+{
+	"scripts": {
+		"db:generate": "prisma generate",
+		"db:migrate": "prisma migrate dev",
+		"db:studio": "prisma studio"
+	}
+}
+```
+
+## Best Practices
+
+1. **Use TypeScript Types**: Leverage Prisma's generated types for type safety
+2. **Handle Not Found**: Always check for null results and throw appropriate errors
+3. **Use Transactions**: Wrap related operations in transactions for data consistency
+4. **Select Only Needed Fields**: Use `select` to reduce data transfer
+5. **Index Properly**: Add `@@index` to frequently queried fields
+6. **Use Environment Variables**: Never hardcode connection strings
+7. **Migrations**: Always review generated migration files before applying
+
+## Example: Complete CRUD Service
+
+```typescript title="src/user/user.service.ts"
+import { Injectable, NotFoundException } from "@dwex/core";
+import { DatabaseService } from "../db";
+import type { User, Prisma } from "@prisma/client";
+
+@Injectable()
+export class UserService {
+	constructor(private readonly db: DatabaseService) {}
+
+	async findAll(options?: {
+		page?: number;
+		limit?: number;
+		search?: string;
+	}) {
+		const { page = 1, limit = 10, search } = options || {};
+		const skip = (page - 1) * limit;
+
+		const where: Prisma.UserWhereInput = search
+			? {
+					OR: [
+						{ name: { contains: search } },
+						{ email: { contains: search } },
+					],
+				}
+			: {};
+
+		const [users, total] = await this.db.$transaction([
+			this.db.user.findMany({
+				where,
+				skip,
+				take: limit,
+				orderBy: { createdAt: "desc" },
+			}),
+			this.db.user.count({ where }),
+		]);
+
+		return {
+			data: users,
+			pagination: {
+				page,
+				limit,
+				total,
+				totalPages: Math.ceil(total / limit),
+			},
+		};
+	}
+
+	async findOne(id: number): Promise<User> {
+		const user = await this.db.user.findUnique({
+			where: { id },
+			include: {
+				posts: true,
+			},
+		});
+
+		if (!user) {
+			throw new NotFoundException(`User #${id} not found`);
+		}
+
+		return user;
+	}
+
+	async findByEmail(email: string): Promise<User | null> {
+		return await this.db.user.findUnique({
+			where: { email },
+		});
+	}
+
+	async create(data: Prisma.UserCreateInput): Promise<User> {
+		return await this.db.user.create({
+			data,
+		});
+	}
+
+	async update(id: number, data: Prisma.UserUpdateInput): Promise<User> {
+		try {
+			return await this.db.user.update({
+				where: { id },
+				data,
+			});
+		} catch (error) {
+			throw new NotFoundException(`User #${id} not found`);
+		}
+	}
+
+	async delete(id: number): Promise<void> {
+		try {
+			await this.db.user.delete({
+				where: { id },
+			});
+		} catch (error) {
+			throw new NotFoundException(`User #${id} not found`);
+		}
+	}
+}
+```
+
+## Seeding
+
+Create a seed script to populate your database with initial data:
+
+```typescript title="prisma/seed.ts"
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+async function main() {
+	// Clear existing data
+	await prisma.user.deleteMany();
+
+	// Create seed data
+	const users = await prisma.user.createMany({
+		data: [
+			{ email: "alice@example.com", name: "Alice" },
+			{ email: "bob@example.com", name: "Bob" },
+		],
+	});
+
+	console.log(`Created ${users.count} users`);
+}
+
+main()
+	.catch((e) => {
+		console.error(e);
+		process.exit(1);
+	})
+	.finally(async () => {
+		await prisma.$disconnect();
+	});
+```
+
+Add to `package.json`:
+
+```json
+{
+	"prisma": {
+		"seed": "bun run prisma/seed.ts"
+	}
+}
+```
+
+Run seed:
+
+```bash
+bunx prisma db seed
+```
+
+## Next Steps
+
+<Cards>
+	<Card
+		title="Dependency Injection"
+		href="/docs/fundamentals/dependency-injection"
+		description="Learn more about injecting services"
+	/>
+	<Card
+		title="Controllers"
+		href="/docs/overview/controllers"
+		description="Build REST endpoints with controllers"
+	/>
+	<Card
+		title="Prisma Docs"
+		href="https://www.prisma.io/docs"
+		description="Official Prisma documentation"
+	/>
+</Cards>

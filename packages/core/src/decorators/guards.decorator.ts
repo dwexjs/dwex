@@ -27,20 +27,20 @@ import { type CanActivate, GUARDS_METADATA, type Type } from "@dwex/common";
  * ```
  */
 export function UseGuards(
-  ...guards: Array<Type<CanActivate>>
+	...guards: Array<Type<CanActivate>>
 ): MethodDecorator & ClassDecorator {
-  return (
-    target: any,
-    propertyKey?: string | symbol,
-    descriptor?: PropertyDescriptor
-  ) => {
-    if (descriptor) {
-      // Method decorator
-      Reflect.defineMetadata(GUARDS_METADATA, guards, descriptor.value);
-      return descriptor;
-    }
-    // Class decorator
-    Reflect.defineMetadata(GUARDS_METADATA, guards, target);
-    return target;
-  };
+	return (
+		target: any,
+		propertyKey?: string | symbol,
+		descriptor?: PropertyDescriptor,
+	) => {
+		if (descriptor) {
+			// Method decorator
+			Reflect.defineMetadata(GUARDS_METADATA, guards, descriptor.value);
+			return descriptor;
+		}
+		// Class decorator
+		Reflect.defineMetadata(GUARDS_METADATA, guards, target);
+		return target;
+	};
 }

@@ -1,9 +1,9 @@
 import "reflect-metadata";
 import {
-  type DwexMiddleware,
-  MIDDLEWARE_METADATA,
-  type MiddlewareFunction,
-  type Type,
+	type DwexMiddleware,
+	MIDDLEWARE_METADATA,
+	type MiddlewareFunction,
+	type Type,
 } from "@dwex/common";
 
 /**
@@ -37,9 +37,9 @@ import {
  * ```
  */
 export function UseMiddleware(
-  ...middleware: Array<Type<DwexMiddleware> | MiddlewareFunction>
+	...middleware: Array<Type<DwexMiddleware> | MiddlewareFunction>
 ): ClassDecorator {
-  return (target: Function) => {
-    Reflect.defineMetadata(MIDDLEWARE_METADATA, middleware, target);
-  };
+	return (target: Function) => {
+		Reflect.defineMetadata(MIDDLEWARE_METADATA, middleware, target);
+	};
 }

@@ -9,17 +9,17 @@ import { HTTP_METHOD, RequestMethod, ROUTE_PATH } from "@dwex/common";
  * @returns Method decorator
  */
 function createMethodDecorator(method: RequestMethod) {
-  return (path = ""): MethodDecorator => {
-    return (
-      target: object,
-      propertyKey: string | symbol,
-      descriptor: PropertyDescriptor
-    ) => {
-      Reflect.defineMetadata(ROUTE_PATH, path, descriptor.value);
-      Reflect.defineMetadata(HTTP_METHOD, method, descriptor.value);
-      return descriptor;
-    };
-  };
+	return (path = ""): MethodDecorator => {
+		return (
+			target: object,
+			propertyKey: string | symbol,
+			descriptor: PropertyDescriptor,
+		) => {
+			Reflect.defineMetadata(ROUTE_PATH, path, descriptor.value);
+			Reflect.defineMetadata(HTTP_METHOD, method, descriptor.value);
+			return descriptor;
+		};
+	};
 }
 
 /**

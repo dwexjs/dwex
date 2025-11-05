@@ -5,6 +5,7 @@ export interface ProjectConfig {
 	projectName: string;
 	port: number;
 	features: string[];
+	database?: string | null;
 	version: string;
 	initGit: boolean;
 }
@@ -16,6 +17,7 @@ export interface CliOptions {
 	projectName?: string;
 	port?: number;
 	features?: string[];
+	database?: string;
 	git?: boolean;
 	noGit?: boolean;
 	help?: boolean;
@@ -29,6 +31,8 @@ export interface Feature {
 	name: string;
 	description: string;
 	dependencies?: Record<string, string>;
+	devDependencies?: Record<string, string>;
+	scripts?: Record<string, string>;
 	conflicts?: string[];
 	imports?: string[];
 	moduleConfig?: {
