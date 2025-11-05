@@ -1,3 +1,15 @@
+## 1.0.0-beta.17 (2025-11-05)
+
+### 🚀 Features
+
+- add database support with Drizzle and Prisma, implement OnModuleInit lifecycle hook, and create comprehensive database documentation ([db3abb6](https://github.com/dwexjs/dwex/commit/db3abb6))
+- **cli:** add update command to CLI interface ([70c84db](https://github.com/dwexjs/dwex/commit/70c84db))
+- **create-dwex:** add next steps message with cd and bun run dev instructions after project creation ([5a5c914](https://github.com/dwexjs/dwex/commit/5a5c914))
+
+### ❤️ Thank You
+
+- mxvsh
+
 ## 1.0.0-beta.16 (2025-10-31)
 
 ### 🚀 Features
