@@ -167,6 +167,13 @@ export class ModuleContainer {
 	}
 
 	/**
+	 * Marks a module as global (for testing purposes)
+	 */
+	markAsGlobal(moduleRef: ModuleRef): void {
+		this.globalModules.add(moduleRef);
+	}
+
+	/**
 	 * Resolves a provider by searching through module hierarchy
 	 *
 	 * @param token - The injection token to resolve

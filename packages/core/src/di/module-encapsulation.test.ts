@@ -4,6 +4,12 @@ import { Injectable } from "./injectable.decorator.js";
 import { Container } from "./container.js";
 import { ModuleContainer } from "./module-container.js";
 
+// Helper to set constructor param types metadata for Bun/Vitest compatibility
+// Bun doesn't emit decorator metadata automatically for classes defined in test files
+function setParamTypes(target: any, paramTypes: any[]): void {
+	Reflect.defineMetadata("design:paramtypes", paramTypes, target);
+}
+
 describe("Module Encapsulation", () => {
 	let container: Container;
 	let moduleContainer: ModuleContainer;
@@ -33,6 +39,7 @@ describe("Module Encapsulation", () => {
 			class UsersService {
 				constructor(private products: ProductsService) {}
 			}
+			setParamTypes(UsersService, [ProductsService]);
 
 			@Module({
 				imports: [ProductsModule],
@@ -83,6 +90,7 @@ describe("Module Encapsulation", () => {
 			class UsersService {
 				constructor(public products: ProductsService) {}
 			}
+			setParamTypes(UsersService, [ProductsService]);
 
 			@Module({
 				imports: [ProductsModule],
@@ -141,6 +149,7 @@ describe("Module Encapsulation", () => {
 			class UsersService {
 				constructor(public config: ConfigService) {}
 			}
+			setParamTypes(UsersService, [ConfigService]);
 
 			@Module({
 				// Not importing ConfigModule
@@ -153,8 +162,7 @@ describe("Module Encapsulation", () => {
 			const usersModuleRef = moduleContainer.addModule(UsersModule);
 
 			// Manually mark as global for this test
-			(configModuleRef as any).isGlobal = true;
-			moduleContainer.getGlobalModules().add(configModuleRef);
+			moduleContainer.markAsGlobal(configModuleRef);
 
 			// Add providers
 			configModuleRef.addProvider(ConfigService);
@@ -189,6 +197,7 @@ describe("Module Encapsulation", () => {
 			class UsersService {
 				constructor(private products: ProductsService) {}
 			}
+			setParamTypes(UsersService, [ProductsService]);
 
 			@Module({
 				providers: [ProductsService],
@@ -236,6 +245,7 @@ describe("Module Encapsulation", () => {
 			class ProductsService {
 				constructor(public db: DatabaseService) {}
 			}
+			setParamTypes(ProductsService, [DatabaseService]);
 
 			@Module({
 				imports: [DatabaseModule],
@@ -248,6 +258,7 @@ describe("Module Encapsulation", () => {
 			class UsersService {
 				constructor(public products: ProductsService) {}
 			}
+			setParamTypes(UsersService, [ProductsService]);
 
 			@Module({
 				imports: [ProductsModule],
