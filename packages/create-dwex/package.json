@@ -1,6 +1,6 @@
 {
   "name": "create-dwex",
-  "version": "1.0.0-beta.18",
+  "version": "1.0.0-beta.19",
   "description": "Scaffolding tool for Dwex applications",
   "type": "module",
   "bin": {

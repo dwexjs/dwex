@@ -1,3 +1,18 @@
+## 1.0.0-beta.19 (2025-11-06)
+
+### 🚀 Features
+
+- support returning Response objects from controllers ([9706182](https://github.com/dwexjs/dwex/commit/9706182))
+
+### 🩹 Fixes
+
+- resolve module encapsulation test failures ([3913968](https://github.com/dwexjs/dwex/commit/3913968))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh
+
 ## 1.0.0-beta.18 (2025-11-05)
 
 ### 🚀 Features
