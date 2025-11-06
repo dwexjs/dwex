@@ -227,6 +227,11 @@ export class DwexApplication {
 			// Execute route handler
 			const result = await this.requestHandler.handle(route, request, response);
 
+			// If result is already a Response object, return it directly
+			if (result instanceof Response) {
+				return result;
+			}
+
 			// If response was manually sent, use it
 			if (response.body !== undefined) {
 				return new Response(response.body, {
