@@ -1,27 +1,29 @@
 import { Injectable, OnModuleInit } from "@dwex/core";
-import { drizzle, type BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import { Database } from "bun:sqlite";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
 
 /**
  * Database service using Drizzle ORM
  *
- * This service initializes the database connection using Bun's SQLite driver
+ * This service initializes the database connection using the Postgres.js driver
  * and provides a Drizzle ORM instance for type-safe database queries.
  */
 @Injectable()
 export class DatabaseService implements OnModuleInit {
-	private _db!: BunSQLiteDatabase<typeof schema>;
+	private _db!: ReturnType<typeof drizzle<typeof schema>>;
 
 	/**
 	 * Get the Drizzle ORM instance
 	 */
-	get db(): BunSQLiteDatabase<typeof schema> {
+	get db() {
 		return this._db;
 	}
 
 	async onModuleInit() {
-		const sqlite = new Database(process.env.DATABASE_URL || "local.db");
-		this._db = drizzle(sqlite, { schema });
+		const connectionString =
+			process.env.DATABASE_URL || "postgresql://localhost:5432/dwex";
+		const client = postgres(connectionString);
+		this._db = drizzle(client, { schema });
 	}
 }

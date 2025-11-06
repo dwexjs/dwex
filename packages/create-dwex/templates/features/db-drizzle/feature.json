@@ -2,9 +2,10 @@
 	"$schema": "../feature.schema.json",
 	"id": "db-drizzle",
 	"name": "Drizzle ORM",
-	"description": "SQL database integration with Drizzle ORM and type-safe queries",
+	"description": "PostgreSQL database integration with Drizzle ORM and type-safe queries",
 	"dependencies": {
-		"drizzle-orm": "^0.36.4"
+		"drizzle-orm": "^0.36.4",
+		"postgres": "^3.4.5"
 	},
 	"devDependencies": {
 		"drizzle-kit": "^0.30.1"
