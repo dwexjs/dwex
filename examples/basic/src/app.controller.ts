@@ -1,6 +1,7 @@
-import { Controller, Get, Injectable } from "@dwex/core";
+import { Controller, Get, Post, Body } from "@dwex/core";
 import { Logger } from "@dwex/logger";
 import { UsersService } from "./users/users.service";
+import { EmailService } from "./emails/email.service";
 
 /**
  * Main application controller
@@ -9,7 +10,10 @@ import { UsersService } from "./users/users.service";
 export class AppController {
 	private readonly logger = new Logger(AppController.name);
 
-	constructor(private usersService: UsersService) {}
+	constructor(
+		private usersService: UsersService,
+		private emailService: EmailService,
+	) {}
 
 	/**
 	 * Public root endpoint
@@ -34,5 +38,31 @@ export class AppController {
 	@Get("user/:id")
 	getUser() {
 		return this.usersService.getUserWithProducts(1);
+	}
+
+	/**
+	 * Send a welcome email (adds job to queue)
+	 */
+	@Post("emails/welcome")
+	async sendWelcomeEmail(@Body() body: { email: string; name: string }) {
+		this.logger.log(`Queueing welcome email for ${body.email}`);
+		return this.emailService.sendWelcomeEmail(body.email, body.name);
+	}
+
+	/**
+	 * Send a notification email (adds job to queue)
+	 */
+	@Post("emails/notification")
+	async sendNotification(@Body() body: { email: string; message: string }) {
+		this.logger.log(`Queueing notification email for ${body.email}`);
+		return this.emailService.sendNotification(body.email, body.message);
+	}
+
+	/**
+	 * Get email queue statistics
+	 */
+	@Get("emails/stats")
+	async getEmailQueueStats() {
+		return this.emailService.getQueueStats();
 	}
 }

@@ -31,19 +31,22 @@
 	},
 	"references": [
     {
-      "path": "../../packages/cli"
-    },
-    {
-      "path": "../../packages/common"
-    },
-    {
-      "path": "../../packages/jwt"
+      "path": "../../packages/bullmq"
     },
     {
       "path": "../../packages/logger"
     },
     {
+      "path": "../../packages/jwt"
+    },
+    {
       "path": "../../packages/core"
+    },
+    {
+      "path": "../../packages/cli"
+    },
+    {
+      "path": "../../packages/common"
     }
   ]
 }

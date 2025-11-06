@@ -13,6 +13,8 @@
     "@dwex/core": "*",
     "@dwex/jwt": "*",
     "@dwex/logger": "*",
+    "@dwex/bullmq": "*",
+    "bullmq": "^5.28.2",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
