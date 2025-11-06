@@ -1,0 +1,30 @@
+{
+	"name": "@dwex/bullmq",
+	"version": "1.0.0-beta.19",
+	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"@dwex/source": "./src/index.ts",
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"!**/*.tsbuildinfo"
+	],
+	"dependencies": {
+		"@dwex/common": "1.0.0-beta.19",
+		"bullmq": "^5.28.2",
+		"reflect-metadata": "^0.2.2",
+		"tslib": "^2.3.0"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.3.1"
+	}
+}
