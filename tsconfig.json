@@ -29,6 +29,9 @@
     },
     {
       "path": "./packages/ai"
+    },
+    {
+      "path": "./packages/bullmq"
     }
   ]
 }
