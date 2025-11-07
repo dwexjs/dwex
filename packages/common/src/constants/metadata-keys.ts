@@ -35,6 +35,9 @@ export const INTERCEPTORS_METADATA = "dwex:interceptors:metadata";
 /** Key for middleware metadata */
 export const MIDDLEWARE_METADATA = "dwex:middleware:metadata";
 
+/** Key for pipes metadata */
+export const PIPES_METADATA = "dwex:pipes:metadata";
+
 /** Key for global scope metadata */
 export const GLOBAL_MODULE = "dwex:global:module";
 

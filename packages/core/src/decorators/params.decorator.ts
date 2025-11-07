@@ -65,6 +65,7 @@ function createParamDecorator(
  * Injects the request body or a specific property from it.
  *
  * @param property - Optional property name to extract from body
+ * @param pipes - Optional pipes to apply to the parameter
  * @returns Parameter decorator
  *
  * @example
@@ -82,15 +83,51 @@ function createParamDecorator(
  *   return { name };
  * }
  * ```
+ *
+ * @example
+ * ```typescript
+ * @Post()
+ * create(@Body(ValidationPipe) createDto: CreateUserDto) {
+ *   return createDto;
+ * }
+ * ```
  */
-export function Body(property?: string): ParameterDecorator {
-	return createParamDecorator(ParamType.BODY, property);
+export function Body(property?: string, ...pipes: any[]): ParameterDecorator;
+export function Body(...pipes: any[]): ParameterDecorator;
+export function Body(...args: any[]): ParameterDecorator {
+	const [property, ...pipes] =
+		typeof args[0] === "string" || args[0] === undefined
+			? args
+			: [undefined, ...args];
+
+	return (
+		target: object,
+		propertyKey: string | symbol | undefined,
+		parameterIndex: number,
+	) => {
+		const handler = propertyKey
+			? (target.constructor as any).prototype[propertyKey]
+			: target;
+
+		const existingParams: RouteParamMetadata[] =
+			Reflect.getOwnMetadata(ROUTE_PARAMS, handler) || [];
+
+		existingParams.push({
+			index: parameterIndex,
+			type: ParamType.BODY,
+			data: property,
+			pipes: pipes.length > 0 ? pipes : undefined,
+		});
+
+		Reflect.defineMetadata(ROUTE_PARAMS, existingParams, handler);
+	};
 }
 
 /**
  * Injects a route parameter or all route parameters.
  *
  * @param param - Optional param name to extract
+ * @param pipes - Optional pipes to apply to the parameter
  * @returns Parameter decorator
  *
  * @example
@@ -108,15 +145,51 @@ export function Body(property?: string): ParameterDecorator {
  *   return params;
  * }
  * ```
+ *
+ * @example
+ * ```typescript
+ * @Get(':id')
+ * findOne(@Param('id', ParseIntPipe) id: number) {
+ *   return { id };
+ * }
+ * ```
  */
-export function Param(param?: string): ParameterDecorator {
-	return createParamDecorator(ParamType.PARAM, param);
+export function Param(param?: string, ...pipes: any[]): ParameterDecorator;
+export function Param(...pipes: any[]): ParameterDecorator;
+export function Param(...args: any[]): ParameterDecorator {
+	const [param, ...pipes] =
+		typeof args[0] === "string" || args[0] === undefined
+			? args
+			: [undefined, ...args];
+
+	return (
+		target: object,
+		propertyKey: string | symbol | undefined,
+		parameterIndex: number,
+	) => {
+		const handler = propertyKey
+			? (target.constructor as any).prototype[propertyKey]
+			: target;
+
+		const existingParams: RouteParamMetadata[] =
+			Reflect.getOwnMetadata(ROUTE_PARAMS, handler) || [];
+
+		existingParams.push({
+			index: parameterIndex,
+			type: ParamType.PARAM,
+			data: param,
+			pipes: pipes.length > 0 ? pipes : undefined,
+		});
+
+		Reflect.defineMetadata(ROUTE_PARAMS, existingParams, handler);
+	};
 }
 
 /**
  * Injects a query parameter or all query parameters.
  *
  * @param query - Optional query param name to extract
+ * @param pipes - Optional pipes to apply to the parameter
  * @returns Parameter decorator
  *
  * @example
@@ -134,9 +207,44 @@ export function Param(param?: string): ParameterDecorator {
  *   return query;
  * }
  * ```
+ *
+ * @example
+ * ```typescript
+ * @Get()
+ * findAll(@Query('page', ParseIntPipe) page: number) {
+ *   return { page };
+ * }
+ * ```
  */
-export function Query(query?: string): ParameterDecorator {
-	return createParamDecorator(ParamType.QUERY, query);
+export function Query(query?: string, ...pipes: any[]): ParameterDecorator;
+export function Query(...pipes: any[]): ParameterDecorator;
+export function Query(...args: any[]): ParameterDecorator {
+	const [query, ...pipes] =
+		typeof args[0] === "string" || args[0] === undefined
+			? args
+			: [undefined, ...args];
+
+	return (
+		target: object,
+		propertyKey: string | symbol | undefined,
+		parameterIndex: number,
+	) => {
+		const handler = propertyKey
+			? (target.constructor as any).prototype[propertyKey]
+			: target;
+
+		const existingParams: RouteParamMetadata[] =
+			Reflect.getOwnMetadata(ROUTE_PARAMS, handler) || [];
+
+		existingParams.push({
+			index: parameterIndex,
+			type: ParamType.QUERY,
+			data: query,
+			pipes: pipes.length > 0 ? pipes : undefined,
+		});
+
+		Reflect.defineMetadata(ROUTE_PARAMS, existingParams, handler);
+	};
 }
 
 /**

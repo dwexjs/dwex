@@ -9,6 +9,8 @@ export * from "./di/index.js";
 
 // Middleware
 export * from "./middleware/index.js";
+// Pipes
+export * from "./pipes/index.js";
 // Reflection
 export * from "./reflection/index.js";
 // Router

@@ -1,5 +1,11 @@
 import "reflect-metadata";
-import { BadRequestException, ROUTE_PARAMS } from "@dwex/common";
+import {
+	type ArgumentMetadata,
+	BadRequestException,
+	PIPES_METADATA,
+	type PipeTransform,
+	ROUTE_PARAMS,
+} from "@dwex/common";
 import {
 	ParamType,
 	type RouteParamMetadata,
@@ -151,14 +157,33 @@ export class RequestHandler {
 			req.body = await this.parseBody(req);
 		}
 
+		// Get pipes from controller and method level
+		const controllerPipes: any[] =
+			Reflect.getMetadata(PIPES_METADATA, route.controller.constructor) || [];
+		const methodPipes: any[] =
+			Reflect.getMetadata(PIPES_METADATA, route.handler) || [];
+
 		for (const paramMetadata of routeParams) {
-			params[paramMetadata.index] = this.extractParam(
+			let value = this.extractParam(
 				paramMetadata,
 				req,
 				res,
 				urlParams,
 				queryParams,
 			);
+
+			// Apply pipes: parameter-level -> method-level -> controller-level
+			const pipes = [
+				...(paramMetadata.pipes || []),
+				...methodPipes,
+				...controllerPipes,
+			];
+
+			if (pipes.length > 0) {
+				value = await this.executePipes(value, paramMetadata, pipes);
+			}
+
+			params[paramMetadata.index] = value;
 		}
 
 		return params;
@@ -215,6 +240,69 @@ export class RequestHandler {
 
 			default:
 				return undefined;
+		}
+	}
+
+	/**
+	 * Executes pipes on a parameter value.
+	 *
+	 * @param value - The parameter value
+	 * @param metadata - The parameter metadata
+	 * @param pipes - Array of pipe classes or instances
+	 * @returns The transformed value
+	 */
+	private async executePipes(
+		value: any,
+		metadata: RouteParamMetadata,
+		pipes: any[],
+	): Promise<any> {
+		let result = value;
+
+		// Build argument metadata
+		const argumentMetadata: ArgumentMetadata = {
+			type: this.mapParamTypeToArgumentType(metadata.type),
+			data: metadata.data,
+			metatype: undefined, // We could enhance this by extracting design:type
+		};
+
+		for (const pipe of pipes) {
+			let pipeInstance: PipeTransform;
+
+			// Check if pipe is a class or an instance
+			if (typeof pipe === "function") {
+				// Try to get from DI container, if not found, instantiate directly
+				try {
+					pipeInstance = this.container.get(pipe);
+				} catch {
+					// If not in container, create a new instance
+					// This allows built-in pipes to work without registration
+					pipeInstance = new pipe();
+				}
+			} else {
+				pipeInstance = pipe;
+			}
+
+			result = await pipeInstance.transform(result, argumentMetadata);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Maps ParamType to ArgumentMetadata type.
+	 */
+	private mapParamTypeToArgumentType(
+		paramType: ParamType,
+	): "body" | "query" | "param" | "custom" {
+		switch (paramType) {
+			case ParamType.BODY:
+				return "body";
+			case ParamType.QUERY:
+				return "query";
+			case ParamType.PARAM:
+				return "param";
+			default:
+				return "custom";
 		}
 	}
 

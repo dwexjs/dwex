@@ -9,3 +9,4 @@ export * from "./provider.interface.js";
 export * from "./dynamic-module.interface.js";
 export * from "./https-options.interface.js";
 export * from "./lifecycle.interface.js";
+export * from "./pipe-transform.interface.js";

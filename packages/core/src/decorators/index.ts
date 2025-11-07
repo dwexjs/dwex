@@ -5,3 +5,4 @@ export * from "./params.decorator.js";
 export * from "./guards.decorator.js";
 export * from "./interceptors.decorator.js";
 export * from "./middleware.decorator.js";
+export * from "./pipes.decorator.js";
