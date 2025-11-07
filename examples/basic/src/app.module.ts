@@ -5,6 +5,7 @@ import { BullMQModule } from "@dwex/bullmq";
 import { AppController } from "./app.controller";
 import { UsersModule } from "./users/users.module";
 import { EmailModule } from "./emails/email.module";
+import { ProductsModule } from "./products/products.module";
 
 /**
  * Root application module
@@ -27,6 +28,7 @@ import { EmailModule } from "./emails/email.module";
 		}),
 		UsersModule,
 		EmailModule,
+		ProductsModule,
 	],
 	controllers: [AppController],
 	providers: [],
