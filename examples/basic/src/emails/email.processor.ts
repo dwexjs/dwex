@@ -32,6 +32,11 @@ export class EmailProcessor extends WorkerHost<EmailData> {
 		};
 	}
 
+	@OnWorkerEvent("ready")
+	onReady() {
+		console.log("🚀 Email Worker is ready and listening for jobs");
+	}
+
 	@OnWorkerEvent("completed")
 	onCompleted(job: Job, result: any) {
 		console.log(`✨ Job ${job.id} completed:`, result);
@@ -45,5 +50,10 @@ export class EmailProcessor extends WorkerHost<EmailData> {
 	@OnWorkerEvent("progress")
 	onProgress(job: Job, progress: number) {
 		console.log(`📊 Job ${job.id} progress: ${progress}%`);
+	}
+
+	@OnWorkerEvent("error")
+	onError(error: Error) {
+		console.error(`⚠️  Email Worker error:`, error.message);
 	}
 }

@@ -1,18 +1,22 @@
 import { Module } from "@dwex/core";
 import { BullMQModule } from "@dwex/bullmq";
 import { EmailService } from "./email.service";
+import { EmailProcessor } from "./email.processor";
 
 /**
  * Email module with BullMQ queue integration
  *
- * Note: Worker/Processor functionality is available but requires additional setup.
- * This example demonstrates queue operations (adding jobs, checking stats).
- * For full worker implementation, see the BullMQ documentation.
+ * Demonstrates full BullMQ functionality:
+ * - Queue registration
+ * - Worker/Processor with automatic job processing
+ * - Event handlers (completed, failed, progress)
  */
 @Module({
 	imports: [
 		// Register the email queue
 		BullMQModule.registerQueue({ name: "emails" }),
+		// Register the email processor (worker)
+		BullMQModule.registerProcessors(EmailProcessor),
 	],
 	providers: [EmailService],
 	exports: [EmailService],
