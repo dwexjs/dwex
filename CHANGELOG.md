@@ -1,3 +1,18 @@
+## 1.0.1 (2025-11-07)
+
+### 🚀 Features
+
+- **examples:** update email module to use registerProcessors ([f89b041](https://github.com/dwexjs/dwex/commit/f89b041))
+
+### 🩹 Fixes
+
+- **core,bullmq:** eagerly instantiate DynamicModule providers and BullMQ workers ([4cb7d12](https://github.com/dwexjs/dwex/commit/4cb7d12))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh
+
 # 1.0.0 (2025-11-07)
 
 ### 🚀 Features
