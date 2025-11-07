@@ -1,3 +1,16 @@
+## 1.0.0-beta.21 (2025-11-07)
+
+### 🚀 Features
+
+- migrate Drizzle ORM template from SQLite to PostgreSQL ([432ae95](https://github.com/dwexjs/dwex/commit/432ae95))
+- add BullMQ integration package for Redis-based queue management ([de77fab](https://github.com/dwexjs/dwex/commit/de77fab))
+- **examples:** add BullMQ email queue example with Redis integration ([68cbe72](https://github.com/dwexjs/dwex/commit/68cbe72))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh
+
 ## 1.0.0-beta.19 (2025-11-06)
 
 ### 🚀 Features
