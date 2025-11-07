@@ -387,6 +387,16 @@ export class DwexApplication {
 									this.container.setProviderModule(token, importedModuleRef);
 								}
 							}
+
+							// Eagerly instantiate dynamic module providers and call lifecycle hooks
+							for (const provider of dynamicModule.providers) {
+								const token =
+									typeof provider === "function" ? provider : provider.provide;
+								if (token) {
+									const instance = this.container.get(token, false, importedModuleRef);
+									await this.container.callModuleInitHook(instance);
+								}
+							}
 						}
 
 						// Handle dynamic module exports

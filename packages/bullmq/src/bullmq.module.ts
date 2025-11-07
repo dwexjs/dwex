@@ -202,7 +202,7 @@ export class BullMQModule {
 
 	/**
 	 * Register processors for queues
-	 * 
+	 *
 	 * This method creates Worker instances for processor classes
 	 *
 	 * @param processors - Array of processor classes
@@ -210,6 +210,7 @@ export class BullMQModule {
 	 */
 	static registerProcessors(...processors: Type<WorkerHost>[]): DynamicModule {
 		const providers: Provider[] = [];
+		const workerTokens: string[] = [];
 
 		for (const ProcessorClass of processors) {
 			if (!isProcessor(ProcessorClass)) {
@@ -217,7 +218,9 @@ export class BullMQModule {
 			}
 
 			const metadata = getProcessorMetadata(ProcessorClass);
-			
+			const workerToken = `WORKER:${metadata.name}`;
+			workerTokens.push(workerToken);
+
 			// Processor instance provider
 			providers.push({
 				provide: ProcessorClass,
@@ -226,7 +229,7 @@ export class BullMQModule {
 
 			// Worker provider
 			providers.push({
-				provide: `WORKER:${metadata.name}`,
+				provide: workerToken,
 				useFactory: (
 					processorInstance: WorkerHost,
 					moduleOptions: BullMQModuleOptions,
@@ -248,6 +251,29 @@ export class BullMQModule {
 					return worker;
 				},
 				inject: [ProcessorClass, BULLMQ_MODULE_OPTIONS],
+			});
+		}
+
+		// Add worker initializer that forces all workers to be instantiated eagerly
+		// This ensures workers start processing jobs immediately when the module loads
+		if (workerTokens.length > 0) {
+			// Create an initializer class that will be auto-instantiated
+			class WorkerInitializer {
+				constructor(...workers: Worker[]) {
+					console.log(`✅ BullMQ: ${workers.length} worker(s) initialized and ready`);
+				}
+
+				onModuleInit() {
+					// Lifecycle hook for future extensibility
+				}
+			}
+
+			providers.push({
+				provide: WorkerInitializer,
+				useFactory: (...workers: Worker[]) => {
+					return new WorkerInitializer(...workers);
+				},
+				inject: workerTokens,
 			});
 		}
 
