@@ -5,31 +5,194 @@ description: Configure Cross-Origin Resource Sharing
 
 ## CORS
 
-Learn how to configure CORS in your Dwex applications.
-
-<Callout type="info">
-This page is under construction. Documentation coming soon!
-</Callout>
+Learn how to configure CORS (Cross-Origin Resource Sharing) in your Dwex applications to allow your API to be accessed from different domains.
 
 ## Overview
 
-Configure Cross-Origin Resource Sharing to allow your API to be accessed from different domains.
+Dwex provides a built-in `corsMiddleware` function that handles CORS headers and preflight requests. The middleware is highly configurable and supports various use cases from simple open access to complex origin validation.
 
-## Example
+## Basic Usage
+
+Import and use the `corsMiddleware` function:
 
 ```typescript
-const app = await DwexFactory.create(AppModule, {
-	cors: {
-		origin: "https://example.com",
-		credentials: true,
-	},
-});
+import { DwexFactory, corsMiddleware } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+// Allow all origins (useful for development)
+app.use(corsMiddleware());
+
+await app.listen(9929);
 ```
 
-## Topics Covered
+## Configuration Options
 
-- CORS configuration
-- Allowed origins
-- Credentials
-- Headers and methods
-- Preflight requests
+### Single Origin
+
+Allow requests from a specific origin:
+
+```typescript
+app.use(corsMiddleware({
+	origin: "https://example.com",
+	credentials: true,
+}));
+```
+
+### Multiple Origins
+
+Allow requests from multiple origins:
+
+```typescript
+app.use(corsMiddleware({
+	origin: ["https://example.com", "https://app.example.com"],
+	credentials: true,
+}));
+```
+
+### Dynamic Origin Validation
+
+Use a function to dynamically validate origins:
+
+```typescript
+app.use(corsMiddleware({
+	origin: (origin) => {
+		// Allow all subdomains of example.com
+		return origin.endsWith(".example.com");
+	},
+	credentials: true,
+}));
+```
+
+### Custom Methods and Headers
+
+Configure allowed methods and headers:
+
+```typescript
+app.use(corsMiddleware({
+	origin: "https://example.com",
+	methods: ["GET", "POST", "PUT", "DELETE"],
+	allowedHeaders: ["Content-Type", "Authorization", "X-Custom-Header"],
+	exposedHeaders: ["X-Response-Id"],
+	credentials: true,
+	maxAge: 86400, // 24 hours
+}));
+```
+
+## Configuration Reference
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `origin` | `string \| string[] \| ((origin: string) => boolean)` | `"*"` | Allowed origins. Can be a string, array of strings, or validation function |
+| `methods` | `string \| string[]` | `["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"]` | Allowed HTTP methods |
+| `allowedHeaders` | `string \| string[]` | `undefined` | Allowed request headers. If not set, reflects the request's `Access-Control-Request-Headers` |
+| `exposedHeaders` | `string \| string[]` | `undefined` | Headers exposed to the client |
+| `credentials` | `boolean` | `false` | Whether to allow credentials (cookies, authorization headers) |
+| `maxAge` | `number` | `undefined` | How long (in seconds) the results of a preflight request can be cached |
+| `preflightContinue` | `boolean` | `false` | Pass the CORS preflight response to the next handler |
+| `optionsSuccessStatus` | `number` | `204` | Status code for successful `OPTIONS` requests |
+
+## Examples
+
+### Development Setup
+
+For local development, allow all origins:
+
+```typescript
+const app = await DwexFactory.create(AppModule);
+
+app.use(corsMiddleware({
+	origin: "*",
+	credentials: false,
+}));
+
+await app.listen(9929);
+```
+
+### Production Setup
+
+For production, restrict to specific origins:
+
+```typescript
+const app = await DwexFactory.create(AppModule);
+
+app.use(corsMiddleware({
+	origin: ["https://example.com", "https://www.example.com"],
+	credentials: true,
+	methods: ["GET", "POST", "PUT", "DELETE"],
+	allowedHeaders: ["Content-Type", "Authorization"],
+	maxAge: 3600,
+}));
+
+await app.listen(9929);
+```
+
+### Advanced: Environment-Based Configuration
+
+Configure CORS based on environment:
+
+```typescript
+const app = await DwexFactory.create(AppModule);
+
+const isDevelopment = Bun.env.NODE_ENV === "development";
+
+app.use(corsMiddleware({
+	origin: isDevelopment
+		? "*"
+		: ["https://example.com", "https://www.example.com"],
+	credentials: !isDevelopment,
+	methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+}));
+
+await app.listen(9929);
+```
+
+## Preflight Requests
+
+The middleware automatically handles preflight `OPTIONS` requests. When a browser sends a preflight request:
+
+1. The middleware checks if the origin is allowed
+2. Sets the appropriate CORS headers
+3. Responds with the configured `optionsSuccessStatus` (default `204`)
+4. Ends the request unless `preflightContinue` is `true`
+
+## Security Considerations
+
+### Credentials and Wildcards
+
+When using `credentials: true`, you cannot use a wildcard (`"*"`) for the origin. You must specify exact origins:
+
+```typescript
+// This will not work properly with credentials
+app.use(corsMiddleware({
+	origin: "*",
+	credentials: true,
+}));
+
+// Use specific origins instead
+app.use(corsMiddleware({
+	origin: ["https://example.com"],
+	credentials: true,
+}));
+```
+
+### Origin Validation
+
+Always validate origins in production. Avoid using `"*"` in production environments:
+
+```typescript
+// Development only
+app.use(corsMiddleware({
+	origin: "*",
+}));
+
+// Production - use specific origins or validation function
+app.use(corsMiddleware({
+	origin: (origin) => {
+		const allowedDomains = [".example.com", ".app.example.com"];
+		return allowedDomains.some(domain => origin.endsWith(domain));
+	},
+	credentials: true,
+}));
+```
