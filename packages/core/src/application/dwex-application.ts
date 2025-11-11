@@ -1,4 +1,5 @@
 import {
+	type DwexApplicationOptions,
 	GLOBAL_MODULE,
 	HttpException,
 	type HttpsOptions,
@@ -30,10 +31,16 @@ export class DwexApplication {
 	private routesResolverLogger?: any;
 	private routerExplorerLogger?: any;
 	private dwexAppLogger?: any;
+	private requestLogger?: any;
 	private startTime: bigint;
+	private options: DwexApplicationOptions;
 
-	constructor(private readonly rootModule: Type<any>) {
+	constructor(
+		private readonly rootModule: Type<any>,
+		options?: DwexApplicationOptions,
+	) {
 		this.startTime = process.hrtime.bigint();
+		this.options = options || {};
 		this.container = new Container();
 		this.moduleContainer = new ModuleContainer();
 		this.container.setModuleContainer(this.moduleContainer);
@@ -55,6 +62,9 @@ export class DwexApplication {
 			this.routesResolverLogger = new Logger("RoutesResolver");
 			this.routerExplorerLogger = new Logger("RouterExplorer");
 			this.dwexAppLogger = new Logger("DwexApplication");
+			if (this.options.logRequests) {
+				this.requestLogger = new Logger("HTTP");
+			}
 		} catch {
 			// Logger not available, that's okay
 		}
@@ -171,6 +181,8 @@ export class DwexApplication {
 	 * Handles incoming HTTP requests.
 	 */
 	private async handleRequest(req: Request): Promise<Response> {
+		const startTime = this.options.logRequests ? performance.now() : 0;
+
 		try {
 			// Create a mutable request object
 			const request: any = {
@@ -229,15 +241,18 @@ export class DwexApplication {
 
 			// If result is already a Response object, return it directly
 			if (result instanceof Response) {
+				this.logRequest(request.method, request.url, result.status, startTime);
 				return result;
 			}
 
 			// If response was manually sent, use it
 			if (response.body !== undefined) {
-				return new Response(response.body, {
+				const res = new Response(response.body, {
 					status: response.statusCode,
 					headers: response.headers,
 				});
+				this.logRequest(request.method, request.url, res.status, startTime);
+				return res;
 			}
 
 			// Auto-serialize response
@@ -250,17 +265,58 @@ export class DwexApplication {
 					headers.set("Content-Type", "application/json");
 				}
 
-				return new Response(body, {
+				const res = new Response(body, {
 					status: response.statusCode,
 					headers,
 				});
+				this.logRequest(request.method, request.url, res.status, startTime);
+				return res;
 			}
 
 			// No content
-			return new Response(null, { status: 204 });
+			const res = new Response(null, { status: 204 });
+			this.logRequest(request.method, request.url, res.status, startTime);
+			return res;
 		} catch (error) {
-			return this.handleError(error);
+			const errorResponse = this.handleError(error);
+			this.logRequest(
+				req.method,
+				new URL(req.url).pathname + new URL(req.url).search,
+				errorResponse.status,
+				startTime,
+			);
+			return errorResponse;
 		}
+	}
+
+	/**
+	 * Logs HTTP request if request logging is enabled.
+	 */
+	private logRequest(
+		method: string,
+		url: string,
+		status: number,
+		startTime: number,
+	): void {
+		if (!this.requestLogger || !this.options.logRequests) return;
+
+		const duration = performance.now() - startTime;
+		const formattedDuration = duration >= 1 ? `${duration.toFixed(2)}ms` : `${(duration * 1000).toFixed(2)}μs`;
+
+		// Color code based on status
+		let statusColor = "\x1b[32m"; // green for 2xx
+		if (status >= 500) {
+			statusColor = "\x1b[31m"; // red for 5xx
+		} else if (status >= 400) {
+			statusColor = "\x1b[33m"; // yellow for 4xx
+		} else if (status >= 300) {
+			statusColor = "\x1b[36m"; // cyan for 3xx
+		}
+		const reset = "\x1b[0m";
+
+		this.requestLogger.log(
+			`${method} ${url} ${statusColor}${status}${reset} ${formattedDuration}`,
+		);
 	}
 
 	/**
