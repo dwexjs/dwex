@@ -1,27 +1,25 @@
-import { Injectable, Inject } from "@dwex/core";
-import { getQueueToken } from "@dwex/bullmq";
-import type { Queue } from "bullmq";
+import { Injectable } from "@dwex/core";
+import { Logger } from "@dwex/logger";
 
 /**
- * Email service that adds jobs to the email queue
+ * Email service - simplified without BullMQ
  */
 @Injectable()
 export class EmailService {
-	constructor(@Inject(getQueueToken("emails")) private emailQueue: Queue) {}
+	private readonly logger = new Logger(EmailService.name);
 
 	/**
 	 * Send a welcome email
 	 */
 	async sendWelcomeEmail(email: string, name: string) {
-		const job = await this.emailQueue.add("welcome", {
-			to: email,
-			subject: `Welcome ${name}!`,
-			body: `Hi ${name}, welcome to our application!`,
-		});
+		this.logger.log(`Sending welcome email to ${email}`);
+		// Simulate sending email
+		await new Promise((resolve) => setTimeout(resolve, 100));
 
 		return {
-			jobId: job.id,
-			message: "Welcome email queued successfully",
+			message: "Welcome email sent successfully",
+			to: email,
+			subject: `Welcome ${name}!`,
 		};
 	}
 
@@ -29,35 +27,24 @@ export class EmailService {
 	 * Send a notification email
 	 */
 	async sendNotification(email: string, message: string) {
-		const job = await this.emailQueue.add("notification", {
-			to: email,
-			subject: "Notification",
-			body: message,
-		});
+		this.logger.log(`Sending notification email to ${email}`);
+		// Simulate sending email
+		await new Promise((resolve) => setTimeout(resolve, 100));
 
 		return {
-			jobId: job.id,
-			message: "Notification email queued successfully",
+			message: "Notification email sent successfully",
+			to: email,
+			subject: "Notification",
 		};
 	}
 
 	/**
-	 * Get queue statistics
+	 * Get email stats (simplified)
 	 */
 	async getQueueStats() {
-		const [waiting, active, completed, failed] = await Promise.all([
-			this.emailQueue.getWaitingCount(),
-			this.emailQueue.getActiveCount(),
-			this.emailQueue.getCompletedCount(),
-			this.emailQueue.getFailedCount(),
-		]);
-
 		return {
-			waiting,
-			active,
-			completed,
-			failed,
-			total: waiting + active + completed + failed,
+			message: "Email service running (no queue configured)",
+			sent: 0,
 		};
 	}
 }
