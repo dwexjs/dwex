@@ -1,3 +1,16 @@
+## 1.1.0 (2025-11-12)
+
+### 🚀 Features
+
+- **core:** add request logging option to DwexFactory.create ([3c695cd](https://github.com/dwexjs/dwex/commit/3c695cd))
+- **core,common:** add Server-Sent Events (SSE) support ([3e6257f](https://github.com/dwexjs/dwex/commit/3e6257f))
+- **examples/basic:** remove BullMQ and add SSE demo endpoints ([a638cbe](https://github.com/dwexjs/dwex/commit/a638cbe))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh @mxvsh
+
 ## 1.0.1 (2025-11-07)
 
 ### 🚀 Features
