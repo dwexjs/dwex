@@ -11,3 +11,4 @@ export * from "./https-options.interface.js";
 export * from "./lifecycle.interface.js";
 export * from "./pipe-transform.interface.js";
 export * from "./dwex-application-options.interface.js";
+export * from "./sse.interface.js";

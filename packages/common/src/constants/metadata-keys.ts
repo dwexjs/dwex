@@ -70,3 +70,6 @@ export const API_PROPERTY = "dwex:api:property";
 
 /** Key for API security metadata (Swagger) */
 export const API_SECURITY = "dwex:api:security";
+
+/** Key for SSE (Server-Sent Events) metadata */
+export const SSE_METADATA = "dwex:sse:metadata";

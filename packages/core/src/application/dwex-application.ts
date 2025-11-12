@@ -7,7 +7,9 @@ import {
 	MODULE_METADATA,
 	type ModuleMetadata,
 	NotFoundException,
+	SseStream,
 	type Type,
+	asyncIterableToSseEvents,
 } from "@dwex/common";
 import "reflect-metadata";
 import { Container } from "../di/container.js";
@@ -239,6 +241,49 @@ export class DwexApplication {
 			// Execute route handler
 			const result = await this.requestHandler.handle(route, request, response);
 
+			// Handle SSE streams
+			if (result instanceof SseStream) {
+				const sseResponse = new Response(result.getStream(), {
+					status: 200,
+					headers: {
+						"Content-Type": "text/event-stream",
+						"Cache-Control": "no-cache, no-transform",
+						"Connection": "keep-alive",
+						"X-Accel-Buffering": "no", // Disable buffering in nginx
+					},
+				});
+				this.logRequest(request.method, request.url, 200, startTime);
+				return sseResponse;
+			}
+
+			// Handle async generators/iterators (for @Sse() decorated methods)
+			if (this.isAsyncIterable(result)) {
+				const asyncIterator = asyncIterableToSseEvents(result);
+				const stream = new ReadableStream({
+					async start(controller) {
+						try {
+							for await (const chunk of asyncIterator) {
+								controller.enqueue(chunk);
+							}
+							controller.close();
+						} catch (error) {
+							controller.error(error);
+						}
+					},
+				});
+				const sseResponse = new Response(stream, {
+					status: 200,
+					headers: {
+						"Content-Type": "text/event-stream",
+						"Cache-Control": "no-cache, no-transform",
+						"Connection": "keep-alive",
+						"X-Accel-Buffering": "no",
+					},
+				});
+				this.logRequest(request.method, request.url, 200, startTime);
+				return sseResponse;
+			}
+
 			// If result is already a Response object, return it directly
 			if (result instanceof Response) {
 				this.logRequest(request.method, request.url, result.status, startTime);
@@ -287,6 +332,19 @@ export class DwexApplication {
 			);
 			return errorResponse;
 		}
+	}
+
+	/**
+	 * Checks if a value is an async iterable (async generator or async iterator).
+	 */
+	private isAsyncIterable(value: any): boolean {
+		return (
+			value !== null &&
+			value !== undefined &&
+			typeof value === "object" &&
+			(typeof value[Symbol.asyncIterator] === "function" ||
+				typeof value.next === "function")
+		);
 	}
 
 	/**
