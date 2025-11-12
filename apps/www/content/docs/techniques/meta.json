@@ -8,6 +8,7 @@
 		"logger",
 		"cookies",
 		"cors",
+		"sse",
 		"file-upload",
 		"performance"
 	]
