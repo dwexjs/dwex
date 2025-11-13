@@ -1,3 +1,14 @@
+## 1.1.1 (2025-11-13)
+
+### 🩹 Fixes
+
+- **core:** include middleware headers in SSE responses ([dd77e1d](https://github.com/dwexjs/dwex/commit/dd77e1d))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh @mxvsh
+
 ## 1.1.0 (2025-11-12)
 
 ### 🚀 Features
