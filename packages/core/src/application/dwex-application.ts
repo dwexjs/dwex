@@ -243,14 +243,16 @@ export class DwexApplication {
 
 			// Handle SSE streams
 			if (result instanceof SseStream) {
+				// Merge middleware headers (e.g., CORS) with SSE-specific headers
+				const headers = new Headers(response.headers);
+				headers.set("Content-Type", "text/event-stream");
+				headers.set("Cache-Control", "no-cache, no-transform");
+				headers.set("Connection", "keep-alive");
+				headers.set("X-Accel-Buffering", "no"); // Disable buffering in nginx
+
 				const sseResponse = new Response(result.getStream(), {
 					status: 200,
-					headers: {
-						"Content-Type": "text/event-stream",
-						"Cache-Control": "no-cache, no-transform",
-						"Connection": "keep-alive",
-						"X-Accel-Buffering": "no", // Disable buffering in nginx
-					},
+					headers,
 				});
 				this.logRequest(request.method, request.url, 200, startTime);
 				return sseResponse;
@@ -271,14 +273,17 @@ export class DwexApplication {
 						}
 					},
 				});
+
+				// Merge middleware headers (e.g., CORS) with SSE-specific headers
+				const headers = new Headers(response.headers);
+				headers.set("Content-Type", "text/event-stream");
+				headers.set("Cache-Control", "no-cache, no-transform");
+				headers.set("Connection", "keep-alive");
+				headers.set("X-Accel-Buffering", "no");
+
 				const sseResponse = new Response(stream, {
 					status: 200,
-					headers: {
-						"Content-Type": "text/event-stream",
-						"Cache-Control": "no-cache, no-transform",
-						"Connection": "keep-alive",
-						"X-Accel-Buffering": "no",
-					},
+					headers,
 				});
 				this.logRequest(request.method, request.url, 200, startTime);
 				return sseResponse;
