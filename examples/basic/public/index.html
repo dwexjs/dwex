@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dwex Static Files Example</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Dwex!</h1>
+        <p>This page is served using ServeStaticModule with SPA mode enabled.</p>
+
+        <div class="links">
+            <h2>Try these routes:</h2>
+            <ul>
+                <li><a href="/">Home (this page)</a></li>
+                <li><a href="/about">About (SPA route)</a></li>
+                <li><a href="/contact">Contact (SPA route)</a></li>
+                <li><a href="/api/users">API Endpoint</a></li>
+            </ul>
+        </div>
+
+        <div id="app"></div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

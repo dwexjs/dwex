@@ -88,6 +88,25 @@ export class DwexApplication {
 	}
 
 	/**
+	 * Sets a global prefix for all routes.
+	 * This prefix will be prepended to all controller routes.
+	 * Note: This does NOT affect static file serving middleware.
+	 *
+	 * @param prefix - The global prefix (e.g., 'api', 'v1', etc.)
+	 *
+	 * @example
+	 * ```typescript
+	 * app.setGlobalPrefix('api');
+	 * // All controller routes will now have /api prefix
+	 * // Example: /users becomes /api/users
+	 * // Static files remain unaffected: / still serves index.html
+	 * ```
+	 */
+	setGlobalPrefix(prefix: string): void {
+		this.router.setGlobalPrefix(prefix);
+	}
+
+	/**
 	 * Starts the HTTP server.
 	 *
 	 * @param port - Port to listen on
@@ -225,6 +244,16 @@ export class DwexApplication {
 
 			// Execute global middleware
 			await this.executeMiddleware(request, response, this.globalMiddleware);
+
+			// If middleware handled the response, return early
+			if (response.body !== undefined) {
+				const res = new Response(response.body, {
+					status: response.statusCode,
+					headers: response.headers,
+				});
+				this.logRequest(request.method, request.url, res.status, startTime);
+				return res;
+			}
 
 			// Find matching route
 			const route = this.router.findRoute(

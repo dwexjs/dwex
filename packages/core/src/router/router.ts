@@ -16,6 +16,7 @@ import { parseRoutePath } from "./route.js";
  */
 export class Router {
 	private routes: Route[] = [];
+	private globalPrefix = "";
 
 	/**
 	 * Registers routes from a controller.
@@ -48,8 +49,10 @@ export class Router {
 				continue;
 			}
 
-			// Combine controller path and method path
-			const fullPath = this.normalizePath(`/${controllerPath}/${routePath}`);
+			// Combine global prefix, controller path and method path
+			const fullPath = this.normalizePath(
+				`/${this.globalPrefix}/${controllerPath}/${routePath}`,
+			);
 
 			// Get route params metadata (not currently used)
 			// const routeParams = Reflect.getMetadata(ROUTE_PARAMS, handler) || [];
@@ -115,6 +118,22 @@ export class Router {
 	 */
 	getRoutes(): Route[] {
 		return this.routes;
+	}
+
+	/**
+	 * Sets a global prefix for all routes.
+	 * This prefix will be prepended to all controller routes.
+	 *
+	 * @param prefix - The global prefix (e.g., 'api', 'v1', etc.)
+	 *
+	 * @example
+	 * ```typescript
+	 * router.setGlobalPrefix('api');
+	 * // All routes will now have /api prefix: /api/users, /api/products, etc.
+	 * ```
+	 */
+	setGlobalPrefix(prefix: string): void {
+		this.globalPrefix = prefix.startsWith("/") ? prefix.slice(1) : prefix;
 	}
 
 	/**

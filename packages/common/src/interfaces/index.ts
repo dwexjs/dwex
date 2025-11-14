@@ -12,3 +12,4 @@ export * from "./lifecycle.interface.js";
 export * from "./pipe-transform.interface.js";
 export * from "./dwex-application-options.interface.js";
 export * from "./sse.interface.js";
+export * from "./serve-static-options.interface.js";
