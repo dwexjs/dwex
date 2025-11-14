@@ -1,3 +1,15 @@
+## 1.2.1 (2025-11-14)
+
+### 🩹 Fixes
+
+- **core:** resolve POST request body handling and CORS preflight issues ([9f6753e](https://github.com/dwexjs/dwex/commit/9f6753e))
+- **core:** fix setGlobalPrefix and prevent duplicate controller registration ([6c3a8e8](https://github.com/dwexjs/dwex/commit/6c3a8e8))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh @mxvsh
+
 ## 1.2.0 (2025-11-14)
 
 ### 🚀 Features

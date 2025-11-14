@@ -1,6 +1,6 @@
 {
   "name": "@dwex/logger",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -22,7 +22,7 @@
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.2",
     "tslib": "^2.3.0",
-    "@dwex/common": "1.2.0",
+    "@dwex/common": "1.2.1",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
