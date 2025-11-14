@@ -27,6 +27,7 @@ export class DwexApplication {
 	private readonly requestHandler: RequestHandler;
 	private readonly globalMiddleware: MiddlewareFunction[] = [];
 	private readonly controllerModuleMap = new Map<Type<any>, ModuleRef>();
+	private readonly registeredControllers = new Set<Type<any>>();
 	private server?: ReturnType<typeof Bun.serve>;
 	private tlsEnabled = false;
 	private instanceLoaderLogger?: any;
@@ -54,8 +55,8 @@ export class DwexApplication {
 	 * Initializes the application by scanning modules and registering providers.
 	 */
 	async init(): Promise<void> {
-		// First scan to register all providers
-		await this.scanModule(this.rootModule, true);
+		// First scan to register all providers (but not controllers yet)
+		await this.scanModule(this.rootModule, true, false, undefined, false);
 
 		// Try to create logger instances (if LoggerModule was imported)
 		try {
@@ -137,6 +138,9 @@ export class DwexApplication {
 		httpsOptions?: HttpsOptions,
 	): Promise<void> {
 		this.tlsEnabled = !!httpsOptions;
+
+		// Register controllers now that global prefix is set
+		await this.scanModule(this.rootModule, true, false, undefined, true);
 
 		this.server = Bun.serve({
 			port,
@@ -493,6 +497,7 @@ export class DwexApplication {
 		register = true,
 		logOnly = false,
 		parentModule?: ModuleRef,
+		registerControllers = true,
 	): Promise<ModuleRef> {
 		const metadata: ModuleMetadata | undefined = Reflect.getMetadata(
 			MODULE_METADATA,
@@ -525,6 +530,7 @@ export class DwexApplication {
 						register,
 						logOnly,
 						moduleRef,
+						registerControllers,
 					);
 					moduleRef.addImport(importedModuleRef);
 				} else {
@@ -536,6 +542,7 @@ export class DwexApplication {
 							register,
 							logOnly,
 							moduleRef,
+							registerControllers,
 						);
 						moduleRef.addImport(importedModuleRef);
 
@@ -616,9 +623,17 @@ export class DwexApplication {
 			}
 		}
 
-		// Register controllers (only on first pass)
-		if (register && metadata.controllers) {
+		// Register controllers (only on first pass and if registerControllers is true)
+		if (register && registerControllers && metadata.controllers) {
 			for (const ControllerClass of metadata.controllers) {
+				// Skip if controller is already registered
+				if (this.registeredControllers.has(ControllerClass)) {
+					continue;
+				}
+
+				// Mark controller as registered
+				this.registeredControllers.add(ControllerClass);
+
 				// Add controller as a provider to the module
 				moduleRef.addProvider(ControllerClass);
 				this.container.addProvider(ControllerClass);
