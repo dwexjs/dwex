@@ -123,9 +123,10 @@ export function corsMiddleware(options: CorsOptions = {}) {
 			}
 
 			if (!preflightContinue) {
-				res.statusCode = optionsSuccessStatus;
+				res.status(optionsSuccessStatus);
 				res.setHeader("Content-Length", "0");
 				res.end();
+				next();
 				return;
 			}
 		}

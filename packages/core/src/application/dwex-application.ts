@@ -205,14 +205,26 @@ export class DwexApplication {
 		const startTime = this.options.logRequests ? performance.now() : 0;
 
 		try {
+			// Read and cache the request body once
+			// This is necessary because Request.text() can only be called once
+			let bodyText: string | null = null;
+			if (
+				req.method !== "GET" &&
+				req.method !== "HEAD" &&
+				req.method !== "OPTIONS"
+			) {
+				bodyText = await req.text();
+			}
+
 			// Create a mutable request object
 			const request: any = {
 				...req,
 				url: new URL(req.url).pathname + new URL(req.url).search,
 				method: req.method,
 				headers: Object.fromEntries(req.headers.entries()),
-				text: () => req.text(),
-				json: () => req.json(),
+				text: () => Promise.resolve(bodyText || ""),
+				json: () =>
+					Promise.resolve(bodyText ? JSON.parse(bodyText) : undefined),
 			};
 
 			// Create response object
@@ -237,7 +249,12 @@ export class DwexApplication {
 					this.body = JSON.stringify(data);
 					return this;
 				},
-				end() {
+				end(data?: any) {
+					if (data !== undefined) {
+						this.body = data;
+					} else if (this.body === undefined) {
+						this.body = "";
+					}
 					return this;
 				},
 			};
