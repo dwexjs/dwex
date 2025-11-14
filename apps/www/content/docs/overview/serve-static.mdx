@@ -1,0 +1,313 @@
+---
+title: Serve Static Files
+description: Serve static files and Single Page Applications with ServeStaticModule
+---
+
+## Overview
+
+The `ServeStaticModule` allows you to serve static files (HTML, CSS, JavaScript, images, etc.) and Single Page Applications (SPAs) built with React, Vue, or other frontend frameworks.
+
+## Installation
+
+ServeStaticModule is built into `@dwex/core` - no additional packages needed.
+
+## Basic Usage
+
+### Serving Static Files
+
+Serve static files from a directory:
+
+```typescript title="main.ts"
+import { DwexFactory, createServeStaticMiddleware } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+// Serve files from ./public directory at /static route
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./public",
+    serveRoot: "/static",
+  })
+);
+
+await app.listen(3000);
+```
+
+Now files in `./public` are accessible:
+- `./public/logo.png` → `http://localhost:3000/static/logo.png`
+- `./public/styles.css` → `http://localhost:3000/static/styles.css`
+
+### Serving a React/Vue SPA
+
+Serve a built SPA with client-side routing support:
+
+```typescript title="main.ts"
+import { DwexFactory, createServeStaticMiddleware } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+// Set global prefix for API routes
+app.setGlobalPrefix("api");
+
+// Serve SPA from root, exclude API routes
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./dist",      // Your build output directory
+    serveRoot: "/",          // Serve from root
+    spa: true,               // Enable SPA mode
+    exclude: ["/api"],       // Don't intercept API routes
+  })
+);
+
+await app.listen(3000);
+```
+
+With this setup:
+- `/` → serves `index.html`
+- `/about` → serves `index.html` (React Router handles routing)
+- `/users/123` → serves `index.html` (client-side route)
+- `/api/users` → handled by your controller
+- `/assets/logo.png` → serves static file
+
+## Configuration Options
+
+```typescript
+interface ServeStaticOptions {
+  // Required: Directory to serve files from
+  rootPath: string;
+
+  // URL prefix for static files (default: "/")
+  serveRoot?: string;
+
+  // Enable SPA mode - serves index.html for unmatched routes (default: false)
+  spa?: boolean;
+
+  // Index file to serve for directories (default: "index.html")
+  indexFile?: string;
+
+  // Dotfile handling: "allow" | "deny" | "ignore" (default: "ignore")
+  dotfiles?: "allow" | "deny" | "ignore";
+
+  // Exclude specific path prefixes from static serving (default: [])
+  exclude?: string[];
+}
+```
+
+## Examples
+
+### Example 1: Assets Directory
+
+Serve images, fonts, and other assets:
+
+```typescript title="main.ts"
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./assets",
+    serveRoot: "/assets",
+  })
+);
+```
+
+Directory structure:
+```
+assets/
+├── images/
+│   └── logo.png
+├── fonts/
+│   └── roboto.woff2
+└── videos/
+    └── intro.mp4
+```
+
+Access at:
+- `/assets/images/logo.png`
+- `/assets/fonts/roboto.woff2`
+- `/assets/videos/intro.mp4`
+
+### Example 2: Multiple Static Directories
+
+Serve from multiple directories:
+
+```typescript title="main.ts"
+// Public assets
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./public",
+    serveRoot: "/",
+  })
+);
+
+// Uploaded files
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./uploads",
+    serveRoot: "/uploads",
+  })
+);
+```
+
+### Example 3: React App with API
+
+Complete setup for a React app with backend API:
+
+```typescript title="main.ts"
+import { DwexFactory, createServeStaticMiddleware } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+// Prefix all API routes with /api
+app.setGlobalPrefix("api");
+
+// Serve React build output
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./client/dist",
+    serveRoot: "/",
+    spa: true,
+    exclude: ["/api"],
+  })
+);
+
+await app.listen(3000);
+```
+
+Your controllers:
+```typescript
+@Controller("users")
+export class UsersController {
+  @Get()
+  findAll() {
+    // Accessible at /api/users
+    return [];
+  }
+}
+```
+
+### Example 4: Secure Dotfiles
+
+Deny access to hidden files:
+
+```typescript title="main.ts"
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./public",
+    serveRoot: "/",
+    dotfiles: "deny", // Return 403 for .env, .git, etc.
+  })
+);
+```
+
+## Using with Module Pattern
+
+You can also use the `ServeStaticModule` in your module imports (though middleware approach is more common):
+
+```typescript title="app.module.ts"
+import { Module } from "@dwex/core";
+import { ServeStaticModule } from "@dwex/core";
+
+@Module({
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: "./public",
+      serveRoot: "/static",
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+## SPA Mode Explained
+
+When `spa: true` is enabled:
+
+1. **File exists** → Serve the file
+2. **Directory with index.html** → Serve index.html
+3. **Path has no extension** (e.g., `/about`) → Serve index.html
+4. **Path has extension but not found** (e.g., `/missing.js`) → Pass to next middleware (likely 404)
+
+This allows client-side routers (React Router, Vue Router) to handle routing while still serving actual files correctly.
+
+## Security
+
+ServeStaticModule includes built-in security features:
+
+- **Path Traversal Protection**: Prevents `../` attacks
+- **Dotfile Handling**: Control access to hidden files
+- **Safe Path Resolution**: Ensures files stay within rootPath
+
+## Caching
+
+Automatic cache headers are set:
+
+- **Static assets** (CSS, JS, images): `Cache-Control: public, max-age=31536000, immutable`
+- **HTML files**: `Cache-Control: no-cache, no-store, must-revalidate`
+
+This ensures optimal performance while allowing SPA updates.
+
+## MIME Types
+
+The module automatically sets correct `Content-Type` headers for:
+
+HTML, CSS, JavaScript, JSON, PNG, JPEG, GIF, SVG, ICO, WOFF, WOFF2, TTF, EOT, OTF, TXT, XML, PDF, ZIP, MP4, WebM, MP3, WAV, WebP
+
+Unknown extensions default to `application/octet-stream`.
+
+## Global Prefix
+
+Use `setGlobalPrefix()` to add a prefix to all controller routes without affecting static files:
+
+```typescript
+const app = await DwexFactory.create(AppModule);
+
+// All controller routes now have /api prefix
+app.setGlobalPrefix("api");
+
+// Static files still serve from root
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./public",
+    serveRoot: "/",
+  })
+);
+```
+
+This separates your API routes (`/api/*`) from static files (`/*`).
+
+## Best Practices
+
+1. **Use `exclude` with SPA mode**: Always exclude API routes when serving SPA from root
+2. **Set global prefix**: Use `app.setGlobalPrefix("api")` to clearly separate API from frontend
+3. **Secure dotfiles**: Set `dotfiles: "deny"` in production
+4. **Order matters**: Add static middleware before it's needed, but after CORS/security middleware
+5. **Build output**: Point `rootPath` to your build directory (`./dist`, `./build`, etc.)
+
+## Example: Full Production Setup
+
+```typescript title="main.ts"
+import { DwexFactory, createServeStaticMiddleware, corsMiddleware } from "@dwex/core";
+import { AppModule } from "./app.module";
+
+const app = await DwexFactory.create(AppModule);
+
+// 1. Security & CORS
+app.use(corsMiddleware({ origin: process.env.ALLOWED_ORIGINS }));
+
+// 2. API prefix
+app.setGlobalPrefix("api");
+
+// 3. Serve SPA
+app.use(
+  createServeStaticMiddleware({
+    rootPath: "./client/dist",
+    serveRoot: "/",
+    spa: true,
+    exclude: ["/api"],
+    dotfiles: "deny",
+  })
+);
+
+await app.listen(3000);
+```

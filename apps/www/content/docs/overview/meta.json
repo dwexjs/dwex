@@ -1,4 +1,4 @@
 {
 	"title": "Overview",
-	"pages": ["modules", "controllers", "providers", "middleware"]
+	"pages": ["modules", "controllers", "providers", "middleware", "serve-static"]
 }
