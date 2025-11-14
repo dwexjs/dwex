@@ -1,3 +1,14 @@
+## 1.2.0 (2025-11-14)
+
+### 🚀 Features
+
+- **core:** add ServeStaticModule for serving static files and SPAs ([a892838](https://github.com/dwexjs/dwex/commit/a892838))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh @mxvsh
+
 ## 1.1.1 (2025-11-13)
 
 ### 🩹 Fixes
