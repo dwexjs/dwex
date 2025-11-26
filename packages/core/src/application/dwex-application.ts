@@ -30,6 +30,7 @@ export class DwexApplication {
 	private readonly registeredControllers = new Set<Type<any>>();
 	private server?: ReturnType<typeof Bun.serve>;
 	private tlsEnabled = false;
+	private routesInitialized = false;
 	private instanceLoaderLogger?: any;
 	private routesResolverLogger?: any;
 	private routerExplorerLogger?: any;
@@ -71,6 +72,28 @@ export class DwexApplication {
 		} catch {
 			// Logger not available, that's okay
 		}
+	}
+
+	/**
+	 * Initializes routes by registering controllers.
+	 * This method should be called after setting the global prefix and before creating OpenAPI documentation.
+	 *
+	 * @example
+	 * ```typescript
+	 * const app = await DwexFactory.create(AppModule);
+	 * app.setGlobalPrefix('api');
+	 * await app.initRoutes();
+	 * // Now routes are available for OpenAPI document generation
+	 * const document = OpenApiModule.createDocument(app, config);
+	 * ```
+	 */
+	async initRoutes(): Promise<void> {
+		if (this.routesInitialized) {
+			return;
+		}
+		// Register controllers now that global prefix is set
+		await this.scanModule(this.rootModule, true, false, undefined, true);
+		this.routesInitialized = true;
 	}
 
 	/**
@@ -139,8 +162,8 @@ export class DwexApplication {
 	): Promise<void> {
 		this.tlsEnabled = !!httpsOptions;
 
-		// Register controllers now that global prefix is set
-		await this.scanModule(this.rootModule, true, false, undefined, true);
+		// Register controllers now that global prefix is set (if not already done)
+		await this.initRoutes();
 
 		this.server = Bun.serve({
 			port,
