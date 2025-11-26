@@ -1,3 +1,16 @@
+## 1.2.2 (2025-11-26)
+
+### 🩹 Fixes
+
+- **core:** add initRoutes method to fix OpenAPI document generation timing ([9c628e7](https://github.com/dwexjs/dwex/commit/9c628e7))
+- **docs:** fix .mdx route rewrite and simplify llm.txt format ([24583ba](https://github.com/dwexjs/dwex/commit/24583ba))
+- **docs:** add queues to techniques sidebar ([2e8889b](https://github.com/dwexjs/dwex/commit/2e8889b))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh @mxvsh
+
 ## 1.2.1 (2025-11-14)
 
 ### 🩹 Fixes

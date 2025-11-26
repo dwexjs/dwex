@@ -1,6 +1,6 @@
 {
   "name": "@dwex/openapi",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -20,8 +20,8 @@
   ],
   "dependencies": {
     "tslib": "^2.3.0",
-    "@dwex/core": "1.2.1",
-    "@dwex/common": "1.2.1",
+    "@dwex/core": "1.2.2",
+    "@dwex/common": "1.2.2",
     "reflect-metadata": "^0.2.2",
     "openapi3-ts": "^4.4.0"
   }
