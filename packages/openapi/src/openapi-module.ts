@@ -112,6 +112,7 @@ export class OpenApiModule {
 	 * Creates an OpenAPI document from a Dwex application.
 	 *
 	 * This is a convenience method that delegates to DocumentFactory.createDocument.
+	 * It automatically initializes routes if they haven't been initialized yet.
 	 *
 	 * @param app - The Dwex application instance
 	 * @param config - OpenAPI document configuration from DocumentBuilder
@@ -119,13 +120,17 @@ export class OpenApiModule {
 	 *
 	 * @example
 	 * ```typescript
-	 * const document = OpenApiModule.createDocument(app, config);
+	 * const document = await OpenApiModule.createDocument(app, config);
 	 * ```
 	 */
-	static createDocument(
+	static async createDocument(
 		app: DwexApplication,
 		config: Omit<OpenAPIObject, "paths">,
-	): OpenAPIObject {
+	): Promise<OpenAPIObject> {
+		// Initialize routes if not already done
+		// This ensures routes are available for document generation
+		await app.initRoutes();
+
 		// Import DocumentFactory dynamically to avoid circular dependencies
 		const { DocumentFactory } = require("./document-factory.js");
 		return DocumentFactory.createDocument(app, config);

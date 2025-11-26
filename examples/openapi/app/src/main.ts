@@ -25,7 +25,7 @@ const config = new DocumentBuilder()
 	.build();
 
 // Generate the OpenAPI document
-const document = OpenApiModule.createDocument(app, config);
+const document = await OpenApiModule.createDocument(app, config);
 
 // Setup Swagger UI at /docs
 OpenApiModule.setup("/docs", app, document, {
