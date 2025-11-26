@@ -1,3 +1,14 @@
+## 1.2.3 (2025-11-26)
+
+### 🩹 Fixes
+
+- **openapi:** automatically initialize routes in createDocument ([f3d4374](https://github.com/dwexjs/dwex/commit/f3d4374))
+
+### ❤️ Thank You
+
+- Claude
+- mxvsh @mxvsh
+
 ## 1.2.2 (2025-11-26)
 
 ### 🩹 Fixes
